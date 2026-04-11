@@ -1,29 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
 
 export default function AddVaccineScreen({ navigation, route }) {
   // Pegamos o nome do pet que veio da tela de Detalhes
   const { petName } = route.params;
 
-  const [name, setName] = useState('');
-  const [date, setDate] = useState('');
+  const [name, setName] = useState("");
+  const [date, setDate] = useState("");
+
+  const handleDateChange = (text) => {
+    const cleaned = text.replace(/\D/g, "");
+    let formatted = cleaned;
+
+    if (cleaned.length > 2) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    if (cleaned.length > 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    setDate(formatted);
+  };
 
   const handleSave = () => {
     if (!name || !date) {
-      Alert.alert('Atenção', 'Por favor, preencha o nome da vacina e a data.');
+      Alert.alert("Atenção", "Por favor, preencha o nome da vacina e a data.");
       return;
     }
 
-    // Criamos o objeto da nova vacina
     const newVaccine = {
       id: Math.random().toString(),
       name: name,
       date: date,
-      applied: true, // Por padrão, ao registrar manualmente, marcamos como aplicada
+      applied: true,
     };
 
-
-    navigation.navigate('Details', { newVaccine });
+    navigation.navigate("Details", { newVaccine });
   };
 
   return (
@@ -44,10 +62,11 @@ export default function AddVaccineScreen({ navigation, route }) {
         <TextInput
           style={styles.input}
           value={date}
-          onChangeText={setDate}
+          onChangeText={handleDateChange}
           placeholder="DD/MM/AAAA"
           placeholderTextColor="#999"
           keyboardType="numeric"
+          maxLength={10}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -66,37 +85,37 @@ export default function AddVaccineScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
   headerText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: "bold",
+    color: "#007AFF",
     marginBottom: 30,
-    textAlign: 'center'
+    textAlign: "center",
   },
   form: { flex: 1 },
-  label: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 },
+  label: { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 8 },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 20,
-    color: '#333'
+    color: "#333",
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10
+    alignItems: "center",
+    marginTop: 10,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
   cancelButton: {
     marginTop: 15,
     padding: 10,
-    alignItems: 'center'
+    alignItems: "center",
   },
-  cancelButtonText: { color: '#FF3B30', fontSize: 14 }
+  cancelButtonText: { color: "#FF3B30", fontSize: 14 },
 });
