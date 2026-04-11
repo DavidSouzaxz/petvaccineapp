@@ -1,80 +1,73 @@
-import { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Text,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import PetCard from "../components/PetCard"; // Importando o novo componente
 
 export default function HomeScreen({ navigation, route }) {
-
   const [pets, setPets] = useState([
-    { id: 1, name: 'Bob', breed: 'Pisncher' },
-    { id: 2, name: 'Mia', breed: 'Douberman' },
-    { id: 3, name: 'Luna', breed: 'Pastor Alemão' },
+    { id: "1", name: "Max", breed: "Golden Retriever" },
+    { id: "2", name: "Bella", breed: "Poodle" },
   ]);
 
+  // Lógica para receber novo pet da tela AddPet
   useEffect(() => {
     if (route.params?.newPet) {
-      setPets((prevPets) => [...prevPets, route.params.newPet])
+      setPets((prev) => [...prev, route.params.newPet]);
     }
-  }, [route.params?.newPet])
-
-  const renderPetItem = ({ item }) => (
-    <TouchableOpacity style={styles.petCard} onPress={() => navigation.navigate('Details', { petName: item.name, petBreed: item.breed })}>
-      <View>
-        <Text style={styles.petName}>{item.name}</Text>
-        <Text style={styles.petBreed}>{item.breed}</Text>
-      </View>
-      <Text style={styles.arrow}>&gt;</Text>
-
-    </TouchableOpacity>
-  )
+  }, [route.params?.newPet]);
 
   return (
     <View style={styles.container}>
       <FlatList
         data={pets}
-        keyExtractor={item => item.id}
-        renderItem={renderPetItem}
-        ListEmptyComponent={<Text>Nenhum Pet cadastrado.</Text>}
-        contentContainerStyle={styles.listContent}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <PetCard
+            pet={item}
+            onPress={(p) =>
+              navigation.navigate("Details", {
+                petName: p.name,
+                petBreed: p.breed,
+              })
+            }
+          />
+        )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Nenhum pet cadastrado ainda.</Text>
+        }
       />
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('AddPet')}
+        onPress={() => navigation.navigate("AddPet")}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  listContent: { padding: 20 },
-  petCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-
-    elevation: 2,
-  },
-  petName: { fontSize: 18, fontWeight: 'bold', color: '#333' },
-  petBreed: { fontSize: 14, color: '#666' },
-  arrow: { fontSize: 18, color: '#ccc' },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  list: { padding: 20 },
+  emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
     bottom: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
   },
-  fabText: { color: '#fff', fontSize: 30, fontWeight: 'bold' }
 });
