@@ -7,7 +7,7 @@ import {
   Text,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import PetCard from "../components/PetCard"; // Importando o novo componente
+import PetCard from "../../components/PetCard"; // Importando o novo componente
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([

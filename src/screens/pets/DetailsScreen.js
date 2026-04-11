@@ -7,7 +7,7 @@ import {
   FlatList,
   Alert,
 } from "react-native";
-import VaccineItem from "../components/VaccineItem";
+import VaccineItem from "../../components/VaccineItem";
 
 export default function DetailsScreen({ route, navigation }) {
   const { petName, petBreed } = route.params;

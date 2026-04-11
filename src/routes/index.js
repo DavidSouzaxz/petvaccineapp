@@ -3,10 +3,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 
-import HomeScreen from "../screens/HomeScreen";
-import DetailsScreen from "../screens/DetailsScreen";
-import AddPetScreen from "../screens/AddPetScreen";
-import AddVaccineScreen from "../screens/AddVaccineScreen";
+import HomeScreen from "../screens/pets/HomeScreen";
+import DetailsScreen from "../screens/pets/DetailsScreen";
+import AddPetScreen from "../screens/pets/AddPetScreen";
+import AddVaccineScreen from "../screens/pets/AddVaccineScreen";
 
 import MapScreen from "../screens/MapScreen";
 import ProfileScreen from "../screens/ProfileScreen";
