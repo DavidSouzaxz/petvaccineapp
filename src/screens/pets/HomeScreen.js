@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Text,
-} from "react-native";
+import {View, StyleSheet, FlatList, TouchableOpacity, Text,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import PetCard from "../../components/PetCard"; // Importando o novo componente
 
@@ -14,11 +8,20 @@ export default function HomeScreen({ navigation, route }) {
     { id: "1", name: "Max", breed: "Golden Retriever" },
     { id: "2", name: "Bella", breed: "Poodle" },
   ]);
-
-  // Lógica para receber novo pet da tela AddPet
+  
   useEffect(() => {
     if (route.params?.newPet) {
-      setPets((prev) => [...prev, route.params.newPet]);
+      const { newPet, isEditing } = route.params;
+
+      if (isEditing) {
+        //se for edição, substitui o pet com mesmo id na lista
+        setPets((prev) =>
+          prev.map((p) => (p.id === newPet.id ? newPet : p))
+        );
+      } else {
+        //se for novo, adiciona no final da lista (comportamento original)
+        setPets((prev) => [...prev, newPet]);
+      }
     }
   }, [route.params?.newPet]);
 
@@ -29,16 +32,12 @@ export default function HomeScreen({ navigation, route }) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <PetCard
-            pet={item}
-            onPress={(p) =>
-              navigation.navigate("Details", {
-                petName: p.name,
-                petBreed: p.breed,
-              })
-            }
-          />
-        )}
+        <PetCard
+          pet={item}
+          onPress={(p) => navigation.navigate("Details", { petName: p.name, petBreed: p.breed })}
+          onEdit={(p) => navigation.navigate("AddPet", { pet: p })}
+        />
+      )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum pet cadastrado ainda.</Text>
         }

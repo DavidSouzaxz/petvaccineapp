@@ -3,8 +3,11 @@ import { TouchableOpacity, View, TextInput, StyleSheet, Text, Alert } from "reac
 
 
 export default function AddPetScreen({ navigation, route }) {
-  const [name, setName] = useState()
-  const [breed, setBreed] = useState()
+
+  const editingPet = route.params?.pet;
+
+  const [name, setName] = useState(editingPet?.name ?? "");
+  const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
   const handlerSave = () => {
     if (!name || !breed) {
@@ -13,12 +16,12 @@ export default function AddPetScreen({ navigation, route }) {
     }
 
     const newPet = {
-      id: Math.random().toString(),
+      id: editingPet?.id ?? Math.random().toString(), 
       name,
       breed
     }
 
-    navigation.navigate('Home', { newPet })
+    navigation.navigate('Home', { newPet, isEditing: !!editingPet }) //passa o pet e se é edição ou criação
   }
 
   return (
@@ -39,7 +42,7 @@ export default function AddPetScreen({ navigation, route }) {
       />
 
       <TouchableOpacity style={styles.button} onPress={handlerSave}>
-        <Text style={styles.buttonText}>Salvar Pet</Text>
+        <Text style={styles.buttonText}>{editingPet ? "Salvar Alterações" : "Salvar Pet"}</Text>
       </TouchableOpacity>
     </View>
   )

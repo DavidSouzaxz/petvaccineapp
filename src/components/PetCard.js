@@ -1,18 +1,19 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-export default function PetCard({ pet, onPress }) {
+export default function PetCard({ pet, onPress, onEdit }) {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(pet)}>
-      <View style={styles.infoContainer}>
+      <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}>
+      <MaterialCommunityIcons name="pencil" size={19} color="#007AFF" />
+      </TouchableOpacity>
+      
         <Ionicons name="paw" size={24} color="#007AFF" />
-        <View style={styles.textContainer}>
-          <Text style={styles.name}>{pet.name}</Text>
-          <Text style={styles.breed}>{pet.breed}</Text>
-        </View>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#CCC" />
+        <Text style={styles.name}>{pet.name}</Text>
+        <Text style={styles.breed}>{pet.breed}</Text>
+      
     </TouchableOpacity>
   );
 }
@@ -22,23 +23,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 15,
     borderRadius: 12,
-    flexDirection: "row",
+    width: "47%",
+    margin: "1.5%",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    elevation: 2,
+    justifyContent: "center",
+    aspectRatio: 1,
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
   },
-  infoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+
+  editButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
   },
-  textContainer: {
-    marginLeft: 15,
-  },
+
   name: {
     fontSize: 18,
     fontWeight: "bold",

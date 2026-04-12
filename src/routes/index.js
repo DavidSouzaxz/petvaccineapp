@@ -8,8 +8,8 @@ import DetailsScreen from "../screens/pets/DetailsScreen";
 import AddPetScreen from "../screens/pets/AddPetScreen";
 import AddVaccineScreen from "../screens/pets/AddVaccineScreen";
 
-import MapScreen from "../screens/MapScreen";
-import ProfileScreen from "../screens/ProfileScreen";
+import MapScreen from "../screens/map/MapScreen";
+import ProfileScreen from "../screens/profile/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -30,7 +30,9 @@ function PetStack() {
       <Stack.Screen
         name="AddPet"
         component={AddPetScreen}
-        options={{ title: "Novo Pet" }}
+        options={({ route }) => ({
+          title: route.params?.pet ? "Editar Pet" : "Novo Pet" //titulo dinâmico
+        })}
       />
       <Stack.Screen
         name="AddVaccine"
