@@ -29,7 +29,8 @@ export default function HomeScreen({ navigation, route }) {
     <View style={styles.container}>
       <FlatList
         data={pets}
-        keyExtractor={(item) => item.id}
+        key="two-columns"
+        numColumns={2}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
         <PetCard

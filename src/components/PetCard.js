@@ -7,7 +7,7 @@ export default function PetCard({ pet, onPress, onEdit }) {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(pet)}>
       <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}>
-      <MaterialCommunityIcons name="pencil" size={19} color="#007AFF" />
+      <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
       </TouchableOpacity>
       
         <Ionicons name="paw" size={24} color="#007AFF" />
