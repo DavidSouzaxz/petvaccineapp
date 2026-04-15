@@ -1,29 +1,54 @@
 import React, { useState, useEffect } from "react";
-import {View, StyleSheet, FlatList, TouchableOpacity, Text,} from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import ServicePet from "../../services/ServicePet";
 import PetCard from "../../components/PetCard"; // Importando o novo componente
 
 export default function HomeScreen({ navigation, route }) {
-  const [pets, setPets] = useState([
-    { id: "1", name: "Max", breed: "Golden Retriever" },
-    { id: "2", name: "Bella", breed: "Poodle" },
-  ]);
-  
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPets = async () => {
+    try {
+      setLoading(true);
+      const data = await ServicePet.listAll();
+      setPets(data);
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível carregar os pets. Verifique a conexão com o servidor.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
   useEffect(() => {
     if (route.params?.newPet) {
-      const { newPet, isEditing } = route.params;
-
-      if (isEditing) {
-        //se for edição, substitui o pet com mesmo id na lista
-        setPets((prev) =>
-          prev.map((p) => (p.id === newPet.id ? newPet : p))
-        );
-      } else {
-        //se for novo, adiciona no final da lista (comportamento original)
-        setPets((prev) => [...prev, newPet]);
-      }
+      fetchPets();
     }
   }, [route.params?.newPet]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text>Carregando seus pets...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -33,15 +58,24 @@ export default function HomeScreen({ navigation, route }) {
         numColumns={2}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-        <PetCard
-          pet={item}
-          onPress={(p) => navigation.navigate("Details", { petName: p.name, petBreed: p.breed })}
-          onEdit={(p) => navigation.navigate("AddPet", { pet: p })}
-        />
-      )}
+          <PetCard
+            pet={item}
+            onPress={(p) =>
+              navigation.navigate("Details", {
+                petId: p.id, // Importante: passe o ID agora
+                petName: p.name,
+                petBreed: p.breed,
+              })
+            }
+            onEdit={(p) => navigation.navigate("AddPet", { pet: p })}
+          />
+        )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum pet cadastrado ainda.</Text>
         }
+        // Adiciona um "puxar para atualizar"
+        onRefresh={fetchPets}
+        refreshing={loading}
       />
 
       <TouchableOpacity
@@ -56,6 +90,7 @@ export default function HomeScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" }, // Estilo para o loading
   list: { padding: 20 },
   emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   fab: {
