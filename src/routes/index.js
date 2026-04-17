@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/pets/HomeScreen";
 import DetailsScreen from "../screens/pets/DetailsScreen";
 import AddPetScreen from "../screens/pets/AddPetScreen";
+import EditPetScreen from "../screens/pets/EditPetScreen";
 import AddVaccineScreen from "../screens/pets/AddVaccineScreen";
 
 import MapScreen from "../screens/map/MapScreen";
@@ -30,8 +31,15 @@ function PetStack() {
       <Stack.Screen
         name="AddPet"
         component={AddPetScreen}
-        options={({ route }) => ({
-          title: route.params?.pet ? "Editar Pet" : "Novo Pet" //titulo dinâmico
+        options={() => ({
+          title: "Novo Pet",
+        })}
+      />
+      <Stack.Screen
+        name="EditPet"
+        component={EditPetScreen}
+        options={() => ({
+          title: "Editar Pet",
         })}
       />
       <Stack.Screen

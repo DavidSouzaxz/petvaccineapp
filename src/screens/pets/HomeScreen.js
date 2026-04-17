@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
-import PetCard from "../../components/PetCard"; // Importando o novo componente
+import PetCard from "../../components/PetCard";
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
@@ -62,18 +62,17 @@ export default function HomeScreen({ navigation, route }) {
             pet={item}
             onPress={(p) =>
               navigation.navigate("Details", {
-                petId: p.id, // Importante: passe o ID agora
+                petId: p.id,
                 petName: p.name,
                 petBreed: p.breed,
               })
             }
-            onEdit={(p) => navigation.navigate("AddPet", { pet: p })}
+            onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
           />
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum pet cadastrado ainda.</Text>
         }
-        // Adiciona um "puxar para atualizar"
         onRefresh={fetchPets}
         refreshing={loading}
       />
