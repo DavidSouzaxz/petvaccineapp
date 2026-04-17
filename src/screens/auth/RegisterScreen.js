@@ -35,6 +35,7 @@ export default function RegisterScreen({ navigation }) {
     } catch (error) {
       const msg = error.response?.data || "Erro ao cadastrar usuário.";
       Alert.alert("Erro", msg);
+      console.log(error)
     }
   };
 
