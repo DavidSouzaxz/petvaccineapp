@@ -15,7 +15,7 @@ export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
   const [birthDate, setBirthDate] = useState(new Date());
-  const [userId, setUserId] = useState("6c0a9456-0fed-4211-89f0-75d152cc54ef");
+  const [userId, setUserId] = useState("4d5003e1-e100-4ffa-8082-bdf2fff2cb5b");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleDateChange = (event, selectedDate) => {

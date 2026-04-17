@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import {
   TouchableOpacity,
   View,
@@ -15,6 +15,43 @@ export default function EditPetScreen({ navigation, route }) {
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleDelete}
+          style={styles.deleteButton}
+        >
+          <Text style={styles.deleteButtonText}>Excluir</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Excluir Pet",
+      `Tem certeza que deseja excluir ${editingPet?.name}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await ServicePet.delete(editingPet.id);
+              Alert.alert("Sucesso", "Pet excluído com sucesso!");
+              navigation.navigate("Home", { newPet: true });
+            } catch (error) {
+              Alert.alert("Erro", "Não foi possível excluir o pet.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handlerSave = async () => {
     if (!name || !breed) {
       Alert.alert("Preencha todos os campos");
@@ -23,21 +60,18 @@ export default function EditPetScreen({ navigation, route }) {
 
     try {
       const petAtualizado = {
-        name: name,
-        breed: breed,
+        name,
+        breed,
         birthDate: editingPet.birthDate,
         userId: editingPet.userId,
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-
-      navigation.navigate("Home", { newPet: true });
+      navigation.navigate("Home", { newPet: true, isEditing: true }); 
     } catch (error) {
-      Alert.alert("Error", "Não foi possível atualizar o pet.");
+      Alert.alert("Erro", "Não foi possível atualizar o pet.");
     }
-
-    navigation.navigate("Home", { newPet, isEditing: !!editingPet });
   };
 
   return (
@@ -54,7 +88,7 @@ export default function EditPetScreen({ navigation, route }) {
         style={styles.input}
         value={breed}
         onChangeText={setBreed}
-        placeholder="Ex: Douberman"
+        placeholder="Ex: Dobermann"
       />
 
       <TouchableOpacity style={styles.button} onPress={handlerSave}>
@@ -82,4 +116,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  deleteButton: {
+    marginRight: 12,
+  },
+  
+  deleteButtonText: {
+    color: "#FF3B30",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
