@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TouchableOpacity,
   View,
@@ -17,7 +17,7 @@ export default function EditPetScreen({ navigation, route }) {
 
   const handlerSave = async () => {
     if (!name || !breed) {
-      Alert.alert("Preencha todos os campos");
+      Alert.alert("Erro", "Preencha todos os campos");
       return;
     }
 
@@ -30,14 +30,17 @@ export default function EditPetScreen({ navigation, route }) {
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
+
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-
-      navigation.navigate("Home", { newPet: true });
+      navigation.navigate({
+        name: "Home",
+        params: { newPet: true },
+        merge: true,
+      });
     } catch (error) {
-      Alert.alert("Error", "Não foi possível atualizar o pet.");
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível atualizar o pet.");
     }
-
-    navigation.navigate("Home", { newPet, isEditing: !!editingPet });
   };
 
   return (

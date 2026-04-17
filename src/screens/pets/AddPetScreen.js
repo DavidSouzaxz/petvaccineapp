@@ -1,4 +1,4 @@
-import { useState, Platform } from "react";
+import { useState, Platform, useEffect } from "react";
 import {
   TouchableOpacity,
   View,
@@ -10,13 +10,23 @@ import {
 import ServicePet from "../../services/ServicePet";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
   const [birthDate, setBirthDate] = useState(new Date());
-  const [userId, setUserId] = useState("6c0a9456-0fed-4211-89f0-75d152cc54ef");
+  const [userId, setUserId] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    const loadUserId = async () => {
+      const id = await AsyncStorage.getItem("@userId");
+      setUserId(id);
+    };
+
+    loadUserId();
+  }, []);
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -45,11 +55,14 @@ export default function AddPetScreen({ navigation, route }) {
       await ServicePet.register(newPet);
 
       Alert.alert("Sucesso", "Pet cadastrado com sucesso!");
+      navigation.navigate({
+        name: "Home",
+        params: { newPet: true },
+        merge: true, // Isso avisa para usar a Home que já existe na pilha
+      });
     } catch (error) {
       Alert.alert("Error", "Não foi possível registrar o pet.");
     }
-
-    navigation.navigate("Home", { newPet: true });
   };
 
   return (

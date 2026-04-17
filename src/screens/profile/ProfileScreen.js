@@ -1,10 +1,33 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React from "react";
+import { TouchableOpacity, Text, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen() { // O "default" é essencial aqui
+export default function ProfileScreen({ onLogout }) {
+  const handleLogout = async () => {
+    Alert.alert("Sair", "Deseja realmente sair do app?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await AsyncStorage.clear();
+            onLogout();
+          } catch (error) {
+            Alert.alert("Erro", "Não foi possível deslogar.");
+          }
+        },
+      },
+    ]);
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <TouchableOpacity
+      onPress={handleLogout}
+      style={{ padding: 20, backgroundColor: "red" }}
+    >
       <Text>📍 Perfil de Usúario (Em breve)</Text>
-    </View>
+      <Text style={{ color: "white", textAlign: "center" }}>Sair da Conta</Text>
+    </TouchableOpacity>
   );
 }
