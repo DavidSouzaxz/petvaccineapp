@@ -65,7 +65,7 @@ export default function Routes() {
         },
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "gray",
-        headerShown: false, // Escondemos o header da Tab porque o Stack já tem o dele
+        headerShown: false, 
       })}
     >
       <Tab.Screen name="Pets" component={PetStack} />

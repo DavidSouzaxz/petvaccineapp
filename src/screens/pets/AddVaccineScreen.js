@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 export default function AddVaccineScreen({ navigation, route }) {
-  // Pegamos o nome do pet que veio da tela de Detalhes
+  
   const { petName } = route.params;
 
   const [name, setName] = useState("");
