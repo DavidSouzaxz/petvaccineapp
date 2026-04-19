@@ -5,43 +5,76 @@ import {
   FlatList,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import PetCard from "../../components/PetCard"; // Importando o novo componente
+import ServicePet from "../../services/ServicePet";
+import PetCard from "../../components/PetCard";
 
 export default function HomeScreen({ navigation, route }) {
-  const [pets, setPets] = useState([
-    { id: "1", name: "Max", breed: "Golden Retriever" },
-    { id: "2", name: "Bella", breed: "Poodle" },
-  ]);
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Lógica para receber novo pet da tela AddPet
+  const fetchPets = async () => {
+    try {
+      setLoading(true);
+      const data = await ServicePet.listAll();
+      setPets(data);
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível carregar os pets. Verifique a conexão com o servidor.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
   useEffect(() => {
     if (route.params?.newPet) {
-      setPets((prev) => [...prev, route.params.newPet]);
+      fetchPets();
     }
   }, [route.params?.newPet]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text>Carregando seus pets...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
         data={pets}
-        keyExtractor={(item) => item.id}
+        key="two-columns"
+        numColumns={2}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <PetCard
             pet={item}
             onPress={(p) =>
               navigation.navigate("Details", {
+                petId: p.id,
                 petName: p.name,
                 petBreed: p.breed,
               })
             }
+            onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
           />
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum pet cadastrado ainda.</Text>
         }
+        onRefresh={fetchPets}
+        refreshing={loading}
       />
 
       <TouchableOpacity
@@ -56,6 +89,7 @@ export default function HomeScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" }, // Estilo para o loading
   list: { padding: 20 },
   emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   fab: {

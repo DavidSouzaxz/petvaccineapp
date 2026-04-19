@@ -1,0 +1,88 @@
+import { useState, useEffect } from "react";
+import {
+  TouchableOpacity,
+  View,
+  TextInput,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
+import ServicePet from "../../services/ServicePet";
+
+export default function EditPetScreen({ navigation, route }) {
+  const editingPet = route.params?.pet;
+
+  const [name, setName] = useState(editingPet?.name ?? "");
+  const [breed, setBreed] = useState(editingPet?.breed ?? "");
+
+  const handlerSave = async () => {
+    if (!name || !breed) {
+      Alert.alert("Erro", "Preencha todos os campos");
+      return;
+    }
+
+    try {
+      const petAtualizado = {
+        name: name,
+        breed: breed,
+        birthDate: editingPet.birthDate,
+        userId: editingPet.userId,
+      };
+
+      await ServicePet.update(editingPet.id, petAtualizado);
+
+      Alert.alert("Sucesso", "Pet atualizado com sucesso!");
+      navigation.navigate({
+        name: "Home",
+        params: { newPet: true },
+        merge: true,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível atualizar o pet.");
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Nome do Pet:</Text>
+      <TextInput
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+        placeholder="Ex: Totó"
+      />
+      <Text style={styles.label}>Raça do Pet:</Text>
+      <TextInput
+        style={styles.input}
+        value={breed}
+        onChangeText={setBreed}
+        placeholder="Ex: Douberman"
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handlerSave}>
+        <Text style={styles.buttonText}>Salvar Alterações</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+});
