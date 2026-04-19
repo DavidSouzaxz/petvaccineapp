@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
-import PetCard from "../../components/PetCard";
+import PetCard, { getBanenerColor } from "../../components/PetCard";
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
@@ -65,6 +65,7 @@ export default function HomeScreen({ navigation, route }) {
                 petId: p.id,
                 petName: p.name,
                 petBreed: p.breed,
+                petColor: getBanenerColor(p.id)[0],
               })
             }
             onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
@@ -89,7 +90,7 @@ export default function HomeScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" }, // Estilo para o loading
+  center: { flex: 1, justifyContent: "center", alignItems: "center" }, 
   list: { padding: 20 },
   emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   fab: {

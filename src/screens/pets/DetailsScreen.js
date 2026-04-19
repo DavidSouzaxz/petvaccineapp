@@ -10,7 +10,7 @@ import {
 import VaccineItem from "../../components/VaccineItem";
 
 export default function DetailsScreen({ route, navigation }) {
-  const { petName, petBreed } = route.params;
+  const { petName, petBreed, petColor } = route.params;
 
   const [vaccines, setVaccines] = useState([
     { id: "1", name: "Antirrábica", date: "10/01/2026", applied: true },
@@ -55,7 +55,7 @@ export default function DetailsScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: petColor }]}>
         <Text style={styles.title}>Carteira de: {petName}</Text>
         <Text style={styles.breed}>Raça: {petBreed}</Text>
       </View>
@@ -65,7 +65,7 @@ export default function DetailsScreen({ route, navigation }) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listPadding}
         renderItem={({ item }) => (
-          <VaccineItem item={item} onConfirm={confirmVaccineApplication} />
+          <VaccineItem item={item} onConfirm={confirmVaccineApplication} petColor={petColor} />
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhuma vacina registrada.</Text>
@@ -73,8 +73,8 @@ export default function DetailsScreen({ route, navigation }) {
       />
 
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("AddVaccine", { petName })}
+        style={[styles.addButton, { backgroundColor: petColor }]}
+        onPress={() => navigation.navigate("AddVaccine", { petName, petColor })}
       >
         <Text style={styles.addButtonText}>Registrar Nova Dose</Text>
       </TouchableOpacity>
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 15,
   },
   title: { fontSize: 22, fontWeight: "bold", color: "#fff" },
-  breed: { fontSize: 16, color: "#e0e0e0", marginTop: 4 },
+  breed: { fontSize: 16, color: "#fff", marginTop: 4 },
   listPadding: { padding: 15 },
   emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   addButton: {

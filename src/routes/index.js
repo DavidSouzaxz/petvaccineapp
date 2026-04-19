@@ -1,4 +1,4 @@
-import React from "react";
+
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -60,12 +60,12 @@ export default function Routes() {
           if (route.name === "Pets") iconName = "paw";
           else if (route.name === "Mapa") iconName = "map";
           else if (route.name === "Perfil") iconName = "person";
-
+     
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "gray",
-        headerShown: false, 
+        headerShown: false,
       })}
     >
       <Tab.Screen name="Pets" component={PetStack} />

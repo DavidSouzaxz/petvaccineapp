@@ -1,13 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function VaccineItem({ item, onConfirm }) {
+export default function VaccineItem({ item, onConfirm, petColor }) {
   return (
     <TouchableOpacity
       style={styles.vaccineCard}
       onPress={() => onConfirm(item)}
     >
-      <View>
+      <View style={[styles.colorBar, { backgroundColor: petColor }]} />
+
+      <View style={{ flex: 1 }}>
         <Text style={styles.vaccineName}>{item.name}</Text>
         <Text style={styles.vaccineDate}>Data: {item.date}</Text>
       </View>
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
     elevation: 1,
+    overflow: "hidden",
   },
   vaccineName: { fontSize: 16, fontWeight: "bold" },
   vaccineDate: { fontSize: 14, color: "#666" },

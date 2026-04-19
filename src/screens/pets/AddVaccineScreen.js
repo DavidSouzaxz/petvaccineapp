@@ -9,8 +9,8 @@ import {
 } from "react-native";
 
 export default function AddVaccineScreen({ navigation, route }) {
-  
-  const { petName } = route.params;
+
+  const { petName, petColor } = route.params;
 
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -41,7 +41,7 @@ export default function AddVaccineScreen({ navigation, route }) {
       applied: true,
     };
 
-    navigation.navigate("Details", { newVaccine });
+    navigation.navigate("Details", { newVaccine, petColor });
   };
 
   return (
