@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,47 @@ import {
   StyleSheet,
   SafeAreaView,
   SafeAreaViewBase,
+  Alert,
 } from "react-native";
+import ServiceUser from "../../services/ServiceUser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
+  const [user, setUser] = useState({});
+
+  const loadingInfo = async () => {
+    const id = await AsyncStorage.getItem("@userId");
+
+    try {
+      const data = await ServiceUser.infoById(id);
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+      });
+      console.log(data);
+    } catch (error) {
+      Alert.alert("Error", "Não foi possível ler as informações de perfil");
+    }
+  };
+
+  useEffect(() => {
+    loadingInfo();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>A</Text>
+              <Text style={styles.avatarText}>{user.name[0]}</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.nameSection}>
-          <Text style={styles.name}>Ana Lucia</Text>
+          <Text style={styles.name}>{user.name}</Text>
 
           <View style={styles.badge}>
             <Text style={styles.badgeText}>Tutor(a) de pets</Text>
