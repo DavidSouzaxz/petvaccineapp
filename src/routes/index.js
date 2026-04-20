@@ -82,7 +82,6 @@ export default function Routes() {
   };
 
   useEffect(() => {
-    // 1. Checa o token ao iniciar
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("@token");
