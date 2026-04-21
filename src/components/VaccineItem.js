@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import FormatDateDisplay from "../core/FormatDateDisplay";
 
 export default function VaccineItem({ item, onConfirm, petColor }) {
   return (
@@ -11,7 +12,10 @@ export default function VaccineItem({ item, onConfirm, petColor }) {
 
       <View style={{ flex: 1 }}>
         <Text style={styles.vaccineName}>{item.name}</Text>
-        <Text style={styles.vaccineDate}>Data: {item.date}</Text>
+        <Text style={styles.vaccineDate}>
+          Data: {FormatDateDisplay(item.applicationDate)} -{" "}
+          {item.applicationDate.substring(11, 16)}
+        </Text>
       </View>
 
       <View

@@ -7,41 +7,63 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import ServiceVaccine from "../../services/ServiceVaccine";
 
 export default function AddVaccineScreen({ navigation, route }) {
-
-  const { petName, petColor } = route.params;
+  const { petId, petName, petColor } = route.params;
 
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [time, setTime] = useState(""); // Novo estado para hora
+  const [observations, setObservations] = useState(""); // Corrigido useState
 
+  // Máscara para Data (DD/MM/AAAA)
   const handleDateChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
     let formatted = cleaned;
-
-    if (cleaned.length > 2) {
+    if (cleaned.length > 2)
       formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    }
-    if (cleaned.length > 4) {
+    if (cleaned.length > 4)
       formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
-    }
     setDate(formatted);
   };
 
-  const handleSave = () => {
-    if (!name || !date) {
-      Alert.alert("Atenção", "Por favor, preencha o nome da vacina e a data.");
+  // Máscara para Hora (HH:mm)
+  const handleTimeChange = (text) => {
+    const cleaned = text.replace(/\D/g, "");
+    let formatted = cleaned;
+    if (cleaned.length > 2)
+      formatted = `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;
+    setTime(formatted);
+  };
+
+  const handleSave = async () => {
+    if (!name || !date || !time) {
+      Alert.alert("Atenção", "Preencha o nome, data e hora.");
       return;
     }
 
+    // Conversão para o padrão ISO do Backend (yyyy-MM-ddTHH:mm:ss)
+    const [day, month, year] = date.split("/");
+    const [hour, minute] = time.split(":");
+    const isoDateTime = `${year}-${month}-${day}T${hour}:${minute}:00`;
+
     const newVaccine = {
-      id: Math.random().toString(),
+      petId: petId,
       name: name,
-      date: date,
-      applied: true,
+      applicationDate: isoDateTime, // Backend agora recebe o formato correto
+      isApplied: false,
+      observations: observations,
     };
 
-    navigation.navigate("Details", { newVaccine, petColor });
+    try {
+      await ServiceVaccine.register(newVaccine);
+      Alert.alert("Sucesso", "Vacina cadastrada!");
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", "Ocorreu um erro ao registrar a vacina.");
+      console.log(error);
+    }
   };
 
   return (
@@ -58,15 +80,41 @@ export default function AddVaccineScreen({ navigation, route }) {
           placeholderTextColor="#999"
         />
 
-        <Text style={styles.label}>Data da Aplicação</Text>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>Data</Text>
+            <TextInput
+              style={styles.input}
+              value={date}
+              onChangeText={handleDateChange}
+              placeholder="DD/MM/AAAA"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              maxLength={10}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>Hora</Text>
+            <TextInput
+              style={styles.input}
+              value={time}
+              onChangeText={handleTimeChange}
+              placeholder="HH:mm"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              maxLength={5}
+            />
+          </View>
+        </View>
+
+        <Text style={styles.label}>Observações</Text>
         <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={handleDateChange}
-          placeholder="DD/MM/AAAA"
+          style={[styles.input, { height: 80 }]}
+          value={observations}
+          onChangeText={setObservations}
+          placeholder="Detalhes adicionais..."
           placeholderTextColor="#999"
-          keyboardType="numeric"
-          maxLength={10}
+          multiline
         />
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -112,10 +160,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  cancelButton: {
-    marginTop: 15,
-    padding: 10,
-    alignItems: "center",
-  },
+  cancelButton: { marginTop: 15, padding: 10, alignItems: "center" },
   cancelButtonText: { color: "#FF3B30", fontSize: 14 },
 });

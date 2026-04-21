@@ -4,17 +4,35 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function PetCard({ pet, onPress, onEdit }) {
-  const [from, to] = getBanenerColor(pet.id);
-
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(pet)}>
+      <View style={styles.banner}>
+        <View style={styles.avatarWrapper}>
+          <View style={styles.avatar}>
+            <Ionicons name="paw" size={24} color="#F4A361" />
+          </View>
+        </View>
+      </View>
+
+      {/* Botão de edição */}
       <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}>
         <MaterialCommunityIcons name="pencil" size={20} color="#F4A361" />
       </TouchableOpacity>
 
-      <Ionicons name="paw" size={24} color="#F4A361" />
-      <Text style={styles.name}>{pet.name}</Text>
-      <Text style={styles.breed}>{pet.breed}</Text>
+      {/* Corpo do card */}
+      <View style={styles.body}>
+        <Text style={styles.name}>{pet.name}</Text>
+        <Text style={styles.breed}>{pet.breed}</Text>
+        {pet.age && <Text style={styles.age}>{pet.age}</Text>}
+
+        {/* Se você tiver badges, pode usar a estrutura row que você tinha:
+        <View style={styles.row}>
+           <View style={[styles.badge, styles.badgeBlue]}>
+              <Text style={styles.badgeBlueText}>Exemplo</Text>
+           </View>
+        </View>
+        */}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -34,6 +52,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     height: 64,
+    backgroundColor: "#f9f9f9", // Adicionei uma cor leve para diferenciar o banner
     alignItems: "center",
     justifyContent: "flex-end",
   },
@@ -67,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   body: {
-    paddingTop: 26,
+    paddingTop: 26, // Espaço para compensar o avatar que sobrepõe o topo
     paddingHorizontal: 10,
     paddingBottom: 12,
     alignItems: "center",
