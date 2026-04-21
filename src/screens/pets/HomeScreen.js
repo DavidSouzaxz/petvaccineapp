@@ -15,11 +15,13 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
-import PetCard, { getBanenerColor } from "../../components/PetCard";
+import PetCard from "../../components/PetCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("");
 
   const fetchPets = async () => {
     try {
@@ -35,6 +37,7 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   useEffect(() => {
+    setUserName(AsyncStorage.getItem("@userName"));
     fetchPets();
   }, []);
 
@@ -46,8 +49,8 @@ export default function HomeScreen({ navigation, route }) {
     <>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Hi, David!</Text>
-          <Text style={styles.headerSubtitle}>Good Morning!</Text>
+          <Text style={styles.headerGreeting}>Hi, {userName}</Text>
+          <Text style={styles.headerSubtitle}>Bem-vindo!</Text>
         </View>
         <Ionicons name="notifications-outline" size={24} color="#333" />
       </View>
@@ -94,7 +97,7 @@ export default function HomeScreen({ navigation, route }) {
         renderItem={({ item }) => (
           <PetCard
             pet={item}
-            onPress={(p) => navigation.navigate("Details", { petId: p.id })}
+            onPress={(p) => navigation.navigate("Details", { pet: p })}
             onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
           />
         )}
