@@ -11,7 +11,7 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ onLogout }) {
   const [user, setUser] = useState(AsyncStorage.getItem("@userName"));
 
   return (
@@ -39,10 +39,11 @@ export default function ProfileScreen() {
             {[
               { label: "Editar perfil", danger: false },
               { label: "Notificações", danger: false },
-              { label: "Sair", danger: true },
+              { label: "Sair", danger: true, onPress: onLogout },
             ].map((item, index, arr) => (
               <TouchableOpacity
                 key={item.label}
+                onPress={item.onPress}
                 style={[
                   styles.menuItem,
                   index < arr.length - 1 && styles.menuItemBorder,
