@@ -1,54 +1,20 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-
-//cores aleatorias para o banner dos pets
-const BANNER_COLORS = [
-  ["#378ADD", "#85B7EB"],
-  ["#9FE1CB", "#1D9E75"],
-  ["#F4C0D1", "#D4537E"],
-  ["#FAC775", "#BA7517"],
-];
-
-export function getBanenerColor(id = "") {
-  const index = id.charCodeAt(0) % BANNER_COLORS.length;
-  return BANNER_COLORS[index];
-}
-
+import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function PetCard({ pet, onPress, onEdit }) {
   const [from, to] = getBanenerColor(pet.id);
 
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPress(pet, from)} activeOpacity={0.85}>
-      
-      <View style={[styles.banner, { backgroundColor: from }]}>
-        <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}> 
-          <MaterialCommunityIcons name="pencil" size={16} color="#fff" />
-        </TouchableOpacity>
-        
-        <View style={styles.avatarWrapper}>
-          <View style={styles.avatar}>
-            <Ionicons name="paw" size={22} color={from} />
-          </View>
-        </View>
-      </View>
+    <TouchableOpacity style={styles.card} onPress={() => onPress(pet)}>
+      <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}>
+        <MaterialCommunityIcons name="pencil" size={20} color="#F4A361" />
+      </TouchableOpacity>
 
-      <View style={styles.body}>
-        <Text style={styles.name}>{pet.name}</Text>
-        <Text style={styles.breed}>{pet.breed}</Text>
-
-        <View style={styles.row}>
-          <Ionicons name="checkmark-circle-outline" size={11} color="#378ADD" />
-          <Text style={styles.rowLabel}>Vacinas</Text>
-          <View style={[styles.badge, styles.badgeBlue]}>
-            <Text style={styles.badgeBlueText}>
-              {pet.vaccineStatus ?? "Aplicadas"}
-            </Text>
-          </View>
-        </View>
-
-      </View>
+      <Ionicons name="paw" size={24} color="#F4A361" />
+      <Text style={styles.name}>{pet.name}</Text>
+      <Text style={styles.breed}>{pet.breed}</Text>
     </TouchableOpacity>
   );
 }

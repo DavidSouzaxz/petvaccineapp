@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
   header: {
     padding: 20,
-    backgroundColor: "#007AFF",
+    backgroundColor: "#F4A361",
     alignItems: "center",
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   listPadding: { padding: 15 },
   emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
   addButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#F4A361",
     margin: 20,
     padding: 15,
     borderRadius: 10,

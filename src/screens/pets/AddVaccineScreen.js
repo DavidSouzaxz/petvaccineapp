@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: "#F4A361",
     marginBottom: 30,
     textAlign: "center",
   },
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#F4A361",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",

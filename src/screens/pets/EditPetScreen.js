@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   TouchableOpacity,
   View,
@@ -15,14 +15,10 @@ export default function EditPetScreen({ navigation, route }) {
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={handleDelete}
-          style={styles.deleteButton}
-        >
+        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           <Text style={styles.deleteButtonText}>Excluir</Text>
         </TouchableOpacity>
       ),
@@ -48,13 +44,13 @@ export default function EditPetScreen({ navigation, route }) {
             }
           },
         },
-      ]
+      ],
     );
   };
 
   const handlerSave = async () => {
     if (!name || !breed) {
-      Alert.alert("Preencha todos os campos");
+      Alert.alert("Erro", "Preencha todos os campos");
       return;
     }
 
@@ -67,9 +63,15 @@ export default function EditPetScreen({ navigation, route }) {
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
+
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-      navigation.navigate("Home", { newPet: true, isEditing: true }); 
+      navigation.navigate({
+        name: "Home",
+        params: { newPet: true },
+        merge: true,
+      });
     } catch (error) {
+      console.error(error);
       Alert.alert("Erro", "Não foi possível atualizar o pet.");
     }
   };
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#F4A361",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginRight: 12,
   },
-  
+
   deleteButtonText: {
     color: "#FF3B30",
     fontSize: 16,
