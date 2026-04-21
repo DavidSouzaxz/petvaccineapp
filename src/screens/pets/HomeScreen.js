@@ -29,7 +29,6 @@ export default function HomeScreen({ navigation, route }) {
       const data = await ServicePet.listAll();
       setPets(data);
     } catch (error) {
-      console.error(error);
       Alert.alert("Erro", "Não foi possível carregar os pets.");
     } finally {
       setLoading(false);
