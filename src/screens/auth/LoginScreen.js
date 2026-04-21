@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 40,
-    color: "#007AFF",
+    color: "#F4A361",
   },
   input: {
     borderWidth: 1,
@@ -99,12 +99,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#F4A361",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 10,
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  linkText: { color: "#007AFF", textAlign: "center", marginTop: 20 },
+  linkText: { color: "#F4A361", textAlign: "center", marginTop: 20 },
 });

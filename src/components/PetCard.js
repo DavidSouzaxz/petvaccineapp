@@ -1,19 +1,18 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function PetCard({ pet, onPress, onEdit }) {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(pet)}>
       <TouchableOpacity style={styles.editButton} onPress={() => onEdit(pet)}>
-      <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
+        <MaterialCommunityIcons name="pencil" size={20} color="#F4A361" />
       </TouchableOpacity>
-      
-        <Ionicons name="paw" size={24} color="#007AFF" />
-        <Text style={styles.name}>{pet.name}</Text>
-        <Text style={styles.breed}>{pet.breed}</Text>
-      
+
+      <Ionicons name="paw" size={24} color="#F4A361" />
+      <Text style={styles.name}>{pet.name}</Text>
+      <Text style={styles.breed}>{pet.breed}</Text>
     </TouchableOpacity>
   );
 }

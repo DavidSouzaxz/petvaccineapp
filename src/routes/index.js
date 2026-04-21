@@ -15,6 +15,7 @@ import MapScreen from "../screens/map/MapScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
+import DashboardScreen from "../screens/map/DashboardScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -64,6 +65,15 @@ function PetStack() {
         component={AddVaccineScreen}
         options={{ title: "Registrar Vacina" }}
       />
+    </Stack.Navigator>
+  );
+}
+
+function MapStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen name="FullMap" component={MapScreen} />
     </Stack.Navigator>
   );
 }
@@ -120,17 +130,17 @@ export default function Routes() {
         tabBarIcon: ({ color, size }) => {
           let iconName;
           if (route.name === "Pets") iconName = "paw";
-          else if (route.name === "Mapa") iconName = "map";
+          else if (route.name === "Clinicas") iconName = "map";
           else if (route.name === "Perfil") iconName = "person";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#007AFF",
+        tabBarActiveTintColor: "#F4A361",
         tabBarInactiveTintColor: "gray",
         headerShown: false,
       })}
     >
       <Tab.Screen name="Pets" component={PetStack} />
-      <Tab.Screen name="Mapa" component={MapScreen} />
+      <Tab.Screen name="Clinicas" component={MapStack} />
       <Tab.Screen name="Perfil">
         {(props) => <ProfileScreen {...props} onLogout={handleLogout} />}
       </Tab.Screen>
