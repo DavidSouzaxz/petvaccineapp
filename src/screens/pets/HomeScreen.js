@@ -16,10 +16,19 @@ import {
 } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
 import PetCard, { getBanenerColor } from "../../components/PetCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [user, setUser] = useState("");  
+
+  useEffect(() => {                       
+    AsyncStorage.getItem("@userName").then((name) => {
+      if (name) setUser(name);      //pegar do asyc
+    });
+  }, []);
 
   const fetchPets = async () => {
     try {
@@ -46,8 +55,8 @@ export default function HomeScreen({ navigation, route }) {
     <>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Hi, David!</Text>
-          <Text style={styles.headerSubtitle}>Good Morning!</Text>
+          <Text style={styles.headerGreeting}>Olá, {user}!</Text>
+          <Text style={styles.headerSubtitle}>Bem-vindo(a) de volta</Text>
         </View>
         <Ionicons name="notifications-outline" size={24} color="#333" />
       </View>
@@ -60,7 +69,7 @@ export default function HomeScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
-      {/* Categorias */}
+      {/* Categorias TIRAR */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Category</Text>
       </View>
