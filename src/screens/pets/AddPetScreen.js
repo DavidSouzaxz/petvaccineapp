@@ -11,6 +11,7 @@ import ServicePet from "../../services/ServicePet";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ButtonRollback from "../../components/ButtonRollback";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -67,6 +68,8 @@ export default function AddPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <ButtonRollback navigation={navigation} />
+      <Text style={styles.titlePage}>Cadastrar Pet</Text>
       <Text style={styles.label}>Nome do Pet:</Text>
       <TextInput
         style={styles.input}
@@ -109,7 +112,8 @@ export default function AddPetScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 20, backgroundColor: "#fff", paddingTop: 80 },
+  titlePage: { textAlign: "center", color: "#000", fontSize: 30, paddingVertical: 10, paddingBottom: 30, fontWeight: "bold" },
   label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
   input: {
     borderWidth: 1,

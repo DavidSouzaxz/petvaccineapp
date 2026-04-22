@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation, route }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerGreeting}>Hi, {userName}</Text>
-          <Text style={styles.headerSubtitle}>Bem-vindo!</Text>
+          <Text style={styles.headerSubtitle}>Seja Bem-vindo!</Text>
         </View>
 
         <TouchableOpacity onPress={() => setNotifications(!notifications)}>

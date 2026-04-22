@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native"; // IMPORTANTE
 import { Ionicons } from "@expo/vector-icons";
 import VaccineItem from "../../components/VaccineItem";
 import ServiceVaccine from "../../services/ServiceVaccine";
+import ButtonRollback from "../../components/ButtonRollback";
 
 export default function DetailsScreen({ route, navigation }) {
   console.log(route.params?.pet?.vaccines);
@@ -57,6 +58,7 @@ export default function DetailsScreen({ route, navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={petColor} />
 
       <View style={[styles.header, { backgroundColor: petColor }]}>
+        <ButtonRollback navigation={navigation} backgroundColor="#f0b98c" color="#6f421d" />
         <Text style={styles.title}>{pet.name}</Text>
         <Text style={styles.breed}>{pet.breed}</Text>
       </View>
@@ -98,7 +100,7 @@ export default function DetailsScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8f9fa" },
   header: {
-    paddingTop: 40,
+    paddingTop: 80,
     paddingBottom: 30,
     paddingHorizontal: 20,
     alignItems: "center",
