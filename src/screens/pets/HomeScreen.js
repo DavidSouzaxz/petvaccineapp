@@ -22,6 +22,7 @@ export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [notifications, setNotifications] = useState(false);
 
   const fetchPets = async () => {
     try {
@@ -51,10 +52,16 @@ export default function HomeScreen({ navigation, route }) {
           <Text style={styles.headerGreeting}>Hi, {userName}</Text>
           <Text style={styles.headerSubtitle}>Bem-vindo!</Text>
         </View>
-        <Ionicons name="notifications-outline" size={24} color="#333" />
+
+        <TouchableOpacity onPress={() => setNotifications(!notifications)}>
+          {notifications ? (
+            <Ionicons name="notifications" size={24} color="#333" />
+          ) : (
+            <Ionicons name="notifications-outline" size={24} color="#333" />
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Banner Promocional */}
       <View style={styles.banner}>
         <Text style={styles.bannerTitle}>Join our Pet Lover Community</Text>
         <TouchableOpacity style={styles.bannerButton}>
@@ -62,7 +69,6 @@ export default function HomeScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
-      {/* Categorias */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Category</Text>
       </View>
@@ -130,7 +136,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 70,
     paddingBottom: 20,
     flexDirection: "row",
     justifyContent: "space-between",

@@ -89,7 +89,6 @@ export default function DashboardScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
       <View style={styles.header}>
         <Text style={styles.greeting}>Clínicas</Text>
-        <Ionicons name="notifications-outline" size={24} color="#333" />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
   header: {
     padding: 30,
-    paddingTop: 60,
+    paddingTop: 70,
     flexDirection: "row",
     justifyContent: "space-between",
   },
