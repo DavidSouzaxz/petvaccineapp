@@ -73,7 +73,7 @@ export default function AddVaccineScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ButtonRollback navigation={navigation} />
+      <ButtonRollback navigation={navigation} disabled={loading} />
       <Text style={styles.headerText}>Registrar Vacina {petName}</Text>
 
       <View style={styles.form}>

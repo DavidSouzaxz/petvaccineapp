@@ -63,7 +63,7 @@ export default function AddPetScreen({ navigation, route }) {
       navigation.navigate({
         name: "Home",
         params: { newPet: true },
-        merge: true, // Isso avisa para usar a Home que já existe na pilha
+        merge: true,
       });
     } catch (error) {
       Alert.alert("Error", "Não foi possível registrar o pet.");
@@ -74,7 +74,7 @@ export default function AddPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ButtonRollback navigation={navigation} />
+      <ButtonRollback navigation={navigation} disabled={loading} />
       <Text style={styles.titlePage}>Cadastrar Pet</Text>
       <Text style={styles.label}>Nome do Pet:</Text>
       <TextInput

@@ -1,11 +1,12 @@
 import { TouchableOpacity, StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ButtonRollback({ navigation, backgroundColor = "white", color = "#333" }) {
+export default function ButtonRollback({ navigation, backgroundColor = "white", color = "#333", disabled }) {
   return (
     <TouchableOpacity
       style={[styles.backButton, { backgroundColor, color }]}
       onPress={() => navigation.goBack()}
+      disabled={disabled}
     >
       <Ionicons name="arrow-back" size={24} color={color} />
     </TouchableOpacity>

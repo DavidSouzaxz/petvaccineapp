@@ -68,7 +68,7 @@ export default function DetailsScreen({ route, navigation }) {
       </View>) : (
         <>
           <View style={[styles.header, { backgroundColor: petColor }]}>
-            <ButtonRollback navigation={navigation} backgroundColor="#f0b98c" color="#6f421d" />
+            <ButtonRollback navigation={navigation} backgroundColor="#f0b98c" color="#6f421d" disabled={loading} />
             <Text style={styles.title}>{pet.name}</Text>
             <Text style={styles.breed}>{pet.breed}</Text>
           </View>
