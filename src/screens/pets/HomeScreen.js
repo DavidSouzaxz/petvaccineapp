@@ -74,7 +74,7 @@ export default function HomeScreen({ navigation, route }) {
         }
         return next;
       });
-    }, 7000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -197,14 +197,17 @@ export default function HomeScreen({ navigation, route }) {
   );
 
   return (
-    <>
+    <View style={styles.container}>
+
+
+      <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
+
       {loading ? (
-        <ActivityIndicator color="#fff" />
-      ) : (
-
-        <View style={styles.container}>
-          <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
-
+        // Container para centralizar o loading
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#F4A361" />
+        </View>) : (
+        <>
           <FlatList
             data={pets}
             key="two-columns"
@@ -231,11 +234,10 @@ export default function HomeScreen({ navigation, route }) {
           >
             <Ionicons name="add" size={30} color="#fff" />
           </TouchableOpacity>
-
-        </View>
+        </>
       )}
 
-    </>
+    </View>
   );
 }
 
@@ -319,5 +321,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
