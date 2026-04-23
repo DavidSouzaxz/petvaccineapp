@@ -16,6 +16,11 @@ const ServiceVaccine = {
     return response.data;
   },
 
+  vaccineIsApplied: async (id) => {
+    const response = await api.post(`/vacinas/isApplied/${id}`)
+    return response.data
+  },
+
   delete: async (id) => {
     await api.delete(`/vacinas/${id}`);
   },

@@ -21,16 +21,16 @@ export default function VaccineItem({ item, onConfirm, petColor }) {
       <View
         style={[
           styles.statusBadge,
-          { backgroundColor: item.applied ? "#C8E6C9" : "#FFCDD2" },
+          { backgroundColor: item.isApplied ? "#C8E6C9" : "#FFCDD2" },
         ]}
       >
         <Text
           style={[
             styles.statusText,
-            { color: item.applied ? "#2E7D32" : "#C62828" },
+            { color: item.isApplied ? "#2E7D32" : "#C62828" },
           ]}
         >
-          {item.applied ? "Aplicada" : "Pendente"}
+          {item.isApplied ? "Aplicada" : "Pendente"}
         </Text>
       </View>
     </TouchableOpacity>

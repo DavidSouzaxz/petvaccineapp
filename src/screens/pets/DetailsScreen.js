@@ -22,19 +22,22 @@ export default function DetailsScreen({ route, navigation }) {
   const [loading, setLoading] = useState(false);
 
   const confirmVaccineApplication = async (item) => {
-    if (item.applied) {
-      Alert.alert("Informação", "Esta vacina já foi marcada como aplicada.");
-      return;
-    }
 
+    setLoading(true);
+    console.log(item)
     try {
-      await ServiceVaccine.register(item.id, { applied: true });
 
-      setVaccines((prev) =>
-        prev.map((v) => (v.id === item.id ? { ...v, applied: true } : v)),
-      );
+      await ServiceVaccine.vaccineIsApplied(item.id);
+
+      // Recarrega os dados após sucesso
+      await loadVaccines();
+
+      Alert.alert("Sucesso", "Vacina marcada como aplicada!");
     } catch (error) {
+      console.error(error);
       Alert.alert("Erro", "Falha ao atualizar status da vacina.");
+    } finally {
+      setLoading(false);
     }
   };
 
