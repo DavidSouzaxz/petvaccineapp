@@ -6,18 +6,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator
 } from "react-native";
 import ServiceVaccine from "../../services/ServiceVaccine";
+import ButtonRollback from "../../components/ButtonRollback"
 
 export default function AddVaccineScreen({ navigation, route }) {
   const { petId, petName, petColor } = route.params;
-
+  const [loading, setLoading] = useState(false)
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState(""); // Novo estado para hora
-  const [observations, setObservations] = useState(""); // Corrigido useState
+  const [time, setTime] = useState("");
+  const [observations, setObservations] = useState("");
 
-  // Máscara para Data (DD/MM/AAAA)
+
   const handleDateChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
     let formatted = cleaned;
@@ -38,6 +40,7 @@ export default function AddVaccineScreen({ navigation, route }) {
   };
 
   const handleSave = async () => {
+    setLoading(true)
     if (!name || !date || !time) {
       Alert.alert("Atenção", "Preencha o nome, data e hora.");
       return;
@@ -51,7 +54,7 @@ export default function AddVaccineScreen({ navigation, route }) {
     const newVaccine = {
       petId: petId,
       name: name,
-      applicationDate: isoDateTime, // Backend agora recebe o formato correto
+      applicationDate: isoDateTime,
       isApplied: false,
       observations: observations,
     };
@@ -63,12 +66,15 @@ export default function AddVaccineScreen({ navigation, route }) {
     } catch (error) {
       Alert.alert("Error", "Ocorreu um erro ao registrar a vacina.");
       console.log(error);
+    } finally {
+      setLoading(false)
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Registrar vacina para: {petName}</Text>
+      <ButtonRollback navigation={navigation} />
+      <Text style={styles.headerText}>Registrar Vacina {petName}</Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>Nome da Vacina</Text>
@@ -117,8 +123,13 @@ export default function AddVaccineScreen({ navigation, route }) {
           multiline
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSave}>
-          <Text style={styles.buttonText}>Salvar na Carteira</Text>
+        <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Salvar na Carteira</Text>
+          )}
+
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -133,9 +144,9 @@ export default function AddVaccineScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20, paddingTop: 90 },
   headerText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#F4A361",
     marginBottom: 30,

@@ -45,7 +45,7 @@ const PET_MESSAGES = [
 
 export default function HomeScreen({ navigation, route }) {
   const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [notifications, setNotifications] = useState(false);
 
@@ -194,36 +194,45 @@ export default function HomeScreen({ navigation, route }) {
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
+    <>
+      {loading ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
 
-      <FlatList
-        data={pets}
-        key="two-columns"
-        numColumns={2}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <PetCard
-            pet={item}
-            onPress={(p) => navigation.navigate("Details", { pet: p })}
-            onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
+        <View style={styles.container}>
+          <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
+
+          <FlatList
+            data={pets}
+            key="two-columns"
+            numColumns={2}
+            ListHeaderComponent={renderHeader}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <PetCard
+                pet={item}
+                onPress={(p) => navigation.navigate("Details", { pet: p })}
+                onEdit={(p) => navigation.navigate("EditPet", { pet: p })}
+              />
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Nenhum pet cadastrado.</Text>
+            }
+            onRefresh={fetchPets}
+            refreshing={loading}
           />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum pet cadastrado.</Text>
-        }
-        onRefresh={fetchPets}
-        refreshing={loading}
-      />
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate("AddPet")}
-      >
-        <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Ionicons name="add" size={30} color="#fff" />
+          </TouchableOpacity>
+
+        </View>
+      )}
+
+    </>
   );
 }
 

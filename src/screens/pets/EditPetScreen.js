@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  ActivityIndicator
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,7 +14,7 @@ import ButtonRollback from "../../components/ButtonRollback";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
-
+  const [loading, setLoading] = useState(false)
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
@@ -51,6 +52,7 @@ export default function EditPetScreen({ navigation, route }) {
   };
 
   const handlerSave = async () => {
+    setLoading(true)
     if (!name || !breed) {
       Alert.alert("Erro", "Preencha todos os campos");
       return;
@@ -76,6 +78,9 @@ export default function EditPetScreen({ navigation, route }) {
       console.error(error);
       Alert.alert("Erro", "Não foi possível atualizar o pet.");
     }
+    finally {
+      setLoading(false)
+    }
   };
 
   return (
@@ -97,8 +102,13 @@ export default function EditPetScreen({ navigation, route }) {
         placeholder="Ex: Dobermann"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handlerSave}>
-        <Text style={styles.buttonText}>Salvar Alterações</Text>
+      <TouchableOpacity style={styles.button} onPress={handlerSave} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+
+          <Text style={styles.buttonText}>Salvar Alterações</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

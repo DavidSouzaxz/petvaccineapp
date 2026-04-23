@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Text,
   Alert,
+  ActivityIndicator
+
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
@@ -19,6 +21,7 @@ export default function AddPetScreen({ navigation, route }) {
   const [birthDate, setBirthDate] = useState(new Date());
   const [userId, setUserId] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -41,6 +44,7 @@ export default function AddPetScreen({ navigation, route }) {
   };
 
   const handlerSave = async () => {
+    setLoading(true)
     if (!name || !breed) {
       Alert.alert("Preencha todos os campos");
       return;
@@ -63,6 +67,8 @@ export default function AddPetScreen({ navigation, route }) {
       });
     } catch (error) {
       Alert.alert("Error", "Não foi possível registrar o pet.");
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -104,8 +110,13 @@ export default function AddPetScreen({ navigation, route }) {
         />
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handlerSave}>
-        <Text style={styles.buttonText}>Salvar Pet</Text>
+      <TouchableOpacity style={styles.button} onPress={handlerSave} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+
+          <Text style={styles.buttonText}>Salvar Pet</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
