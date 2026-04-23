@@ -16,7 +16,7 @@ import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 
 export default function DetailsScreen({ route, navigation }) {
-  console.log(route.params?.pet?.vaccines);
+
   const { pet, petColor = "#F4A361" } = route.params;
 
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines);
@@ -30,7 +30,7 @@ export default function DetailsScreen({ route, navigation }) {
 
       await ServiceVaccine.vaccineIsApplied(item.id);
 
-      // Recarrega os dados após sucesso
+
       await loadVaccines();
 
       Alert.alert("Sucesso", "Vacina marcada como aplicada!");
