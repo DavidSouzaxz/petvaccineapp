@@ -88,12 +88,15 @@ export default function HomeScreen({ navigation, route }) {
   }, [activeMessageIndex]);
 
   const fetchPets = async () => {
+    const userId = await AsyncStorage.getItem("@userId")
+
     try {
       setLoading(true);
-      const data = await ServicePet.listAll();
+      const data = await ServicePet.getPetsByUser(userId);
       setPets(data);
     } catch (error) {
       Alert.alert("Erro", "Não foi possível carregar os pets.");
+      console.log(error)
     } finally {
       setLoading(false);
     }
