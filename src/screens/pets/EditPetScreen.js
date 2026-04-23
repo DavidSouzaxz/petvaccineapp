@@ -18,32 +18,30 @@ export default function EditPetScreen({ navigation, route }) {
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-          <Text style={styles.deleteButtonText}>Excluir</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+
 
   const handleDelete = () => {
+
     Alert.alert(
       "Excluir Pet",
       `Tem certeza que deseja excluir ${editingPet?.name}?`,
       [
-        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cancelar", style: "cancel",
+        },
         {
           text: "Excluir",
           style: "destructive",
           onPress: async () => {
+            setLoading(true)
             try {
               await ServicePet.delete(editingPet.id);
               Alert.alert("Sucesso", "Pet excluído com sucesso!");
               navigation.navigate("Home", { newPet: true });
             } catch (error) {
               Alert.alert("Erro", "Não foi possível excluir o pet.");
+            } finally {
+              setLoading(false)
             }
           },
         },
@@ -85,7 +83,14 @@ export default function EditPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ButtonRollback navigation={navigation} />
+      <ButtonRollback navigation={navigation} disabled={loading} />
+
+      <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+
+        <Ionicons name="trash" color="#fff" size={20} />
+      </TouchableOpacity>
+
+
       <Text style={styles.titlePage}>Edição de Pet</Text>
       <Text style={styles.label}>Nome do Pet:</Text>
       <TextInput
@@ -110,12 +115,21 @@ export default function EditPetScreen({ navigation, route }) {
           <Text style={styles.buttonText}>Salvar Alterações</Text>
         )}
       </TouchableOpacity>
+      <TouchableOpacity style={styles.buttonCancel} onPress={() => navigation.goBack()} disabled={loading}>
+
+        <ActivityIndicator color="#fff" />
+
+
+        <Text style={styles.buttonCancelText}>Cancelar</Text>
+
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff", paddingTop: 80 },
+  buttonTrash: { flexDirection: "row", justifyContent: "flex-end" },
   titlePage: { textAlign: "center", color: "#000", fontSize: 30, paddingVertical: 10, paddingBottom: 30, fontWeight: "bold" },
   label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
   input: {
@@ -133,13 +147,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  buttonCancel: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonCancelText: { color: "#FF3B30", fontSize: 18, fontWeight: "bold" },
   deleteButton: {
-    marginRight: 12,
+
+    backgroundColor: "#FF3B30",
+    color: "#fff",
+    padding: 13,
+    fontSize: 16,
+    borderRadius: 15,
+    fontWeight: "600",
+    position: "absolute",
+    top: 55,
+    right: 22,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
 
-  deleteButtonText: {
-    color: "#FF3B30",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+
 });
