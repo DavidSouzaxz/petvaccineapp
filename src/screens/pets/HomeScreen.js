@@ -14,6 +14,8 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
 import PetCard from "../../components/PetCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import VaccineAlertCard from "../../components/VaccineAlertCard";
+import ServiceVaccine from "../../services/ServiceVaccine";
 
 
 const { width } = Dimensions.get("window");
@@ -50,11 +52,21 @@ export default function HomeScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [notifications, setNotifications] = useState(false);
-
+  const [vaccines, setVaccines] = useState([])
   const isForward = useRef(true);
   const flatListRef = useRef(null);
   const [activeMessageIndex, setActiveMessageIndex] = useState(0);
 
+  const listVaccines = async () => {
+    const userId = await AsyncStorage.getItem("@userId")
+    try {
+      const response = await ServiceVaccine.listVaccinesPendentes(userId)
+      setVaccines(response)
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
 
   const fetchPets = async () => {
@@ -79,6 +91,7 @@ export default function HomeScreen({ navigation, route }) {
     };
     loadUserName();
     fetchPets();
+    listVaccines()
   }, []);
 
   useEffect(() => {
@@ -108,6 +121,18 @@ export default function HomeScreen({ navigation, route }) {
           <Text style={styles.bannerButtonText}>Join now</Text>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Lembrete</Text>
+      </View>
+
+      <View style={{ paddingBottom: 20, flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
+        {vaccines.length > 0 ? (vaccines.map((item, index) => (
+          <VaccineAlertCard key={index} vaccine={item} />
+        ))) : (<Text style={{ margin: 20 }}>Nenhuma vacina pendente! 🎉</Text>)}
+
+      </View>
+
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
