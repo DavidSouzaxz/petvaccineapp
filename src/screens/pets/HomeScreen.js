@@ -135,7 +135,7 @@ export default function HomeScreen({ navigation, route }) {
         <Text style={styles.sectionTitle}>Lembrete</Text>
       </View>
 
-      <View style={{ paddingBottom: 20, flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
+      <View style={{ paddingBottom: 20, flexDirection: "row", flexWrap: "wrap", justifyContent: vaccines.length % 2 === 0 ? "center" : "flex-start", marginLeft: vaccines.length % 2 === 0 ? 0 : 10 }}>
         {vaccines.length > 0 ? (vaccines.map((item, index) => (
           <VaccineAlertCard key={index} vaccine={item} />
         ))) : (<Text style={{ margin: 20 }}>Nenhuma vacina pendente! 🎉</Text>)}
