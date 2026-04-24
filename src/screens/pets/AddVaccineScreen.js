@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Switch
 } from "react-native";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback"
+import { validateDate, validateTime } from "../../core/validators";
 
 export default function AddVaccineScreen({ navigation, route }) {
   const { petId, petName, petColor } = route.params;
@@ -17,8 +19,10 @@ export default function AddVaccineScreen({ navigation, route }) {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [isApplied, setIsApplied] = useState(false);
   const [observations, setObservations] = useState("");
 
+  const toggleSwitch = () => setIsApplied(previousState => !previousState);
 
   const handleDateChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
@@ -40,13 +44,26 @@ export default function AddVaccineScreen({ navigation, route }) {
   };
 
   const handleSave = async () => {
-    setLoading(true)
+
     if (!name || !date || !time) {
       Alert.alert("Atenção", "Preencha o nome, data e hora.");
       return;
     }
 
-    // Conversão para o padrão ISO do Backend (yyyy-MM-ddTHH:mm:ss)
+    const dateError = validateDate(date);
+    const timeError = validateTime(time);
+
+    if (dateError) {
+      Alert.alert("Erro na Data", dateError);
+      return;
+    }
+    if (timeError) {
+      Alert.alert("Erro na Hora", timeError);
+      return;
+    }
+
+    setLoading(true)
+
     const [day, month, year] = date.split("/");
     const [hour, minute] = time.split(":");
     const isoDateTime = `${year}-${month}-${day}T${hour}:${minute}:00`;
@@ -55,7 +72,7 @@ export default function AddVaccineScreen({ navigation, route }) {
       petId: petId,
       name: name,
       applicationDate: isoDateTime,
-      isApplied: false,
+      isApplied: isApplied,
       observations: observations,
     };
 
@@ -75,6 +92,15 @@ export default function AddVaccineScreen({ navigation, route }) {
     <View style={styles.container}>
       <ButtonRollback navigation={navigation} disabled={loading} />
       <Text style={styles.headerText}>Registrar Vacina {petName}</Text>
+      <View style={styles.switchContainer}>
+        <Text style={[styles.label, { textAlign: "center" }]}>{isApplied ? "Aplicada" : "N/Aplicada"} </Text>
+        <Switch
+          trackColor={{ false: "#767577", true: "#F4A361" }}
+          thumbColor={isApplied ? "#ffffff" : "#f4f3f4"}
+          onValueChange={toggleSwitch}
+          value={isApplied}
+        />
+      </View>
 
       <View style={styles.form}>
         <Text style={styles.label}>Nome da Vacina</Text>
@@ -113,6 +139,7 @@ export default function AddVaccineScreen({ navigation, route }) {
           </View>
         </View>
 
+
         <Text style={styles.label}>Observações</Text>
         <TextInput
           style={[styles.input, { height: 80 }]}
@@ -123,11 +150,13 @@ export default function AddVaccineScreen({ navigation, route }) {
           multiline
         />
 
+
+
         <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Salvar na Carteira</Text>
+            <Text style={styles.buttonText}>Salvar na Carteirinha</Text>
           )}
 
         </TouchableOpacity>
@@ -151,6 +180,11 @@ const styles = StyleSheet.create({
     color: "#F4A361",
     marginBottom: 30,
     textAlign: "center",
+  },
+  switchContainer: {
+    position: "absolute",
+    top: 55,
+    right: 25
   },
   form: { flex: 1 },
   label: { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 8 },
