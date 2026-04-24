@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import ServicePet from "../../services/ServicePet";
 import PetCard from "../../components/PetCard";
@@ -83,6 +84,14 @@ export default function HomeScreen({ navigation, route }) {
       setLoading(false);
     }
   };
+
+
+  useFocusEffect(
+    useCallback(() => {
+      listVaccines()
+      fetchPets();
+    }, [])
+  );
 
   useEffect(() => {
     const loadUserName = async () => {

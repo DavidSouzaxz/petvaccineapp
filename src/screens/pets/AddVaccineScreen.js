@@ -30,7 +30,7 @@ export default function AddVaccineScreen({ navigation, route }) {
     setDate(formatted);
   };
 
-  // Máscara para Hora (HH:mm)
+
   const handleTimeChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
     let formatted = cleaned;
