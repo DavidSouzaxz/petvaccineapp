@@ -15,10 +15,12 @@ import ServicePet from "../../services/ServicePet";
 import PetCard from "../../components/PetCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
 const { width } = Dimensions.get("window");
-const GAP = 20;
-const CARD_WIDTH = width - 40;
+const CARD_WIDTH = width - 50;
+const GAP = 40;
 const SNAP_INTERVAL = CARD_WIDTH + GAP;
+const SIDE_PADDING = (width - CARD_WIDTH) / 2;
 
 const PET_MESSAGES = [
   {
@@ -53,39 +55,7 @@ export default function HomeScreen({ navigation, route }) {
   const flatListRef = useRef(null);
   const [activeMessageIndex, setActiveMessageIndex] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveMessageIndex((prev) => {
-        let next;
-        if (isForward.current) {
-          if (prev + 1 < PET_MESSAGES.length) {
-            next = prev + 1;
-          } else {
-            isForward.current = false;
-            next = prev - 1;
-          }
-        } else {
-          if (prev - 1 >= 0) {
-            next = prev - 1;
-          } else {
-            isForward.current = true;
-            next = prev + 1;
-          }
-        }
-        return next;
-      });
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
-  useEffect(() => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToIndex({
-        index: activeMessageIndex,
-        animated: true,
-      });
-    }
-  }, [activeMessageIndex]);
 
   const fetchPets = async () => {
     const userId = await AsyncStorage.getItem("@userId")
@@ -147,43 +117,23 @@ export default function HomeScreen({ navigation, route }) {
         ref={flatListRef}
         data={PET_MESSAGES}
         horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
+        pagingEnabled={false}
         snapToInterval={SNAP_INTERVAL}
-        decelerationRate="fast"
-        snapToAlignment="start"
-        disableIntervalMomentum={true}
-        scrollEventThrottle={10}
-        getItemLayout={(_, index) => ({
-          length: SNAP_INTERVAL,
-          offset: SNAP_INTERVAL * index,
-          index,
-        })}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(
-            e.nativeEvent.contentOffset.x / SNAP_INTERVAL,
-          );
-          if (index !== activeMessageIndex) {
-            if (index >= PET_MESSAGES.length - 1) isForward.current = false;
-            if (index <= 0) isForward.current = true;
-            setActiveMessageIndex(index);
-          }
-        }}
+        showsHorizontalScrollIndicator={false}
+
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageCard,
-              { width: CARD_WIDTH, marginRight: GAP },
-            ]}
-          >
+          <View style={[styles.messageCard, { width: CARD_WIDTH, marginRight: GAP }]}>
             <View style={styles.messageIconContainer}>
               <FontAwesome5 name={item.icon} size={20} color="#F4A361" />
             </View>
             <Text style={styles.messageText}>{item.text}</Text>
           </View>
         )}
+
         contentContainerStyle={styles.carouselContainer}
       />
+
+
 
       <Text
         style={[
@@ -277,7 +227,7 @@ const styles = StyleSheet.create({
   bannerButtonText: { color: "#F4A361", fontWeight: "bold" },
   sectionHeader: { marginHorizontal: 20, marginBottom: 15 },
   sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#333" },
-  carouselContainer: { paddingHorizontal: 10, marginBottom: 15 },
+  carouselContainer: { paddingHorizontal: 10, marginBottom: 15, marginLeft: 5 },
   messageCard: {
     backgroundColor: "#FFF",
     borderRadius: 15,
