@@ -40,6 +40,7 @@ export default function LoginScreen({ navigation, onSignIn }) {
       }
     } catch (error) {
       Alert.alert("Erro", "E-mail ou senha inválidos.");
+      setLoading(false);
     } finally {
       setLoading(false);
     }
