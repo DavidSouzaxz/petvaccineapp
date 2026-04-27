@@ -131,6 +131,7 @@ export default function HomeScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
+      {/* Categorias */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Lembrete</Text>
       </View>

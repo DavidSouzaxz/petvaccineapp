@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,13 +14,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function ProfileScreen({ onLogout }) {
   const [user, setUser] = useState(AsyncStorage.getItem("@userName"));
 
+  useEffect(() => {
+    AsyncStorage.getItem("@userName").then((name) => {
+      if (name) setUser(name);
+    });
+  } , []);    // nao deu para funcionar pelos styles
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>D</Text>
+              <Text style={styles.avatarText}>{user[0]}</Text>
             </View>
           </View>
         </View>
@@ -64,7 +70,7 @@ export default function ProfileScreen({ onLogout }) {
   );
 }
 
-const BLUE = "#007AFF";
+const BLUE = "#F4A361";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
@@ -77,7 +83,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffffff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -85,11 +91,11 @@ const styles = StyleSheet.create({
     width: 66,
     height: 66,
     borderRadius: 33,
-    backgroundColor: "#B5D4F4",
+    backgroundColor: "#f3c39cff",
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 26, fontWeight: "500", color: "#0C447C" },
+  avatarText: { fontSize: 26, fontWeight: "500", color: "#000000ff" },
 
   nameSection: { alignItems: "center", marginTop: 44, marginBottom: 8 },
   name: { fontSize: 18, fontWeight: "600", color: "#111" },
