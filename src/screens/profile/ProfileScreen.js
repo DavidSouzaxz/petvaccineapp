@@ -11,8 +11,8 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen({onLogout}) {
-  const [user, setUser] = useState("");
+export default function ProfileScreen({ onLogout }) {
+  const [user, setUser] = useState(AsyncStorage.getItem("@userName"));
 
   useEffect(() => {
     AsyncStorage.getItem("@userName").then((name) => {

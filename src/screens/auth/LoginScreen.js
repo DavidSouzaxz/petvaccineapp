@@ -6,17 +6,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceUser from "../../services/ServiceUser";
 
-// Adicionamos o onSignIn aqui nas props
 export default function LoginScreen({ navigation, onSignIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // Validação básica antes de chamar a API
+    setLoading(true);
     if (!email || !password) {
       Alert.alert("Erro", "Por favor, preencha todos os campos.");
       return;
@@ -35,13 +36,12 @@ export default function LoginScreen({ navigation, onSignIn }) {
         await AsyncStorage.setItem("@userId", response.userId);
         await AsyncStorage.setItem("@userName", response.name);
 
-        Alert.alert("Bem-vindo", `Olá, ${response.name}!`);
-
         onSignIn(response.token);
       }
     } catch (error) {
       Alert.alert("Erro", "E-mail ou senha inválidos.");
-      console.log("Erro no login:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,8 +66,16 @@ export default function LoginScreen({ navigation, onSignIn }) {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Entrar</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>

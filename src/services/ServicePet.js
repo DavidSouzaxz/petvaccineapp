@@ -11,6 +11,11 @@ const ServicePet = {
     return response.data;
   },
 
+  getPetsByUser: async (id) => {
+    const response = await api.get(`/pets/usuario/${id}`)
+    return response.data
+  },
+
   update: async (id, petData) => {
     const response = await api.put(`/pets/${id}`, petData);
     return response.data;

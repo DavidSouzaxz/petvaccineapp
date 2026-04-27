@@ -5,8 +5,9 @@ import {
   Text,
   TouchableOpacity,
   Linking,
+  Platform
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getNearbyClinics } from "../../services/ServiceMap";
@@ -15,6 +16,7 @@ import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 
 export default function MapScreen({ navigation }) {
   const [markers, setMarkers] = useState([]);
+  const [loading, setLoading] = useState(false)
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [region, setRegion] = useState(null);
 
@@ -25,8 +27,8 @@ export default function MapScreen({ navigation }) {
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
@@ -82,6 +84,18 @@ export default function MapScreen({ navigation }) {
     })();
   }, [fetchNearby]);
 
+  const handlePress = async (clinic) => {
+    const sucesso = await OpenGoogleMaps(clinic);
+    setLoading(true)
+    if (sucesso) {
+      setLoading(false)
+      console.log("Deu bom! O usuário foi para o Maps.");
+    } else {
+      setLoading(false)
+      Alert.alert("Ops!", "Não conseguimos abrir o mapa no seu dispositivo.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -95,9 +109,22 @@ export default function MapScreen({ navigation }) {
           <Marker
             key={m.id}
             coordinate={{ latitude: m.lat, longitude: m.lon }}
-            onPress={() => setSelectedClinic(m)}
+            onPress={() => handlePress(selectedClinic)}
+            title={m.nome || m.name}
             pinColor="#F4A361"
-          />
+          >
+            <Callout
+              tooltip
+              onPress={() => OpenGoogleMaps(m)}
+            >
+              <View style={styles.calloutContainer}>
+                <Text style={styles.calloutTitle} numberOfLines={1}>
+                  {m.nome || m.name}
+                </Text>
+                <Text style={styles.calloutSubtitle}>Toque para mais detalhes</Text>
+              </View>
+            </Callout>
+          </Marker>
         ))}
       </MapView>
       <TouchableOpacity
@@ -124,9 +151,10 @@ export default function MapScreen({ navigation }) {
           </View>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => OpenGoogleMaps(selectedClinic)}
+            onPress={() => handlePress(selectedClinic)}
+            disabled={loading}
           >
-            <Text style={styles.buttonText}>Ver Detalhes no Maps</Text>
+            <Text style={styles.buttonText}>Ver Detalhes</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -137,6 +165,26 @@ export default function MapScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
   map: { width: "100%", height: "100%" },
+  calloutContainer: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 10,
+    width: 180, // LARGURA FIXA PARA O iOS
+    borderWidth: 1,
+    borderColor: "#EEE",
+    alignItems: "center",
+  },
+  calloutTitle: {
+    fontWeight: "bold",
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
+  calloutSubtitle: {
+    fontSize: 12,
+    color: "#F4A361",
+    marginTop: 2,
+  },
   card: {
     position: "absolute",
     bottom: 30,

@@ -6,11 +6,14 @@ import {
   StyleSheet,
   Text,
   Alert,
+  ActivityIndicator
+
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ButtonRollback from "../../components/ButtonRollback";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -18,6 +21,7 @@ export default function AddPetScreen({ navigation, route }) {
   const [birthDate, setBirthDate] = useState(new Date());
   const [userId, setUserId] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -40,6 +44,7 @@ export default function AddPetScreen({ navigation, route }) {
   };
 
   const handlerSave = async () => {
+    setLoading(true)
     if (!name || !breed) {
       Alert.alert("Preencha todos os campos");
       return;
@@ -58,15 +63,19 @@ export default function AddPetScreen({ navigation, route }) {
       navigation.navigate({
         name: "Home",
         params: { newPet: true },
-        merge: true, // Isso avisa para usar a Home que já existe na pilha
+        merge: true,
       });
     } catch (error) {
       Alert.alert("Error", "Não foi possível registrar o pet.");
+    } finally {
+      setLoading(false)
     }
   };
 
   return (
     <View style={styles.container}>
+      <ButtonRollback navigation={navigation} disabled={loading} />
+      <Text style={styles.titlePage}>Cadastrar Pet</Text>
       <Text style={styles.label}>Nome do Pet:</Text>
       <TextInput
         style={styles.input}
@@ -101,15 +110,21 @@ export default function AddPetScreen({ navigation, route }) {
         />
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handlerSave}>
-        <Text style={styles.buttonText}>Salvar Pet</Text>
+      <TouchableOpacity style={styles.button} onPress={handlerSave} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+
+          <Text style={styles.buttonText}>Salvar Pet</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 20, backgroundColor: "#fff", paddingTop: 80 },
+  titlePage: { textAlign: "center", color: "#000", fontSize: 30, paddingVertical: 10, paddingBottom: 30, fontWeight: "bold" },
   label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
   input: {
     borderWidth: 1,

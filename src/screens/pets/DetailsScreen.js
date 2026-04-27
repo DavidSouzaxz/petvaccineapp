@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,102 +6,155 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  StatusBar,
+  ActivityIndicator
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native"; // IMPORTANTE
+import { Ionicons } from "@expo/vector-icons";
 import VaccineItem from "../../components/VaccineItem";
+import ServiceVaccine from "../../services/ServiceVaccine";
+import ButtonRollback from "../../components/ButtonRollback";
 
 export default function DetailsScreen({ route, navigation }) {
-  const { petName, petBreed, petColor } = route.params;
 
-  const [vaccines, setVaccines] = useState([
-    { id: "1", name: "Antirrábica", date: "10/01/2026", applied: true },
-    { id: "2", name: "V10", date: "15/02/2026", applied: false },
-    { id: "3", name: "Gripe Canina", date: "20/03/2026", applied: true },
-  ]);
+  const { pet, petColor = "#F4A361" } = route.params;
 
-  // Captura nova vacina vinda do formulário
-  useEffect(() => {
-    if (route.params?.newVaccine) {
-      setVaccines((prev) => {
-        const exists = prev.find((v) => v.id === route.params.newVaccine.id);
-        if (exists) return prev;
-        return [...prev, route.params.newVaccine];
-      });
+  const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines);
+  const [loading, setLoading] = useState(false);
+
+  const confirmVaccineApplication = async (item) => {
+
+    setLoading(true);
+
+    try {
+
+      await ServiceVaccine.vaccineIsApplied(item.id);
+
+
+      await loadVaccines();
+
+      Alert.alert("Sucesso", "Vacina marcada como aplicada!");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Falha ao atualizar status da vacina.");
+    } finally {
+      setLoading(false);
     }
-  }, [route.params?.newVaccine]);
-
-  // Regra de negócio: Confirmar aplicação
-  const confirmVaccineApplication = (item) => {
-    if (item.applied) {
-      Alert.alert("Informação", "Esta vacina já foi marcada como aplicada.");
-      return;
-    }
-
-    Alert.alert(
-      "Confirmar Vacinação",
-      `Deseja marcar a vacina "${item.name}" como aplicada?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Confirmar",
-          onPress: () => {
-            setVaccines((prev) =>
-              prev.map((v) => (v.id === item.id ? { ...v, applied: true } : v)),
-            );
-          },
-        },
-      ],
-    );
   };
+
+  const loadVaccines = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await ServiceVaccine.listAll();
+      setVaccines(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false)
+    }
+  }, [pet.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadVaccines();
+    }, [loadVaccines]),
+  );
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: petColor }]}>
-        <Text style={styles.title}>Carteira de: {petName}</Text>
-        <Text style={styles.breed}>Raça: {petBreed}</Text>
-      </View>
+      <StatusBar barStyle="light-content" backgroundColor={petColor} />
+      {loading ? (<View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#F4A361" />
+      </View>) : (
+        <>
+          <View style={[styles.header, { backgroundColor: petColor }]}>
+            <ButtonRollback navigation={navigation} backgroundColor="#f0b98c" color="#6f421d" disabled={loading} />
+            <Text style={styles.title}>{pet.name}</Text>
+            <Text style={styles.breed}>{pet.breed}</Text>
+          </View>
 
-      <FlatList
-        data={vaccines}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listPadding}
-        renderItem={({ item }) => (
-          <VaccineItem item={item} onConfirm={confirmVaccineApplication} petColor={petColor} />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhuma vacina registrada.</Text>
-        }
-      />
+          <FlatList
+            data={vaccines}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listPadding}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <VaccineItem
+                item={item}
+                onConfirm={confirmVaccineApplication}
+                petColor={petColor}
+              />
+            )}
+            ListEmptyComponent={
+              !loading && (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="medical-outline" size={48} color="#ccc" />
+                  <Text style={styles.emptyText}>Nenhuma vacina registrada.</Text>
+                </View>
+              )
+            }
+          />
 
-      <TouchableOpacity
-        style={[styles.addButton, { backgroundColor: petColor }]}
-        onPress={() => navigation.navigate("AddVaccine", { petName, petColor })}
-      >
-        <Text style={styles.addButtonText}>Registrar Nova Dose</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity
+            style={[styles.addButton, { backgroundColor: petColor }]}
+            onPress={() =>
+              navigation.navigate("AddVaccine", { petId: pet.id, petColor })
+            }
+          >
+            <Text style={styles.addButtonText}>+ Registrar Nova Dose</Text>
+          </TouchableOpacity>
+        </>
+
+      )
+      }
+
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1, backgroundColor: "#f8f9fa" },
   header: {
-    padding: 20,
-    backgroundColor: "#F4A361",
+    paddingTop: 80,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
     alignItems: "center",
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  title: { fontSize: 22, fontWeight: "bold", color: "#fff" },
-  breed: { fontSize: 16, color: "#fff", marginTop: 4 },
+  title: { fontSize: 24, fontWeight: "bold", color: "#fff" },
+  breed: { fontSize: 16, color: "#fff", marginTop: 4, opacity: 0.9 },
   listPadding: { padding: 15 },
-  emptyText: { textAlign: "center", marginTop: 50, color: "#999" },
-  addButton: {
-    backgroundColor: "#F4A361",
-    margin: 20,
-    padding: 15,
-    borderRadius: 10,
+  emptyContainer: {
     alignItems: "center",
-    elevation: 2,
+    marginTop: 100,
   },
-  addButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 10,
+    color: "#999",
+    fontSize: 16,
+  },
+  addButton: {
+    margin: 20,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  addButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

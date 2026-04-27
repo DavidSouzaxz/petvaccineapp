@@ -39,11 +39,11 @@ function AuthNavigator({ onSignIn }) {
 
 function PetStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: "Meus Pets", headerLeft: () => null }}
+        options={{ headerLeft: () => null }}
       />
       <Stack.Screen
         name="Details"
