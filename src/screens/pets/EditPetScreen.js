@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,34 +14,32 @@ import ButtonRollback from "../../components/ButtonRollback";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
 
-
-
   const handleDelete = () => {
-
     Alert.alert(
       "Excluir Pet",
       `Tem certeza que deseja excluir ${editingPet?.name}?`,
       [
         {
-          text: "Cancelar", style: "cancel",
+          text: "Cancelar",
+          style: "cancel",
         },
         {
           text: "Excluir",
           style: "destructive",
           onPress: async () => {
-            setLoading(true)
+            setLoading(true);
             try {
               await ServicePet.delete(editingPet.id);
               Alert.alert("Sucesso", "Pet excluído com sucesso!");
-              navigation.navigate("Home", { newPet: true });
+              navigation.navigate("Pets", { newPet: true });
             } catch (error) {
               Alert.alert("Erro", "Não foi possível excluir o pet.");
             } finally {
-              setLoading(false)
+              setLoading(false);
             }
           },
         },
@@ -50,7 +48,7 @@ export default function EditPetScreen({ navigation, route }) {
   };
 
   const handlerSave = async () => {
-    setLoading(true)
+    setLoading(true);
     if (!name || !breed) {
       Alert.alert("Erro", "Preencha todos os campos");
       return;
@@ -68,16 +66,15 @@ export default function EditPetScreen({ navigation, route }) {
 
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
       navigation.navigate({
-        name: "Home",
+        name: "Pets",
         params: { newPet: true },
         merge: true,
       });
     } catch (error) {
       console.error(error);
       Alert.alert("Erro", "Não foi possível atualizar o pet.");
-    }
-    finally {
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,10 +83,8 @@ export default function EditPetScreen({ navigation, route }) {
       <ButtonRollback navigation={navigation} disabled={loading} />
 
       <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-
         <Ionicons name="trash" color="#fff" size={20} />
       </TouchableOpacity>
-
 
       <Text style={styles.titlePage}>Edição de Pet</Text>
       <Text style={styles.label}>Nome do Pet:</Text>
@@ -107,21 +102,25 @@ export default function EditPetScreen({ navigation, route }) {
         placeholder="Ex: Dobermann"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handlerSave} disabled={loading}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handlerSave}
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-
           <Text style={styles.buttonText}>Salvar Alterações</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.buttonCancel} onPress={() => navigation.goBack()} disabled={loading}>
-
+      <TouchableOpacity
+        style={styles.buttonCancel}
+        onPress={() => navigation.goBack()}
+        disabled={loading}
+      >
         <ActivityIndicator color="#fff" />
 
-
         <Text style={styles.buttonCancelText}>Cancelar</Text>
-
       </TouchableOpacity>
     </View>
   );
@@ -130,7 +129,14 @@ export default function EditPetScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff", paddingTop: 80 },
   buttonTrash: { flexDirection: "row", justifyContent: "flex-end" },
-  titlePage: { textAlign: "center", color: "#000", fontSize: 30, paddingVertical: 10, paddingBottom: 30, fontWeight: "bold" },
+  titlePage: {
+    textAlign: "center",
+    color: "#000",
+    fontSize: 30,
+    paddingVertical: 10,
+    paddingBottom: 30,
+    fontWeight: "bold",
+  },
   label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
   input: {
     borderWidth: 1,
@@ -155,7 +161,6 @@ const styles = StyleSheet.create({
   },
   buttonCancelText: { color: "#FF3B30", fontSize: 18, fontWeight: "bold" },
   deleteButton: {
-
     backgroundColor: "#FF3B30",
     color: "#fff",
     padding: 13,
@@ -172,6 +177,4 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
-
-
 });

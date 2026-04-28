@@ -6,8 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
-  ActivityIndicator
-
+  ActivityIndicator,
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
@@ -21,7 +20,7 @@ export default function AddPetScreen({ navigation, route }) {
   const [birthDate, setBirthDate] = useState(new Date());
   const [userId, setUserId] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -44,7 +43,7 @@ export default function AddPetScreen({ navigation, route }) {
   };
 
   const handlerSave = async () => {
-    setLoading(true)
+    setLoading(true);
     if (!name || !breed) {
       Alert.alert("Preencha todos os campos");
       return;
@@ -61,14 +60,14 @@ export default function AddPetScreen({ navigation, route }) {
 
       Alert.alert("Sucesso", "Pet cadastrado com sucesso!");
       navigation.navigate({
-        name: "Home",
+        name: "Pets",
         params: { newPet: true },
         merge: true,
       });
     } catch (error) {
       Alert.alert("Error", "Não foi possível registrar o pet.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -110,11 +109,14 @@ export default function AddPetScreen({ navigation, route }) {
         />
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handlerSave} disabled={loading}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handlerSave}
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-
           <Text style={styles.buttonText}>Salvar Pet</Text>
         )}
       </TouchableOpacity>
@@ -124,7 +126,14 @@ export default function AddPetScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff", paddingTop: 80 },
-  titlePage: { textAlign: "center", color: "#000", fontSize: 30, paddingVertical: 10, paddingBottom: 30, fontWeight: "bold" },
+  titlePage: {
+    textAlign: "center",
+    color: "#000",
+    fontSize: 30,
+    paddingVertical: 10,
+    paddingBottom: 30,
+    fontWeight: "bold",
+  },
   label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
   input: {
     borderWidth: 1,

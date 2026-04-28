@@ -7,6 +7,7 @@ import api from "../services/api"; // Certifique-se de importar sua instância d
 
 // Imports das Telas
 import HomeScreen from "../screens/pets/HomeScreen";
+import PetsScreen from "../screens/pets/PetsScreen";
 import DetailsScreen from "../screens/pets/DetailsScreen";
 import AddPetScreen from "../screens/pets/AddPetScreen";
 import EditPetScreen from "../screens/pets/EditPetScreen";
@@ -37,12 +38,24 @@ function AuthNavigator({ onSignIn }) {
   );
 }
 
-function PetStack() {
+function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="Home"
         component={HomeScreen}
+        options={{ headerLeft: () => null }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function PetStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="Pets"
+        component={PetsScreen}
         options={{ headerLeft: () => null }}
       />
       <Stack.Screen
@@ -129,9 +142,10 @@ export default function Routes() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
-          if (route.name === "Pets") iconName = "paw";
+          if (route.name === "Home") iconName = "home";
           else if (route.name === "Clinicas") iconName = "map";
           else if (route.name === "Perfil") iconName = "person";
+          else if (route.name === "Pets") iconName = "paw";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#F4A361",
@@ -139,6 +153,7 @@ export default function Routes() {
         headerShown: false,
       })}
     >
+      <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Pets" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
       <Tab.Screen name="Perfil">
