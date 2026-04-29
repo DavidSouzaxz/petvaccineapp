@@ -38,24 +38,24 @@ function AuthNavigator({ onSignIn }) {
   );
 }
 
-function HomeStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ headerLeft: () => null }}
-      />
-    </Stack.Navigator>
-  );
-}
+// function HomeStack() {
+//   return (
+//     <Stack.Navigator screenOptions={{ headerShown: false }}>
+//       <Stack.Screen
+//         name="Home"
+//         component={HomeScreen}
+//         options={{ headerLeft: () => null }}
+//       />
+//     </Stack.Navigator>
+//   );
+// }
 
 function PetStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
-        name="Pets"
-        component={PetsScreen}
+        name="PetsHome"
+        component={HomeScreen}
         options={{ headerLeft: () => null }}
       />
       <Stack.Screen
@@ -145,7 +145,7 @@ export default function Routes() {
           if (route.name === "Home") iconName = "home";
           else if (route.name === "Clinicas") iconName = "map";
           else if (route.name === "Perfil") iconName = "person";
-          else if (route.name === "Pets") iconName = "paw";
+          // else if (route.name === "Pets") iconName = "paw";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#F4A361",
@@ -153,8 +153,8 @@ export default function Routes() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Pets" component={PetStack} />
+      {/* <Tab.Screen name="Home" component={HomeStack} /> */}
+      <Tab.Screen name="Home" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
       <Tab.Screen name="Perfil">
         {(props) => <ProfileScreen {...props} onLogout={handleLogout} />}

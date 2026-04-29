@@ -60,7 +60,7 @@ export default function AddPetScreen({ navigation, route }) {
 
       Alert.alert("Sucesso", "Pet cadastrado com sucesso!");
       navigation.navigate({
-        name: "Pets",
+        name: "PetsHome",
         params: { newPet: true },
         merge: true,
       });

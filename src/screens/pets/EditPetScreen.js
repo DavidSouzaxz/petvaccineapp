@@ -35,7 +35,7 @@ export default function EditPetScreen({ navigation, route }) {
             try {
               await ServicePet.delete(editingPet.id);
               Alert.alert("Sucesso", "Pet excluído com sucesso!");
-              navigation.navigate("Pets", { newPet: true });
+              navigation.navigate("PetsHome", { newPet: true });
             } catch (error) {
               Alert.alert("Erro", "Não foi possível excluir o pet.");
             } finally {
@@ -66,7 +66,7 @@ export default function EditPetScreen({ navigation, route }) {
 
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
       navigation.navigate({
-        name: "Pets",
+        name: "PetsHome",
         params: { newPet: true },
         merge: true,
       });
