@@ -9,6 +9,7 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
@@ -80,6 +81,7 @@ export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [notifications, setNotifications] = useState(false);
+  const [activeMenuPetId, setActiveMenuPetId] = useState(null);
 
   const fetchHomeData = async () => {
     const userId = await AsyncStorage.getItem("@userId");
@@ -125,8 +127,16 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate("AddPet");
   }, [navigation]);
 
+  const closeMenu = useCallback(() => {
+    setActiveMenuPetId(null);
+  }, []);
+
+  const openMenu = useCallback((petId) => {
+    setActiveMenuPetId((current) => (current === petId ? null : petId));
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={closeMenu}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
 
       <View style={styles.header}>
@@ -157,7 +167,10 @@ export default function HomeScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.containerImage}>
-            <Image source={require("../../../assets/petcard.png")} style={styles.cardImage} />
+            <Image
+              source={require("../../../assets/petcard.png")}
+              style={styles.cardImage}
+            />
           </View>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Meus pets</Text>
@@ -179,7 +192,10 @@ export default function HomeScreen({ navigation }) {
                     style={styles.petCard}
                   >
                     <View style={styles.petProfileWrapper}>
-                      <Image source={dogProfile} style={styles.petProfileImage} />
+                      <Image
+                        source={dogProfile}
+                        style={styles.petProfileImage}
+                      />
                     </View>
                     <View style={styles.petInfo}>
                       <Text style={styles.petName}>{pet.name}</Text>
@@ -198,7 +214,9 @@ export default function HomeScreen({ navigation }) {
                           size={14}
                           color={status.color}
                         />
-                        <Text style={[styles.statusText, { color: status.color }]}>
+                        <Text
+                          style={[styles.statusText, { color: status.color }]}
+                        >
                           {status.label}
                         </Text>
                       </View>
@@ -221,7 +239,48 @@ export default function HomeScreen({ navigation }) {
                         </Text>
                       </View>
                     </View>
-                    <Ionicons name="ellipsis-vertical" size={16} color="#999" />
+                    <TouchableOpacity
+                      style={styles.moreButton}
+                      onPress={() => openMenu(pet.id)}
+                    >
+                      <Ionicons
+                        name="ellipsis-vertical"
+                        size={16}
+                        color="#999"
+                      />
+                    </TouchableOpacity>
+                    {activeMenuPetId === pet.id && (
+                      <View style={styles.menuCard}>
+                        <TouchableOpacity
+                          style={styles.menuItem}
+                          onPress={() => {
+                            closeMenu();
+                            navigation.navigate("Details", { pet });
+                          }}
+                        >
+                          <Ionicons
+                            name="eye-outline"
+                            size={16}
+                            color="#6F5A49"
+                          />
+                          <Text style={styles.menuText}>Visualizar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.menuItem, styles.menuItemLast]}
+                          onPress={() => {
+                            closeMenu();
+                            navigation.navigate("EditPet", { pet });
+                          }}
+                        >
+                          <Ionicons
+                            name="pencil-outline"
+                            size={16}
+                            color="#6F5A49"
+                          />
+                          <Text style={styles.menuText}>Editar</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 );
               })
@@ -307,7 +366,7 @@ export default function HomeScreen({ navigation }) {
       <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
         <Ionicons name="add" size={26} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </Pressable>
   );
 }
 
@@ -378,6 +437,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     width: PET_CARD_WIDTH,
     alignSelf: "center",
+    position: "relative",
   },
   petProfileWrapper: {
     width: 56,
@@ -404,6 +464,41 @@ const styles = StyleSheet.create({
   },
   statusText: { fontSize: 11, fontWeight: "600" },
   petVaccineInfo: { marginRight: 12, alignItems: "flex-end" },
+  moreButton: {
+    padding: 6,
+    marginLeft: 4,
+  },
+  menuCard: {
+    position: "absolute",
+    top: 42,
+    right: 10,
+    width: 140,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F1E2D1",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
+    zIndex: 10,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F4E7D7",
+  },
+  menuItemLast: { borderBottomWidth: 0 },
+  menuText: {
+    marginLeft: 8,
+    fontSize: 13,
+    color: "#6F5A49",
+    fontWeight: "600",
+  },
   petVaccineLabel: { fontSize: 11, color: "#A3A3A3" },
   petVaccineName: { fontSize: 12, fontWeight: "600", color: "#2B2B2B" },
   petVaccineDateRow: {
@@ -414,18 +509,19 @@ const styles = StyleSheet.create({
   },
   containerImage: {
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   cardImage: {
-    width: width - 40, height: 200, borderRadius: 20,
+    width: width - 40,
+    height: 200,
+    borderRadius: 20,
 
-    backgroundColor: '#F4E7D7',
+    backgroundColor: "#F4E7D7",
 
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
-
 
     elevation: 5,
   },
