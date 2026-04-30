@@ -35,13 +35,7 @@ const getVaccineStatus = (item) => {
   };
 };
 
-export default function VaccineItem({
-  item,
-  onConfirm,
-  petColor,
-  index,
-  total,
-}) {
+export default function VaccineItem({ item, onPress, petColor, index, total }) {
   const status = useMemo(() => getVaccineStatus(item), [item]);
   const safeTotal = typeof total === "number" && total > 0 ? total : 1;
   const showLine = index !== safeTotal - 1;
@@ -62,7 +56,7 @@ export default function VaccineItem({
 
       <TouchableOpacity
         style={styles.vaccineCard}
-        onPress={() => onConfirm(item)}
+        onPress={() => onPress(item)}
         activeOpacity={0.85}
       >
         <View style={styles.cardHeader}>

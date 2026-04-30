@@ -12,7 +12,7 @@ const ServiceVaccine = {
   },
 
   listVaccinesPendentes: async (id) => {
-    const response = await api.get(`/vacinas/pendentes/${id}`)
+    const response = await api.get(`/vacinas/pendentes/${id}`);
     return response.data;
   },
 
@@ -21,9 +21,14 @@ const ServiceVaccine = {
     return response.data;
   },
 
+  update: async (id, vaccineData) => {
+    const response = await api.patch(`/vacinas/${id}`, vaccineData);
+    return response.data;
+  },
+
   vaccineIsApplied: async (id) => {
-    const response = await api.post(`/vacinas/isApplied/${id}`)
-    return response.data
+    const response = await api.post(`/vacinas/isApplied/${id}`);
+    return response.data;
   },
 
   delete: async (id) => {

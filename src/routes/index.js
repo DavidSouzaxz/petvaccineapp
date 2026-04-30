@@ -12,6 +12,7 @@ import DetailsScreen from "../screens/pets/DetailsScreen";
 import AddPetScreen from "../screens/pets/AddPetScreen";
 import EditPetScreen from "../screens/pets/EditPetScreen";
 import AddVaccineScreen from "../screens/pets/AddVaccineScreen";
+import EditVaccineScreen from "../screens/pets/EditVaccineScreen";
 import MapScreen from "../screens/map/MapScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -77,6 +78,11 @@ function PetStack() {
         name="AddVaccine"
         component={AddVaccineScreen}
         options={{ title: "Registrar Vacina" }}
+      />
+      <Stack.Screen
+        name="EditVaccine"
+        component={EditVaccineScreen}
+        options={{ title: "Editar Vacina" }}
       />
     </Stack.Navigator>
   );

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   StatusBar,
   ActivityIndicator,
   ScrollView,
@@ -22,22 +21,15 @@ export default function DetailsScreen({ route, navigation }) {
 
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines || []);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("Vacinas"); // "Resumo", "Vacinas", "Informacoes"
 
-  const confirmVaccineApplication = async (item) => {
-    setLoading(true);
-
-    try {
-      await ServiceVaccine.vaccineIsApplied(item.id);
-
-      await loadVaccines();
-
-      Alert.alert("Sucesso", "Vacina marcada como aplicada!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Falha ao atualizar status da vacina.");
-    } finally {
-      setLoading(false);
-    }
+  const handleEditVaccine = (item) => {
+    navigation.navigate("EditVaccine", {
+      vaccine: item,
+      petId: pet.id,
+      petName: pet.name,
+      petColor,
+    });
   };
 
   const loadVaccines = useCallback(async () => {
@@ -181,94 +173,228 @@ export default function DetailsScreen({ route, navigation }) {
             </View>
           </View>
 
+          {/* Tabs */}
           <View style={styles.tabs}>
-            <Text style={styles.tabMuted}>Resumo</Text>
-            <View style={styles.tabActive}>
-              <Text style={styles.tabTextActive}>Vacinas</Text>
-              <View style={styles.tabUnderline} />
-            </View>
-            <Text style={styles.tabMuted}>Informacoes</Text>
+            <TouchableOpacity onPress={() => setActiveTab("Resumo")}>
+              <View style={activeTab === "Resumo" ? styles.tabActive : null}>
+                <Text
+                  style={
+                    activeTab === "Resumo"
+                      ? styles.tabTextActive
+                      : styles.tabMuted
+                  }
+                >
+                  Resumo
+                </Text>
+                {activeTab === "Resumo" && <View style={styles.tabUnderline} />}
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab("Vacinas")}>
+              <View style={activeTab === "Vacinas" ? styles.tabActive : null}>
+                <Text
+                  style={
+                    activeTab === "Vacinas"
+                      ? styles.tabTextActive
+                      : styles.tabMuted
+                  }
+                >
+                  Vacinas
+                </Text>
+                {activeTab === "Vacinas" && (
+                  <View style={styles.tabUnderline} />
+                )}
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab("Informacoes")}>
+              <View
+                style={activeTab === "Informacoes" ? styles.tabActive : null}
+              >
+                <Text
+                  style={
+                    activeTab === "Informacoes"
+                      ? styles.tabTextActive
+                      : styles.tabMuted
+                  }
+                >
+                  Informações
+                </Text>
+                {activeTab === "Informacoes" && (
+                  <View style={styles.tabUnderline} />
+                )}
+              </View>
+            </TouchableOpacity>
           </View>
 
-          <Text style={styles.sectionTitle}>Calendario de vacinas</Text>
-          {calendarVaccines.length > 0 ? (
-            <View style={styles.calendarList}>
-              {calendarVaccines.map((item, index) => (
-                <VaccineItem
-                  key={item.id}
-                  item={item}
-                  onConfirm={confirmVaccineApplication}
-                  petColor={petColor}
-                  index={index}
-                  total={calendarVaccines.length}
+          {/* Tab Content */}
+          {activeTab === "Vacinas" && (
+            <>
+              <Text style={styles.sectionTitle}>Calendario de vacinas</Text>
+              {calendarVaccines.length > 0 ? (
+                <View style={styles.calendarList}>
+                  {calendarVaccines.map((item, index) => (
+                    <VaccineItem
+                      key={item.id}
+                      item={item}
+                      onPress={handleEditVaccine}
+                      petColor={petColor}
+                      index={index}
+                      total={calendarVaccines.length}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="medical-outline" size={44} color="#D3D3D3" />
+                  <Text style={styles.emptyText}>
+                    Nenhuma vacina registrada.
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() =>
+                  navigation.navigate("AddVaccine", { petId: pet.id, petColor })
+                }
+              >
+                <Ionicons
+                  name="add"
+                  size={18}
+                  color="#E98B3A"
+                  style={styles.addButtonIcon}
                 />
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="medical-outline" size={44} color="#D3D3D3" />
-              <Text style={styles.emptyText}>Nenhuma vacina registrada.</Text>
+                <Text style={styles.addButtonText}>Adicionar vacina</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.sectionTitle}>Historico de vacinas</Text>
+              <View style={styles.historyCard}>
+                {historyVaccines.length > 0 ? (
+                  historyVaccines.map((item, index) => (
+                    <View
+                      key={`history-${item.id}`}
+                      style={[
+                        styles.historyRow,
+                        index === historyVaccines.length - 1 &&
+                          styles.historyRowLast,
+                      ]}
+                    >
+                      <Text style={styles.historyName}>{item.name}</Text>
+                      <View style={styles.historyRight}>
+                        <Text style={styles.historyDate}>
+                          {FormatDateDisplay(item.applicationDate)}
+                        </Text>
+                        <Ionicons
+                          name="chevron-forward"
+                          size={14}
+                          color="#C7C7C7"
+                          style={styles.historyChevron}
+                        />
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.historyEmptyText}>
+                    Sem historico ainda.
+                  </Text>
+                )}
+              </View>
+
+              <View style={styles.infoCard}>
+                <Ionicons
+                  name="medical"
+                  size={22}
+                  color="#E98B3A"
+                  style={styles.infoIcon}
+                />
+                <Text style={styles.infoText}>
+                  Mantenha as vacinas do seu pet sempre em dia para garantir a
+                  saude e o bem-estar dele.
+                </Text>
+              </View>
+            </>
+          )}
+
+          {activeTab === "Informacoes" && (
+            <View style={styles.infoCard}>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{ fontWeight: "700", fontSize: 16, marginBottom: 10 }}
+                >
+                  Informações do Pet
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Nome:</Text> {pet.name}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Espécie:</Text>{" "}
+                  {pet.specie || pet.species || "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Raça:</Text>{" "}
+                  {pet.breed || "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Sexo:</Text>{" "}
+                  {pet.sex || "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Cor:</Text>{" "}
+                  {pet.color || "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Peso:</Text>{" "}
+                  {pet.weight ? `${pet.weight} kg` : "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Data de nascimento:</Text>{" "}
+                  {pet.birthDate ? FormatDateDisplay(pet.birthDate) : "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Microchip:</Text>{" "}
+                  {pet.microchip || "-"}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                  <Text style={{ fontWeight: "600" }}>Observações:</Text>{" "}
+                  {pet.observations || "-"}
+                </Text>
+              </View>
             </View>
           )}
 
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() =>
-              navigation.navigate("AddVaccine", { petId: pet.id, petColor })
-            }
-          >
-            <Ionicons
-              name="add"
-              size={18}
-              color="#E98B3A"
-              style={styles.addButtonIcon}
-            />
-            <Text style={styles.addButtonText}>Adicionar vacina</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.sectionTitle}>Historico de vacinas</Text>
-          <View style={styles.historyCard}>
-            {historyVaccines.length > 0 ? (
-              historyVaccines.map((item, index) => (
-                <View
-                  key={`history-${item.id}`}
-                  style={[
-                    styles.historyRow,
-                    index === historyVaccines.length - 1 &&
-                      styles.historyRowLast,
-                  ]}
-                >
-                  <Text style={styles.historyName}>{item.name}</Text>
-                  <View style={styles.historyRight}>
-                    <Text style={styles.historyDate}>
-                      {FormatDateDisplay(item.applicationDate)}
-                    </Text>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={14}
-                      color="#C7C7C7"
-                      style={styles.historyChevron}
-                    />
-                  </View>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.historyEmptyText}>Sem historico ainda.</Text>
-            )}
-          </View>
-
-          <View style={styles.infoCard}>
-            <Ionicons
-              name="medical"
-              size={22}
-              color="#E98B3A"
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>
-              Mantenha as vacinas do seu pet sempre em dia para garantir a saude
-              e o bem-estar dele.
-            </Text>
-          </View>
+          {activeTab === "Resumo" && (
+            <View style={styles.resumoCard}>
+              <Ionicons
+                name="stats-chart"
+                size={32}
+                color="#2E7D32"
+                style={styles.resumoIcon}
+              />
+              <Text style={styles.resumoTitle}>Resumo de Saúde</Text>
+              <Text style={styles.resumoText}>
+                {pet.name} está {petStatus.label.toLowerCase()} com as vacinas.
+              </Text>
+              <Text style={styles.resumoStat}>
+                Total de vacinas:{" "}
+                <Text style={styles.resumoStatBold}>{vaccines.length}</Text>
+              </Text>
+              <Text style={styles.resumoStat}>
+                Vacinas aplicadas:{" "}
+                <Text style={styles.resumoStatBold}>
+                  {vaccines.filter((v) => v.isApplied).length}
+                </Text>
+              </Text>
+              <Text style={styles.resumoStat}>
+                Vacinas pendentes:{" "}
+                <Text style={styles.resumoStatBold}>
+                  {vaccines.filter((v) => !v.isApplied).length}
+                </Text>
+              </Text>
+              <Text style={styles.resumoTip}>
+                Dica: mantenha o calendário de vacinação em dia e consulte
+                sempre um veterinário!
+              </Text>
+            </View>
+          )}
         </ScrollView>
       )}
     </View>
@@ -428,6 +554,47 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "#7D5A3B",
     fontSize: 13,
+    lineHeight: 18,
+  },
+  resumoCard: {
+    marginTop: 18,
+    marginHorizontal: 20,
+    paddingVertical: 26,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    backgroundColor: "#E9F7EE",
+    alignItems: "center",
+    alignSelf: "stretch",
+  },
+  resumoIcon: { marginBottom: 10 },
+  resumoTitle: {
+    fontWeight: "700",
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#2E7D32",
+    textAlign: "center",
+  },
+  resumoText: {
+    fontSize: 14,
+    color: "#2E7D32",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  resumoStat: {
+    fontSize: 13,
+    color: "#2E7D32",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  resumoStatBold: {
+    fontWeight: "700",
+    color: "#2E7D32",
+  },
+  resumoTip: {
+    fontSize: 13,
+    color: "#2E7D32",
+    marginTop: 8,
+    textAlign: "center",
     lineHeight: 18,
   },
   loadingContainer: {
