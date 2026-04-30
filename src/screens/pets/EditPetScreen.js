@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -13,13 +13,17 @@ import {
 import ServicePet from "../../services/ServicePet";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ButtonRollback from "../../components/ButtonRollback";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ServiceUser from "../../services/ServiceUser";
+import FormatDateDisplay from "../../core/FormatDateDisplay";
+import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
-  const [species, setSpecies] = useState("Gato");
+  const [species, setSpecies] = useState("Cachorro");
   const [isSpeciesOpen, setIsSpeciesOpen] = useState(false);
   const [sex, setSex] = useState(
     editingPet?.sex && editingPet.sex.toLowerCase() === "macho"
@@ -64,27 +68,70 @@ export default function EditPetScreen({ navigation, route }) {
     );
   };
 
+  const loadingUserData = async () => {
+    const userId = await AsyncStorage.getItem("@userId");
+    try {
+      const response = await ServiceUser.listById(userId);
+
+      setOwnerName(response.name);
+      setOwnerPhone(response.contact);
+      setOwnerEmail(response.email);
+    } catch (error) {
+      Alert.alert("Error", "erro ao carregar os dados do usuario.");
+      console.log(error);
+    }
+  };
+
+  const loadingPet = async () => {
+    const petId = editingPet.id;
+
+    try {
+      const response = await ServicePet.getById(petId);
+      setBirthDate(
+        response.birthDate ? FormatDateDisplay(response.birthDate) : "",
+      );
+      setWeight(
+        response.weight !== null && response.weight !== undefined
+          ? String(response.weight).replace(".", ",")
+          : "",
+      );
+      setSpecies(response.specie);
+      setColor(response.color);
+      setMicrochip(response.microchip);
+      setSex(response.sex);
+      setNotes(response.observations);
+    } catch (error) {
+      Alert.alert("Error", "erro ao carregar os dados do pet.");
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadingUserData();
+    loadingPet();
+  }, []);
+
   const handlerSave = async () => {
     setLoading(true);
     if (!name || !breed) {
       Alert.alert("Erro", "Preencha todos os campos");
       return;
     }
+    const birthDateFormat = FormatDateForRequisition(birthDate);
 
+    const petAtualizado = {
+      name,
+      breed,
+      specie: species,
+      color: color,
+      microchip: microchip || null,
+      weight: weight ? Number(weight.replace(",", ".")) : null,
+      birthDate: birthDateFormat,
+      sex: sex,
+      observations: notes,
+      userId: await AsyncStorage.getItem("@userId"),
+    };
     try {
-      const petAtualizado = {
-        name,
-        breed,
-        species: species,
-        color: color,
-        microchip: microchip || null,
-        weight: weight ? Number(weight.replace(",", ".")) : null,
-        birthDate: birthDate,
-        sex: sex,
-        observations: notes,
-        userId: editingPet.userId,
-      };
-
       await ServicePet.update(editingPet.id, petAtualizado);
 
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
@@ -98,6 +145,7 @@ export default function EditPetScreen({ navigation, route }) {
       Alert.alert("Erro", "Nao foi possivel atualizar o pet.");
     } finally {
       setLoading(false);
+      console.log(petAtualizado);
     }
   };
 

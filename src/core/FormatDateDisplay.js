@@ -18,4 +18,14 @@ const FormatDateDisplay = (dateInput) => {
   return `${day}/${month}/${year}`;
 };
 
+const FormatDateForRequisition = (dateInput) => {
+  let date = dateInput;
+  if (date && /^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+    const [day, month, year] = date.split("/");
+    return `${year}-${month}-${day}`;
+  }
+  return date;
+};
+
 export default FormatDateDisplay;
+export { FormatDateForRequisition };

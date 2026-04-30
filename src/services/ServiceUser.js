@@ -10,6 +10,11 @@ const ServiceUser = {
     const response = await api.post("/auth/register", userData);
     return response.data;
   },
+
+  listById: async (id) => {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  },
 };
 
 export default ServiceUser;

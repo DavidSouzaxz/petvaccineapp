@@ -11,19 +11,22 @@ import {
   Image,
 } from "react-native";
 import ServicePet from "../../services/ServicePet";
-import FormatDateDisplay from "../../core/FormatDateDisplay";
+import FormatDateDisplay, {
+  FormatDateForRequisition,
+} from "../../core/FormatDateDisplay";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ServiceUser from "../../services/ServiceUser";
 import ButtonRollback from "../../components/ButtonRollback";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
-  const [species, setSpecies] = useState("Gato");
+  const [species, setSpecies] = useState("Cachorro");
   const [isSpeciesOpen, setIsSpeciesOpen] = useState(false);
   const [sex, setSex] = useState("Femea");
-  const [birthDate, setBirthDate] = useState(new Date());
+  const [birthDate, setBirthDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [weight, setWeight] = useState("");
   const [color, setColor] = useState("");
@@ -35,19 +38,10 @@ export default function AddPetScreen({ navigation, route }) {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const loadUserId = async () => {
-      const id = await AsyncStorage.getItem("@userId");
-      setUserId(id);
-    };
-
-    loadUserId();
-  }, []);
-
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setBirthDate(selectedDate);
+      setBirthDate(FormatDateDisplay(selectedDate));
     }
   };
 
@@ -55,19 +49,40 @@ export default function AddPetScreen({ navigation, route }) {
     setShowDatePicker(false);
   };
 
+  const loadUserData = async () => {
+    const id = await AsyncStorage.getItem("@userId");
+
+    try {
+      const response = await ServiceUser.listById(id);
+      setUserId(id);
+      setOwnerName(response.name);
+      setOwnerPhone(response.contact);
+      setOwnerEmail(response.email);
+    } catch (error) {
+      Alert.alert("Error", "erro ao carregar os dados do usuario.");
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
   const handlerSave = async () => {
     setLoading(true);
     if (!name || !breed) {
       Alert.alert("Preencha todos os campos");
+      setLoading(false);
       return;
     }
     try {
+      const birthDateFormat = FormatDateForRequisition(birthDate);
       const newPet = {
         name: name,
         specie: species,
         breed: breed,
         color: color,
-        birthDate: birthDate.toISOString().split("T")[0],
+        birthDate: birthDateFormat,
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
         sex: sex,
@@ -226,17 +241,21 @@ export default function AddPetScreen({ navigation, route }) {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.inputDateText}>
-              {FormatDateDisplay(birthDate)}
+              {birthDate || "10/05/2022"}
             </Text>
             <Ionicons name="calendar" size={16} color="#B9B1A9" />
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={birthDate}
+              value={
+                birthDate && /^\d{2}\/\d{2}\/\d{4}$/.test(birthDate)
+                  ? new Date(birthDate.split("/").reverse().join("-"))
+                  : new Date()
+              }
               mode="date"
               display="default"
               maximumDate={new Date()}
-              onValueChange={handleDateChange}
+              onChange={handleDateChange}
               onDismiss={handleDismiss}
             />
           )}
@@ -288,6 +307,7 @@ export default function AddPetScreen({ navigation, route }) {
             onChangeText={setOwnerName}
             placeholder="Ana Lucia"
             placeholderTextColor="#B9B1A9"
+            editable={false}
           />
 
           <Text style={styles.fieldLabel}>Telefone</Text>
@@ -297,6 +317,7 @@ export default function AddPetScreen({ navigation, route }) {
             onChangeText={setOwnerPhone}
             placeholder="(21) 99999-9999"
             placeholderTextColor="#B9B1A9"
+            editable={false}
           />
 
           <Text style={styles.fieldLabel}>E-mail</Text>
@@ -306,6 +327,7 @@ export default function AddPetScreen({ navigation, route }) {
             onChangeText={setOwnerEmail}
             placeholder="analucia@email.com"
             placeholderTextColor="#B9B1A9"
+            editable={false}
           />
         </View>
       </ScrollView>
