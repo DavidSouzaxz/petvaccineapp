@@ -9,7 +9,6 @@ import {
   Dimensions,
   Image,
   ScrollView,
-  Pressable,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
@@ -136,7 +135,7 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   return (
-    <Pressable style={styles.container} onPress={closeMenu}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
 
       <View style={styles.header}>
@@ -193,7 +192,11 @@ export default function HomeScreen({ navigation }) {
                   >
                     <View style={styles.petProfileWrapper}>
                       <Image
-                        source={dogProfile}
+                        source={
+                          pet.photoUrl
+                            ? { uri: pet.photoUrl }
+                            : require("../../../assets/dogProfile.png")
+                        }
                         style={styles.petProfileImage}
                       />
                     </View>
@@ -366,7 +369,7 @@ export default function HomeScreen({ navigation }) {
       <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
         <Ionicons name="add" size={26} color="#fff" />
       </TouchableOpacity>
-    </Pressable>
+    </View>
   );
 }
 

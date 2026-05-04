@@ -143,7 +143,11 @@ export default function DetailsScreen({ route, navigation }) {
 
           <View style={styles.petCard}>
             <Image
-              source={require("../../../assets/dogProfile.png")}
+              source={
+                pet.photoUrl
+                  ? { uri: pet.photoUrl }
+                  : require("../../../assets/dogProfile.png")
+              }
               style={styles.petAvatar}
             />
             <View style={styles.petInfo}>

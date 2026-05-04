@@ -10,7 +10,9 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import ServicePet from "../../services/ServicePet";
+import ServiceSignature from "../../services/ServiceSignature";
 import FormatDateDisplay, {
   FormatDateForRequisition,
 } from "../../core/FormatDateDisplay";
@@ -37,11 +39,25 @@ export default function AddPetScreen({ navigation, route }) {
   const [ownerEmail, setOwnerEmail] = useState("");
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(null);
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setBirthDate(FormatDateDisplay(selectedDate));
+    }
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // Perfil geralmente é quadrado
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
 
@@ -75,8 +91,18 @@ export default function AddPetScreen({ navigation, route }) {
       setLoading(false);
       return;
     }
+
     try {
+      let finalPhotoUrl = null;
+
+      // 1. Upload Seguro para Cloudinary (se houver imagem)
+      if (image) {
+        const authData = await ServiceSignature.getSignature();
+        finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
+      }
+
       const birthDateFormat = FormatDateForRequisition(birthDate);
+
       const newPet = {
         name: name,
         specie: species,
@@ -88,6 +114,7 @@ export default function AddPetScreen({ navigation, route }) {
         sex: sex,
         observations: notes,
         userId: userId,
+        photoUrl: finalPhotoUrl, // Enviando a URL final para o back-end
       };
 
       await ServicePet.register(newPet);
@@ -99,6 +126,7 @@ export default function AddPetScreen({ navigation, route }) {
         merge: true,
       });
     } catch (error) {
+      console.log(error);
       Alert.alert("Error", "Não foi possível registrar o pet.");
     } finally {
       setLoading(false);
@@ -132,10 +160,19 @@ export default function AddPetScreen({ navigation, route }) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
-              source={require("../../../assets/dogProfile.png")}
+              // Se tiver imagem selecionada, mostra ela. Se não, mostra o placeholder.
+              source={
+                image
+                  ? { uri: image }
+                  : require("../../../assets/dogProfile.png")
+              }
               style={styles.avatarImage}
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={pickImage} // Chama o picker ao clicar
+              disabled={loading}
+            >
               <Ionicons name="camera" size={16} color="#FFF" />
             </TouchableOpacity>
           </View>

@@ -18,6 +18,8 @@ import ProfileScreen from "../screens/profile/ProfileScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import DashboardScreen from "../screens/map/DashboardScreen";
+import OccurrencesScreen from "../screens/occurrences/OccurrencesScreen";
+import OcurrenceRegistrationScreen from "../screens/occurrences/OcurrenceRegistrationScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -96,6 +98,17 @@ function MapStack() {
     </Stack.Navigator>
   );
 }
+function OccurrencesStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Occurrences" component={OccurrencesScreen} />
+      <Stack.Screen
+        name="OccurrencesAdd"
+        component={OcurrenceRegistrationScreen}
+      />
+    </Stack.Navigator>
+  );
+}
 
 export default function Routes() {
   const [userToken, setUserToken] = useState(null);
@@ -150,6 +163,7 @@ export default function Routes() {
           let iconName;
           if (route.name === "Home") iconName = "home";
           else if (route.name === "Clinicas") iconName = "map";
+          else if (route.name === "Ocorrencias") iconName = "clipboard";
           else if (route.name === "Perfil") iconName = "person";
           // else if (route.name === "Pets") iconName = "paw";
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -162,6 +176,7 @@ export default function Routes() {
       {/* <Tab.Screen name="Home" component={HomeStack} /> */}
       <Tab.Screen name="Home" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
+      <Tab.Screen name="Ocorrencias" component={OccurrencesStack} />
       <Tab.Screen name="Perfil">
         {(props) => <ProfileScreen {...props} onLogout={handleLogout} />}
       </Tab.Screen>
