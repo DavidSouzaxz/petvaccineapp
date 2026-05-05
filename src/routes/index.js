@@ -16,6 +16,7 @@ import ProfileScreen from "../screens/profile/ProfileScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import DashboardScreen from "../screens/map/DashboardScreen";
+import EditProfileScreen from "../screens/profile/EditProfileScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -142,8 +143,29 @@ export default function Routes() {
       <Tab.Screen name="Pets" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
       <Tab.Screen name="Perfil">
-        {(props) => <ProfileScreen {...props} onLogout={handleLogout} />}
+        {() => <ProfileStack onLogout={handleLogout} />}
       </Tab.Screen>
     </Tab.Navigator>
+  );
+}
+
+//navegacao tela de perfil
+
+function ProfileStack({ onLogout }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
+      <Stack.Screen name="ProfileHome">
+        {(props) => (
+          <ProfileScreen {...props} onLogout={onLogout} />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+      />
+
+    </Stack.Navigator>
   );
 }

@@ -8,102 +8,153 @@ import {
   SafeAreaView,
 } from "react-native";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FontAwesome5, Entypo, AntDesign, Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "react-native";
 
-export default function ProfileScreen({ onLogout }) {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons, MaterialCommunityIcons  } from "@expo/vector-icons";
+
+
+export default function ProfileScreen({navigation, onLogout }) {
   const [user, setUser] = useState("");
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-  AsyncStorage.getItem("@userName").then((name) => {
-    if (name) setUser(name);
-  });
-
-  AsyncStorage.getItem("@userEmail").then((mail) => {
-    if (mail) setEmail(mail);
-  });
-}, []);
+    AsyncStorage.getItem("@userName").then(setUser);
+    AsyncStorage.getItem("@userEmail").then(setEmail);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        
-        <View style={styles.topContainer}>
-          <Text style={styles.title}>Perfil</Text>
 
-          <Text style={[styles.subtitle, { width: 200 }]}>    
-          Gerencie sua conta e cuide cada vez melhor dos seus pets.
+        <View style={styles.header}>
+          <Text style={styles.title}>Perfil</Text>
+          <Text style={styles.subtitle}>
+            Gerencie sua conta e cuide{"\n"}
+            cada vez melhor dos seus pets.
           </Text>
 
           <View style={styles.profileRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{user[0]}</Text>
+
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{user[0]}</Text>
+              </View>
+
+              <View style={styles.camera}>
+                <Ionicons name="camera" size={16} color="#ff7a00" />
+              </View>
             </View>
 
             <View style={styles.info}>
               <Text style={styles.name}>{user}</Text>
-              <Text style={styles.email}>{email || "email nao carregada"}</Text>
+              <Text style={styles.email}>{email || "email nao carrega"}</Text>
 
               <View style={styles.badge}>
-                <Ionicons name="shield-checkmark" size={15} color="#a85b1f" style={{ marginRight: 5 }} />
-                <Text style={styles.badgeText}>Tutor Responsável</Text>
+                <Ionicons name="shield-checkmark" size={15} color="#ff7a00"/>
+                <Text style={styles.badgeText}> Tutor responsável</Text>
               </View>
-
-              
             </View>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Configurações</Text>
-
-          <View style={styles.menuCard}>
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.menuLeft}>
-                <Ionicons name="person-outline" size={20} color="#F4A361" />
-                <Text style={styles.menuLabel}>Editar perfil</Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Meus pets</Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={styles.link}>Ver todos</Text>
+                <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
               </View>
-              <Text style={styles.menuArrow}>›</Text>
-            </TouchableOpacity>
+          </View>
 
+          <View style={styles.statsRow}>
+            <View style={styles.stat}>
+              
+              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statLabel}>cadastrados</Text>
+            </View>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.menuLeft}>
-                <Ionicons name="notifications-outline" size={20} color="#7b61ff" />
-                <Text style={styles.menuLabel}>Notificações</Text>
-              </View>
-              <Text style={styles.menuArrow}>›</Text>
-            </TouchableOpacity>
+            <View style={styles.divider} />
 
+            <View style={styles.stat}>
+              
+              <Text style={styles.statNumber}>2</Text>
+              <Text style={styles.statLabel}>em dia</Text>
+            </View>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.menuLeft}>
-                <Ionicons name="shield-checkmark-outline" size={20} color="#2ecc71" />
-                <Text style={styles.menuLabel}>Privacidade e segurança</Text>
-              </View>
-              <Text style={styles.menuArrow}>›</Text>
-            </TouchableOpacity>
+            <View style={styles.divider} />
 
-
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.menuLeft}>
-                <Ionicons name="information-circle-outline" size={20} color="#3498db" />
-                <Text style={styles.menuLabel}>Sobre o aplicativo</Text>
-              </View>
-              <Text style={styles.menuArrow}>›</Text>
-            </TouchableOpacity>
-
-
-          <View style={styles.logoutContainer}>
-          <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-            <Ionicons name="exit-outline" size={20} color="#e74c3c" />
-            <Text style={styles.logoutText}>Sair da conta</Text>
-          </TouchableOpacity>
-        </View>
-
+            <View style={styles.stat}>
+              
+              <Text style={styles.statNumber}>1</Text>
+              <Text style={styles.statLabel}>pendentes</Text>
+            </View>
           </View>
         </View>
+
+        <View style={styles.menuCard}>
+  <Text style={styles.sectionTitle}>Configurações</Text>
+
+          
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate("EditProfile")}>
+              
+            <View style={styles.menuLeft}>
+              <View style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}>
+                <Ionicons name="person-outline" size={18} color="#ff7a00" />
+              </View>
+              <Text style={styles.menuText}>Editar perfil</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuLeft}>
+              <View style={[styles.iconCircle, { backgroundColor: "#7b61ff20" }]}>
+                <Ionicons name="notifications-outline" size={18} color="#7b61ff" />
+              </View>
+              <Text style={styles.menuText}>Notificações</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuLeft}>
+              <View style={[styles.iconCircle, { backgroundColor: "#2ecc7120" }]}>
+                <Ionicons name="shield-checkmark-outline" size={18} color="#2ecc71" />
+              </View>
+              <Text style={styles.menuText}>Privacidade</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuLeft}>
+              <View style={[styles.iconCircle, { backgroundColor: "#3498db20" }]}>
+                <Ionicons name="information-circle-outline" size={18} color="#3498db" />
+              </View>
+              <Text style={styles.menuText}>Sobre</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+          </TouchableOpacity>
+
+        </View>
+
+        <View style={styles.help}>
+          <Ionicons name="chatbubble-ellipses-outline" size={22} color="#ff7a00" />
+          <View style={{ marginLeft: 10 }}>
+            <Text style={styles.helpTitle}>Precisa de ajuda?</Text>
+            <Text style={styles.helpText}>
+              Fale conosco ou acesse a central.
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.logout} onPress={onLogout}>
+          <Ionicons name="exit-outline" size={20} color="#e74c3c" />
+          <Text style={styles.logoutText}>Sair da conta</Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
@@ -114,101 +165,160 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#FDF4E7",
+    backgroundColor: "#f7efe5",
   },
 
-  topContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 65,
-    paddingBottom: 20,
-  },
+  header: {
+  paddingTop: StatusBar.currentHeight || 20, //emulador bugado
+  paddingHorizontal: 20,
+  paddingBottom: 20,
+},
 
   title: {
-    fontSize: 25,
+    fontSize: 26,
     fontWeight: "700",
-    color: "#222",
   },
 
   subtitle: {
-    fontSize: 13,
     color: "#777",
-    marginTop: 4,
     marginBottom: 20,
   },
 
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+  },
+
+  avatarContainer: {
+    position: "relative",
   },
 
   avatar: {
-    width: 79,
-    height: 79,
-    borderRadius: 39.5,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: "#f3c39c",
     alignItems: "center",
     justifyContent: "center",
   },
 
   avatarText: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: "700",
   },
 
+  camera: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    
+  },
+
   info: {
-    flex: 1,
-    marginLeft: 13,
+    marginLeft: 15,
   },
 
   name: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#222",
   },
 
   email: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 2,
+    color: "#777",
   },
 
   badge: {
-    marginTop: 6,
-    backgroundColor: "#fde7d3",
-    paddingHorizontal: 7,
-    paddingVertical: 4,
-    borderRadius: 20,
-    alignSelf: "flex-start",
     flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: "#ffe8d6",
+    padding: 5,
+    borderRadius: 20,
+    marginTop: 5,
   },
 
   badgeText: {
-    fontSize: 11,
-    color: "#a85b1f",
-    fontWeight: "500",
+    color: "#ff7a00",
+    fontSize: 12,
   },
 
-  section: {
-    marginHorizontal: 16,
-    marginTop: 25,
+  card: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 16,
+    padding: 15,
+    elevation: 0.6,
+    marginBottom: 5,
   },
+
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+
+  cardTitle: {
+    fontWeight: "700",
+  },
+
+  link: {
+    color: "#ff7a00",
+    marginHorizontal: 5,
+    
+  },
+
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+},
+
+  stat: {
+    flex: 1,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    marginLeft: 15,   
+  },
+
+  statNumber: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#777",
+  },
+
+  divider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#eee",
+  },
+
+  sectionTitle: {
+   
+    fontWeight: "700",
+    marginHorizontal: 14,
+    marginTop: 14,
+    marginBottom: 5,
+},
 
   menuCard: {
-    backgroundColor: "#fffcf7ff",
+    backgroundColor: "#fff",
+    margin: 20,
     borderRadius: 16,
-    overflow: "hidden",
-    elevation: 2,
-    marginTop: 10,
+    marginBottom: 0,
+    elevation: 0.6,
   },
 
   menuItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    padding: 15,
   },
 
   menuLeft: {
@@ -216,26 +326,56 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  menuLabel: {
-    marginLeft: 12,
-    fontSize: 14,
-    color: "#222",
+  iconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+},
+
+  menuText: {
+    marginLeft: 10,
   },
 
-  menuArrow: {
-    fontSize: 18,
-    color: "#c0c0c0ff",
+  arrow: {
+    color: "#ccc",
   },
- 
-  logoutButton: {
+
+  help: {
+    flexDirection: "row",
+    backgroundColor: "#fdf0e1ff",
+    margin: 20,
+    padding: 15,
+    borderRadius: 16,
+    elevation: 0.3,
+    
+  },
+
+  helpTitle: {
+    fontWeight: "700",
+  },
+
+  helpText: {
+    fontSize: 12,
+    color: "#777",
+  },
+
+  logout: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-  }, 
+    backgroundColor: "#ffe1deff",
+    margin: 20,
+    padding: 15,
+    borderRadius: 16,
+    elevation: 0.3,
+    marginTop: 3,
+  },
 
   logoutText: {
     marginLeft: 10,
     color: "#e74c3c",
     fontWeight: "600",
   },
+
 });
