@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceUser from "../../services/ServiceUser";
 import ButtonRollback from "../../components/ButtonRollback";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
+import InputDatePicker from "../../components/InputDatePicker";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -52,7 +53,7 @@ export default function AddPetScreen({ navigation, route }) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // Perfil geralmente é quadrado
+      aspect: [1, 1],
       quality: 0.7,
     });
 
@@ -95,7 +96,6 @@ export default function AddPetScreen({ navigation, route }) {
     try {
       let finalPhotoUrl = null;
 
-      // 1. Upload Seguro para Cloudinary (se houver imagem)
       if (image) {
         const authData = await ServiceSignature.getSignature();
         finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
@@ -160,7 +160,6 @@ export default function AddPetScreen({ navigation, route }) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
-              // Se tiver imagem selecionada, mostra ela. Se não, mostra o placeholder.
               source={
                 image
                   ? { uri: image }
@@ -170,7 +169,7 @@ export default function AddPetScreen({ navigation, route }) {
             />
             <TouchableOpacity
               style={styles.cameraButton}
-              onPress={pickImage} // Chama o picker ao clicar
+              onPress={pickImage}
               disabled={loading}
             >
               <Ionicons name="camera" size={16} color="#FFF" />
@@ -225,7 +224,7 @@ export default function AddPetScreen({ navigation, route }) {
             </View>
           )}
 
-          <Text style={styles.fieldLabel}>Raca</Text>
+          <Text style={styles.fieldLabel}>Raça</Text>
           <TextInput
             style={styles.input}
             value={breed}
@@ -271,31 +270,17 @@ export default function AddPetScreen({ navigation, route }) {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.fieldLabel}>Data de nascimento</Text>
-          <TouchableOpacity
-            style={styles.inputWithIcon}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.inputDateText}>
-              {birthDate || "10/05/2022"}
-            </Text>
-            <Ionicons name="calendar" size={16} color="#B9B1A9" />
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={
-                birthDate && /^\d{2}\/\d{2}\/\d{4}$/.test(birthDate)
-                  ? new Date(birthDate.split("/").reverse().join("-"))
-                  : new Date()
-              }
-              mode="date"
-              display="default"
-              maximumDate={new Date()}
-              onChange={handleDateChange}
-              onDismiss={handleDismiss}
-            />
-          )}
+          <InputDatePicker
+            label={"Data de Nascimento"}
+            value={birthDate}
+            onChange={(val) => setBirthDate(val)}
+            styleLabel={{
+              fontSize: 12,
+              color: "#9A948E",
+              marginBottom: 6,
+              fontWeight: "600",
+            }}
+          />
 
           <Text style={styles.fieldLabel}>Peso (kg)</Text>
           <TextInput

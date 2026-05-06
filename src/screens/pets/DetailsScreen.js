@@ -21,7 +21,7 @@ export default function DetailsScreen({ route, navigation }) {
 
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines || []);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("Vacinas"); // "Resumo", "Vacinas", "Informacoes"
+  const [activeTab, setActiveTab] = useState("Vacinas");
 
   const handleEditVaccine = (item) => {
     navigation.navigate("EditVaccine", {
@@ -258,7 +258,11 @@ export default function DetailsScreen({ route, navigation }) {
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() =>
-                  navigation.navigate("AddVaccine", { petId: pet.id, petColor })
+                  navigation.navigate("AddVaccine", {
+                    petId: pet.id,
+                    petColor,
+                    petName: pet.name,
+                  })
                 }
               >
                 <Ionicons

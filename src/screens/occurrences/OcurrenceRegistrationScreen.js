@@ -16,26 +16,28 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ServiceOccurrence from "../../services/ServiceOccurrences";
 import ServiceSignature from "../../services/ServiceSignature";
 import { validateDate, validateTime } from "../../core/validators";
+import InputDatePicker from "../../components/InputDatePicker";
+import InputTimePicker from "../../components/InputTimePicker";
 
 const OCCURRENCE_TYPES = [
-  { id: "MEMORY", label: "Lembrança" },
-  { id: "VACCINE", label: "Vacina" },
-  { id: "CHECKUP", label: "Consulta" },
-  { id: "SURGERY", label: "Cirurgia" },
-  { id: "EXAM", label: "Exame" },
-  { id: "MEDICATION", label: "Medicação" },
+  { id: "VOMITING", label: "Vômito" },
+  { id: "REDUCE_APPETITE", label: "Apetite Reduzido" },
+  { id: "HECTIC", label: "Muito Agitado" },
+  { id: "HAIR_FALLING", label: "Pelo Caindo" },
+  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas" },
+  { id: "EXCESSIVE_LICKING", label: "Lambedura Excessiva" },
 ];
 
 export default function AddOccurrenceScreen({ navigation, route }) {
   const { petId, petName, petColor } = route.params;
   const [loading, setLoading] = useState(false);
 
-  const [type, setType] = useState("CHECKUP");
+  const [type, setType] = useState("VOMITING");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [image, setImage] = useState(null); // Estado para a foto
+  const [image, setImage] = useState(null);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -77,11 +79,6 @@ export default function AddOccurrenceScreen({ navigation, route }) {
       return;
     }
 
-    const dateError = validateDate(date);
-    const timeError = validateTime(time);
-    if (dateError || timeError)
-      return Alert.alert("Erro", dateError || timeError);
-
     setLoading(true);
 
     try {
@@ -93,9 +90,7 @@ export default function AddOccurrenceScreen({ navigation, route }) {
         finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
       }
 
-      const [day, month, year] = date.split("/");
-      const [hour, minute] = time.split(":");
-      const isoDateTime = `${year}-${month}-${day}T${hour}:${minute}:00`;
+      const isoDateTime = `${date}T${time}:00`;
 
       const newOccurrence = {
         petId: petId,
@@ -198,25 +193,17 @@ export default function AddOccurrenceScreen({ navigation, route }) {
 
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Data</Text>
-              <TextInput
-                style={styles.input}
+              <InputDatePicker
+                label="Data da Ocorrência"
                 value={date}
-                onChangeText={handleDateChange}
-                placeholder="DD/MM/AAAA"
-                keyboardType="numeric"
-                maxLength={10}
+                onChange={(val) => setDate(val)}
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Hora</Text>
-              <TextInput
-                style={styles.input}
+              <InputTimePicker
+                label="Horário"
                 value={time}
-                onChangeText={handleTimeChange}
-                placeholder="HH:mm"
-                keyboardType="numeric"
-                maxLength={5}
+                onChange={(val) => setTime(val)}
               />
             </View>
           </View>

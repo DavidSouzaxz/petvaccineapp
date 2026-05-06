@@ -14,6 +14,8 @@ import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 import { validateDate, validateTime } from "../../core/validators";
+import InputDatePicker from "../../components/InputDatePicker";
+import InputTimePicker from "../../components/InputTimePicker";
 
 const parseDateTime = (value) => {
   if (!value) return { date: "", time: "" };
@@ -69,8 +71,6 @@ export default function EditVaccineScreen({ navigation, route }) {
     "Outra...",
   ];
 
-  const toggleSwitch = () => setIsApplied((previousState) => !previousState);
-
   const handleDateChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
     let formatted = cleaned;
@@ -100,23 +100,9 @@ export default function EditVaccineScreen({ navigation, route }) {
       return;
     }
 
-    const dateError = validateDate(date);
-    const timeError = validateTime(time);
-
-    if (dateError) {
-      Alert.alert("Erro na Data", dateError);
-      return;
-    }
-    if (timeError) {
-      Alert.alert("Erro na Hora", timeError);
-      return;
-    }
-
     setLoading(true);
 
-    const [day, month, year] = date.split("/");
-    const [hour, minute] = time.split(":");
-    const isoDateTime = `${year}-${month}-${day}T${hour}:${minute}:00`;
+    const isoDateTime = `${date}T${time}:00`;
 
     const updatedVaccine = {
       petId: petId,
@@ -145,7 +131,9 @@ export default function EditVaccineScreen({ navigation, route }) {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <ButtonRollback navigation={navigation} disabled={loading} />
+        <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
+          <ButtonRollback navigation={navigation} disabled={loading} />
+        </View>
         <View style={styles.headerBox}>
           <FontAwesome6
             name="syringe"
@@ -162,25 +150,28 @@ export default function EditVaccineScreen({ navigation, route }) {
           </Text>
         </View>
 
-        <View style={styles.togglesRow}>
-          <View style={styles.toggleBox}>
-            <Switch
-              trackColor={{ false: "#FFD9B3", true: "#F4A361" }}
-              thumbColor={isApplied ? "#fff" : "#f4f3f4"}
-              onValueChange={toggleSwitch}
-              value={isApplied}
-              style={styles.toggleSwitch}
-            />
-            <Text
-              style={[
-                styles.toggleLabel,
-                { color: isApplied ? "#4CAF50" : "#FF9800" },
-              ]}
+        <View style={styles.card}>
+          <View style={styles.togglesRow}>
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setIsApplied(!isApplied)}
             >
-              {isApplied ? "Aplicada" : "Nao Aplicada"}
-            </Text>
-          </View>
-          {/* <View style={styles.toggleBox}>
+              <Ionicons
+                name={isApplied ? "checkbox" : "checkbox-outline"}
+                size={24}
+                color={isApplied ? "#4CAF50" : "#B9B1A9"}
+                style={{ marginRight: 8 }}
+              />
+              <Text
+                style={[
+                  styles.checkboxLabel,
+                  { color: isApplied ? "#4CAF50" : "#B9B1A9" },
+                ]}
+              >
+                Aplicada
+              </Text>
+            </TouchableOpacity>
+            {/* <View style={styles.toggleBox}>
             <Switch
               trackColor={{ false: "#B9B1A9", true: "#1976D2" }}
               thumbColor={reminder ? "#fff" : "#f4f3f4"}
@@ -197,32 +188,42 @@ export default function EditVaccineScreen({ navigation, route }) {
               {reminder ? "Lembrete ativado" : "Sem lembrete"}
             </Text>
           </View> */}
-        </View>
-
-        <View style={styles.card}>
+          </View>
           <Text style={styles.label}>Nome da Vacina</Text>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "#FFF9F4",
+              borderWidth: 1,
+              borderColor: "#EFE2D7",
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              marginBottom: 14,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setShowSuggestions(!showSuggestions)}
+              style={{ paddingRight: 8 }}
+            >
+              <Ionicons name="list" size={22} color="#F4A361" />
+            </TouchableOpacity>
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              style={{
+                flex: 1,
+                paddingVertical: 10,
+                fontSize: 15,
+                color: "#2B2B2B",
+              }}
               value={name}
               onChangeText={(text) => {
                 setName(text);
                 setShowSuggestions(text.length === 0);
               }}
-              placeholder="Ex: Antirrabica, V10..."
+              placeholder="Ex: Antirrábica, V10..."
               placeholderTextColor="#B9B1A9"
               onFocus={() => setShowSuggestions(true)}
             />
-            <TouchableOpacity
-              onPress={() => setShowSuggestions(!showSuggestions)}
-            >
-              <Ionicons
-                name="list"
-                size={22}
-                color="#F4A361"
-                style={{ marginLeft: 8 }}
-              />
-            </TouchableOpacity>
           </View>
           {showSuggestions && (
             <View style={styles.suggestionBox}>
@@ -240,27 +241,57 @@ export default function EditVaccineScreen({ navigation, route }) {
 
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Data</Text>
-              <TextInput
-                style={styles.input}
+              <InputDatePicker
+                label="Data da aplicação"
                 value={date}
-                onChangeText={handleDateChange}
-                placeholder="DD/MM/AAAA"
-                placeholderTextColor="#B9B1A9"
-                keyboardType="numeric"
-                maxLength={10}
+                onChange={(val) => setDate(val)}
+                styleLabel={{
+                  fontSize: 13,
+                  fontWeight: "600",
+                  color: "#9A948E",
+                  marginBottom: 6,
+                }}
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Hora</Text>
-              <TextInput
-                style={styles.input}
+              <InputTimePicker
+                label="Horário"
                 value={time}
-                onChangeText={handleTimeChange}
-                placeholder="HH:mm"
-                placeholderTextColor="#B9B1A9"
-                keyboardType="numeric"
-                maxLength={5}
+                onChange={(val) => setTime(val)}
+                styleLabel={{
+                  fontSize: 13,
+                  fontWeight: "600",
+                  color: "#9A948E",
+                  marginBottom: 6,
+                }}
+              />
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <InputDatePicker
+                label="Data para Proxima"
+                value={date}
+                onChange={(val) => setDate(val)}
+                styleLabel={{
+                  fontSize: 13,
+                  fontWeight: "600",
+                  color: "#9A948E",
+                  marginBottom: 6,
+                }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <InputTimePicker
+                label="Horário"
+                value={time}
+                onChange={(val) => setTime(val)}
+                styleLabel={{
+                  fontSize: 13,
+                  fontWeight: "600",
+                  color: "#9A948E",
+                  marginBottom: 6,
+                }}
               />
             </View>
           </View>
@@ -322,7 +353,7 @@ const styles = StyleSheet.create({
   togglesRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
     gap: 32,
     marginTop: 10,
     marginBottom: 10,
@@ -341,14 +372,30 @@ const styles = StyleSheet.create({
     elevation: 1,
     minWidth: 120,
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  checkboxLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   toggleLabel: {
     fontSize: 13,
     fontWeight: "700",
     marginTop: 6,
     textAlign: "center",
-  },
-  toggleSwitch: {
-    marginBottom: 0,
   },
   card: {
     backgroundColor: "#FFF",

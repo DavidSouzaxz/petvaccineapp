@@ -19,26 +19,34 @@ import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
 
 const OCCURRENCE_FILTERS = [
   { id: "all", label: "Todas", icon: "th-large" },
-  { id: "MEMORY", label: "Lembranças", icon: "folder" },
-  { id: "VACCINE", label: "Vacinas", icon: "syringe" },
-  { id: "SURGERY", label: "Cirurgias", icon: "hospital" },
-  { id: "MEDICATION", label: "Medicações", icon: "briefcase-medical" },
-  { id: "CHECKUP", label: "Consultas", icon: "stethoscope" },
-  { id: "EXAM", label: "Exames", icon: "file-medical-alt" },
+  { id: "VOMITING", label: "Vômito", icon: "folder" },
+  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "syringe" },
+  { id: "HECTIC", label: "Muito Agitado", icon: "hospital" },
+  { id: "HAIR_FALLING", label: "Pelo Caindo", icon: "briefcase-medical" },
+  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas", icon: "stethoscope" },
+  {
+    id: "EXCESSIVE_LICKING",
+    label: "Lambedura Excessiva",
+    icon: "file-medical-alt",
+  },
 ];
 
 const OCCURRENCE_TYPE_COLORS = {
-  MEMORY: { accent: "#7922ac", badge: "#f5e3ff", icon: "folder" },
-  VACCINE: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "syringe" },
-  MEDICATION: {
+  HAIR_FALLING: { accent: "#7922ac", badge: "#f5e3ff", icon: "folder" },
+  VOMITING: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "syringe" },
+  REDUCE_APPETITE: {
     accent: "#3A7BD5",
     badge: "#E7F0FB",
     icon: "briefcase-medical",
   },
-  CHECKUP: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "stethoscope" },
-  EXAM: { accent: "#44c564", badge: "#E7F0FB", icon: "file-medical-alt" },
-  SURGERY: { accent: "#d15e31", badge: "#fce6dd", icon: "file-signature" },
-  Outros: { accent: "#D0A44B", badge: "#FFF6DD", icon: "tint" },
+  HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "stethoscope" },
+  HAIR_FALLING: {
+    accent: "#44c564",
+    badge: "#E7F0FB",
+    icon: "file-medical-alt",
+  },
+  LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "file-signature" },
+  EXCESSIVE_LICKING: { accent: "#D0A44B", badge: "#FFF6DD", icon: "tint" },
 };
 
 export default function OccurrencesScreen({ navigation }) {
@@ -71,18 +79,18 @@ export default function OccurrencesScreen({ navigation }) {
   const filteresType = (type) => {
     let typeResp = "";
 
-    if (type === "MEMORY") {
-      typeResp = "Lembrança";
-    } else if (type === "VACCINE") {
-      typeResp = "Vacina";
-    } else if (type === "CHECKUP") {
-      typeResp = "Consulta";
-    } else if (type === "SURGERY") {
-      typeResp = "Cirurgia";
-    } else if (type === "EXAM") {
-      typeResp = "Exame";
-    } else if (type === "MEDICATION") {
-      typeResp = "Medicamento";
+    if (type === "VOMITING") {
+      typeResp = "Vômito";
+    } else if (type === "REDUCE_APPETITE") {
+      typeResp = "Apetite Reduzido";
+    } else if (type === "HECTIC") {
+      typeResp = "Muito Agitado";
+    } else if (type === "LOOSE_STOOLS") {
+      typeResp = "Fezes Amolecidas";
+    } else if (type === "HAIR_FALLING") {
+      typeResp = "Pelo Caindo";
+    } else if (type === "EXCESSIVE_LICKING") {
+      typeResp = "Lambedura Excessiva";
     }
 
     return typeResp;
@@ -294,13 +302,17 @@ export default function OccurrencesScreen({ navigation }) {
             occurrences
               .filter((item) => {
                 if (activeFilter === "all") return true;
-                if (activeFilter === "MEMORY") return item.type === "MEMORY";
-                if (activeFilter === "MEDICATION")
-                  return item.type === "MEDICATION";
-                if (activeFilter === "EXAM") return item.type === "EXAM";
-                if (activeFilter === "CHECKUP") return item.type === "CHECKUP";
-                if (activeFilter === "SURGERY") return item.type === "SURGERY";
-                if (activeFilter === "VACCINE") return item.type === "VACCINE";
+                if (activeFilter === "VOMITING")
+                  return item.type === "VOMITING";
+                if (activeFilter === "REDUCE_APPETITE")
+                  return item.type === "REDUCE_APPETITE";
+                if (activeFilter === "HECTIC") return item.type === "HECTIC";
+                if (activeFilter === "HAIR_FALLING")
+                  return item.type === "HAIR_FALLING";
+                if (activeFilter === "LOOSE_STOOLS")
+                  return item.type === "LOOSE_STOOLS";
+                if (activeFilter === "EXCESSIVE_LICKING")
+                  return item.type === "EXCESSIVE_LICKING";
                 if (activeFilter === "others") return item.type === "Outros";
                 return true;
               })

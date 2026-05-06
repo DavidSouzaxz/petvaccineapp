@@ -19,6 +19,7 @@ import ServiceUser from "../../services/ServiceUser";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
 import ServiceSignature from "../../services/ServiceSignature";
+import InputDatePicker from "../../components/InputDatePicker";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
@@ -139,7 +140,6 @@ export default function EditPetScreen({ navigation, route }) {
     try {
       let finalPhotoUrl = currentPhotoUrl;
 
-      // Se o usuário selecionou uma NOVA imagem, faz o upload
       if (image) {
         const authData = await ServiceSignature.getSignature();
         finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
@@ -158,7 +158,7 @@ export default function EditPetScreen({ navigation, route }) {
         sex: sex,
         observations: notes,
         userId: await AsyncStorage.getItem("@userId"),
-        photoUrl: finalPhotoUrl, // URL atualizada (ou mantida)
+        photoUrl: finalPhotoUrl,
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
@@ -309,17 +309,17 @@ export default function EditPetScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.fieldLabel}>Data de nascimento</Text>
-          <View style={styles.inputWithIcon}>
-            <TextInput
-              style={styles.inputFlex}
-              value={birthDate}
-              onChangeText={setBirthDate}
-              placeholder="10/05/2022"
-              placeholderTextColor="#B9B1A9"
-            />
-            <Ionicons name="calendar" size={16} color="#B9B1A9" />
-          </View>
+          <InputDatePicker
+            label={"Data de Nascimento"}
+            value={birthDate}
+            onChange={(val) => setBirthDate(val)}
+            styleLabel={{
+              fontSize: 12,
+              color: "#9A948E",
+              marginBottom: 6,
+              fontWeight: "600",
+            }}
+          />
 
           <Text style={styles.fieldLabel}>Peso (kg)</Text>
           <TextInput
