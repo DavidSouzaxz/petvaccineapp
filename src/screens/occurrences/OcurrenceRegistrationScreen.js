@@ -87,12 +87,9 @@ export default function AddOccurrenceScreen({ navigation, route }) {
     try {
       let finalPhotoUrl = null;
 
-      // FLUXO DE UPLOAD SEGURO
       if (image) {
-        // 1. Pega a assinatura no Back-end
         const authData = await ServiceSignature.getSignature();
 
-        // 2. Faz o upload assinado para o Cloudinary
         finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
       }
 
@@ -106,10 +103,9 @@ export default function AddOccurrenceScreen({ navigation, route }) {
         title: title,
         description: description,
         occurrenceDate: isoDateTime,
-        photoUrl: finalPhotoUrl, // Agora envia a URL real do Cloudinary
+        photoUrl: finalPhotoUrl,
       };
 
-      // 3. Salva a ocorrência no seu MySQL/PostgreSQL via API
       await ServiceOccurrence.register(newOccurrence);
 
       Alert.alert("Sucesso", "Ocorrência registrada!");

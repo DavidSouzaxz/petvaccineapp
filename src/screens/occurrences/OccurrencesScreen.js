@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,37 +7,51 @@ import {
   TouchableOpacity,
   StatusBar,
   Image,
+  ActivityIndicator,
   Modal,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceOccurrences from "../../services/ServiceOccurrences";
 import ServicePet from "../../services/ServicePet";
+import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
 
 const OCCURRENCE_FILTERS = [
   { id: "all", label: "Todas", icon: "th-large" },
-  { id: "symptoms", label: "Sintomas", icon: "notes-medical" },
-  { id: "behavior", label: "Comportamento", icon: "dog" },
-  { id: "others", label: "Outros", icon: "ellipsis-h" },
+  { id: "MEMORY", label: "Lembranças", icon: "folder" },
+  { id: "VACCINE", label: "Vacinas", icon: "syringe" },
+  { id: "SURGERY", label: "Cirurgias", icon: "hospital" },
+  { id: "MEDICATION", label: "Medicações", icon: "briefcase-medical" },
+  { id: "CHECKUP", label: "Consultas", icon: "stethoscope" },
+  { id: "EXAM", label: "Exames", icon: "file-medical-alt" },
 ];
 
 const OCCURRENCE_TYPE_COLORS = {
-  Sintoma: { accent: "#2F8E59", badge: "#E5F5EC", icon: "stomach" },
-  Comportamento: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "paw" },
+  MEMORY: { accent: "#7922ac", badge: "#f5e3ff", icon: "folder" },
+  VACCINE: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "syringe" },
+  MEDICATION: {
+    accent: "#3A7BD5",
+    badge: "#E7F0FB",
+    icon: "briefcase-medical",
+  },
+  CHECKUP: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "stethoscope" },
+  EXAM: { accent: "#44c564", badge: "#E7F0FB", icon: "file-medical-alt" },
+  SURGERY: { accent: "#d15e31", badge: "#fce6dd", icon: "file-signature" },
   Outros: { accent: "#D0A44B", badge: "#FFF6DD", icon: "tint" },
 };
-
-const petAvatar = require("../../../assets/dogProfile.png");
 
 export default function OccurrencesScreen({ navigation }) {
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [petsLoading, setPetsLoading] = useState(true);
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [showPetSelector, setShowPetSelector] = useState(false);
 
   const fetchPets = async () => {
+    setPetsLoading(true);
     const userId = await AsyncStorage.getItem("@userId");
 
     try {
@@ -49,7 +63,29 @@ export default function OccurrencesScreen({ navigation }) {
     } catch (e) {
       console.error("Erro ao buscar pets:", e);
       setPets([]);
+    } finally {
+      setPetsLoading(false);
     }
+  };
+
+  const filteresType = (type) => {
+    let typeResp = "";
+
+    if (type === "MEMORY") {
+      typeResp = "Lembrança";
+    } else if (type === "VACCINE") {
+      typeResp = "Vacina";
+    } else if (type === "CHECKUP") {
+      typeResp = "Consulta";
+    } else if (type === "SURGERY") {
+      typeResp = "Cirurgia";
+    } else if (type === "EXAM") {
+      typeResp = "Exame";
+    } else if (type === "MEDICATION") {
+      typeResp = "Medicamento";
+    }
+
+    return typeResp;
   };
 
   const fetchOccurrences = async (petId) => {
@@ -75,228 +111,261 @@ export default function OccurrencesScreen({ navigation }) {
     }
   }, [selectedPet]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (selectedPet && selectedPet.id) {
+        fetchOccurrences(selectedPet.id);
+      }
+    }, [selectedPet]),
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.title}>Ocorrências</Text>
-            <Text style={styles.subtitle}>
-              Registre sintomas, mudanças de comportamento{"\n"}e outros eventos
-              do seu pet.
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.filterButton}>
-            <Ionicons name="filter" size={18} color="#4A4A4A" />
-          </TouchableOpacity>
+      {petsLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#F4A361" />
         </View>
-
-        <TouchableOpacity
-          style={styles.petCard}
-          onPress={() => setShowPetSelector(true)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.petInfoRow}>
-            <Image source={petAvatar} style={styles.petAvatar} />
-            <View>
-              <Text style={styles.petName}>
-                {selectedPet ? selectedPet.name : "Selecione um pet"}
-              </Text>
-              <Text style={styles.petBreed}>
-                {selectedPet ? selectedPet.breed : ""}
-              </Text>
-            </View>
-          </View>
-          <Ionicons name="chevron-down" size={18} color="#8C8C8C" />
-        </TouchableOpacity>
-
-        <Modal
-          visible={showPetSelector}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowPetSelector(false)}
-        >
-          <TouchableOpacity
-            style={styles.petSelectorOverlay}
-            activeOpacity={1}
-            onPress={() => setShowPetSelector(false)}
-          >
-            <View style={styles.petSelectorCard}>
-              <View style={styles.petSelectorHeader}>
-                <Text style={styles.petSelectorTitle}>Selecione um pet</Text>
-                <TouchableOpacity onPress={() => setShowPetSelector(false)}>
-                  <Ionicons name="close" size={24} color="#333" />
-                </TouchableOpacity>
-              </View>
-              <ScrollView style={styles.petSelectorList}>
-                {pets.map((pet) => (
-                  <TouchableOpacity
-                    key={pet.id}
-                    style={[
-                      styles.petSelectorItem,
-                      selectedPet &&
-                        selectedPet.id === pet.id &&
-                        styles.petSelectorItemActive,
-                    ]}
-                    onPress={() => {
-                      setSelectedPet(pet);
-                      setShowPetSelector(false);
-                    }}
-                  >
-                    <View style={styles.petSelectorItemContent}>
-                      <Text
-                        style={[
-                          styles.petSelectorItemName,
-                          selectedPet &&
-                            selectedPet.id === pet.id &&
-                            styles.petSelectorItemNameActive,
-                        ]}
-                      >
-                        {pet.name}
-                      </Text>
-                      <Text style={styles.petSelectorItemBreed}>
-                        {pet.breed}
-                      </Text>
-                    </View>
-                    {selectedPet && selectedPet.id === pet.id && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={24}
-                        color="#F49B4B"
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-
+      ) : (
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filtersRow}
-          contentContainerStyle={{ gap: 10, paddingHorizontal: 0 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          {OCCURRENCE_FILTERS.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.filterChip,
-                activeFilter === item.id && styles.filterChipActive,
-              ]}
-              onPress={() => setActiveFilter(item.id)}
-              activeOpacity={0.7}
-            >
-              <FontAwesome5
-                name={item.icon}
-                size={16}
-                color={activeFilter === item.id ? "#F49B4B" : "#6F6F6F"}
-              />
-              <Text
-                style={[
-                  styles.filterText,
-                  activeFilter === item.id && styles.filterTextActive,
-                ]}
-              >
-                {item.label}
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.title}>Ocorrências</Text>
+              <Text style={styles.subtitle}>
+                Registre sintomas, mudanças de comportamento{"\n"}e outros
+                eventos do seu pet.
               </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            </View>
+            {/* <TouchableOpacity style={styles.filterButton}>
+              <Ionicons name="filter" size={18} color="#4A4A4A" />
+            </TouchableOpacity> */}
+          </View>
 
-        <View style={styles.listHeaderRow}>
-          <Text style={styles.sectionTitle}>Ocorrências registradas</Text>
           <TouchableOpacity
-            style={styles.addButton}
-            onPress={() =>
-              navigation.navigate("OccurrencesAdd", {
-                petId: selectedPet?.id,
-                petName: selectedPet?.name,
-                petColor: "#F49B4B",
-              })
-            }
+            style={styles.petCard}
+            onPress={() => setShowPetSelector(true)}
+            activeOpacity={0.7}
           >
-            <Ionicons name="add" size={16} color="#F49B4B" />
-            <Text style={styles.addButtonText}>Nova ocorrência</Text>
+            <View style={styles.petInfoRow}>
+              <Image
+                source={
+                  selectedPet && selectedPet.photoUrl
+                    ? { uri: selectedPet.photoUrl }
+                    : require("../../../assets/dogProfile.png")
+                }
+                style={styles.petAvatar}
+              />
+              <View>
+                <Text style={styles.petName}>
+                  {selectedPet ? selectedPet.name : "Selecione um pet"}
+                </Text>
+                <Text style={styles.petBreed}>
+                  {selectedPet ? selectedPet.breed : ""}
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-down" size={18} color="#8C8C8C" />
           </TouchableOpacity>
-        </View>
 
-        {loading ? (
-          <Text style={{ textAlign: "center", marginTop: 30 }}>
-            Carregando...
-          </Text>
-        ) : occurrences.length === 0 ? (
-          <Text style={{ textAlign: "center", marginTop: 30 }}>
-            Nenhuma ocorrência encontrada.
-          </Text>
-        ) : (
-          occurrences
-            .filter((item) => {
-              if (activeFilter === "all") return true;
-              if (activeFilter === "symptoms") return item.type === "Sintoma";
-              if (activeFilter === "behavior")
-                return item.type === "Comportamento";
-              if (activeFilter === "others") return item.type === "Outros";
-              return true;
-            })
-            .map((item) => {
-              const typeColors =
-                OCCURRENCE_TYPE_COLORS[item.type] ||
-                OCCURRENCE_TYPE_COLORS["Outros"];
-              return (
-                <View key={item.id} style={styles.occurrenceCard}>
-                  <View style={styles.iconWrapper(typeColors.badge)}>
-                    <FontAwesome5
-                      name={typeColors.icon}
-                      size={18}
-                      color={typeColors.accent}
-                    />
-                  </View>
-                  <View style={styles.occurrenceBody}>
-                    <View style={styles.occurrenceHeader}>
-                      <Text style={styles.occurrenceTitle}>{item.title}</Text>
-                      <View style={styles.badge(typeColors.badge)}>
-                        <Text style={styles.badgeText(typeColors.accent)}>
-                          {item.type}
+          <Modal
+            visible={showPetSelector}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowPetSelector(false)}
+          >
+            <TouchableOpacity
+              style={styles.petSelectorOverlay}
+              activeOpacity={1}
+              onPress={() => setShowPetSelector(false)}
+            >
+              <View style={styles.petSelectorCard}>
+                <View style={styles.petSelectorHeader}>
+                  <Text style={styles.petSelectorTitle}>Selecione um pet</Text>
+                  <TouchableOpacity onPress={() => setShowPetSelector(false)}>
+                    <Ionicons name="close" size={24} color="#333" />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.petSelectorList}>
+                  {pets.map((pet) => (
+                    <TouchableOpacity
+                      key={pet.id}
+                      style={[
+                        styles.petSelectorItem,
+                        selectedPet &&
+                          selectedPet.id === pet.id &&
+                          styles.petSelectorItemActive,
+                      ]}
+                      onPress={() => {
+                        setSelectedPet(pet);
+                        setShowPetSelector(false);
+                      }}
+                    >
+                      <View style={styles.petSelectorItemContent}>
+                        <Text
+                          style={[
+                            styles.petSelectorItemName,
+                            selectedPet &&
+                              selectedPet.id === pet.id &&
+                              styles.petSelectorItemNameActive,
+                          ]}
+                        >
+                          {pet.name}
+                        </Text>
+                        <Text style={styles.petSelectorItemBreed}>
+                          {pet.breed}
+                        </Text>
+                      </View>
+                      {selectedPet && selectedPet.id === pet.id && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={24}
+                          color="#F49B4B"
+                        />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filtersRow}
+            contentContainerStyle={{ gap: 10, paddingHorizontal: 0 }}
+          >
+            {OCCURRENCE_FILTERS.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.filterChip,
+                  activeFilter === item.id && styles.filterChipActive,
+                ]}
+                onPress={() => setActiveFilter(item.id)}
+                activeOpacity={0.7}
+              >
+                <FontAwesome5
+                  name={item.icon}
+                  size={16}
+                  color={activeFilter === item.id ? "#F49B4B" : "#6F6F6F"}
+                />
+                <Text
+                  style={[
+                    styles.filterText,
+                    activeFilter === item.id && styles.filterTextActive,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={styles.listHeaderRow}>
+            <Text style={styles.sectionTitle}>Ocorrências registradas</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() =>
+                navigation.navigate("OccurrencesAdd", {
+                  petId: selectedPet?.id,
+                  petName: selectedPet?.name,
+                  petColor: "#F49B4B",
+                })
+              }
+            >
+              <Ionicons name="add" size={16} color="#F49B4B" />
+              <Text style={styles.addButtonText}>Nova ocorrência</Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#F4A361" />
+            </View>
+          ) : occurrences.length === 0 ? (
+            <Text style={{ textAlign: "center", marginTop: 30 }}>
+              Nenhuma ocorrência encontrada.
+            </Text>
+          ) : (
+            occurrences
+              .filter((item) => {
+                if (activeFilter === "all") return true;
+                if (activeFilter === "MEMORY") return item.type === "MEMORY";
+                if (activeFilter === "MEDICATION")
+                  return item.type === "MEDICATION";
+                if (activeFilter === "EXAM") return item.type === "EXAM";
+                if (activeFilter === "CHECKUP") return item.type === "CHECKUP";
+                if (activeFilter === "SURGERY") return item.type === "SURGERY";
+                if (activeFilter === "VACCINE") return item.type === "VACCINE";
+                if (activeFilter === "others") return item.type === "Outros";
+                return true;
+              })
+              .map((item) => {
+                const typeColors =
+                  OCCURRENCE_TYPE_COLORS[item.type] ||
+                  OCCURRENCE_TYPE_COLORS["Outros"];
+                return (
+                  <View key={item.id} style={styles.occurrenceCard}>
+                    <View style={styles.iconWrapper(typeColors.badge)}>
+                      <FontAwesome5
+                        name={typeColors.icon}
+                        size={18}
+                        color={typeColors.accent}
+                      />
+                    </View>
+                    <View style={styles.occurrenceBody}>
+                      <View style={styles.occurrenceHeader}>
+                        <Text style={styles.occurrenceTitle}>{item.title}</Text>
+                        <View style={styles.badge(typeColors.badge)}>
+                          <Text style={styles.badgeText(typeColors.accent)}>
+                            {filteresType(item.type)}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.occurrenceSubtitle}>
+                        {item.description}
+                      </Text>
+                      <View style={styles.metaRow}>
+                        <Ionicons
+                          name="calendar-outline"
+                          size={14}
+                          color="#9A9A9A"
+                        />
+                        <Text style={styles.metaText}>
+                          {FormatDateTimeDisplay(item.occurrenceDate)}
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.occurrenceSubtitle}>
-                      {item.subtitle}
-                    </Text>
-                    <View style={styles.metaRow}>
-                      <Ionicons name="time-outline" size={14} color="#9A9A9A" />
-                      <Text style={styles.metaText}>
-                        {item.date} {item.time}
-                      </Text>
-                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color="#C4C4C4"
+                    />
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color="#C4C4C4" />
-                </View>
-              );
-            })
-        )}
+                );
+              })
+          )}
 
-        <View style={styles.tipCard}>
-          <View style={styles.tipIcon}>
-            <Ionicons name="paw" size={18} color="#F49B4B" />
+          <View style={styles.tipCard}>
+            <View style={styles.tipIcon}>
+              <Ionicons name="paw" size={18} color="#F49B4B" />
+            </View>
+            <View style={styles.tipTextWrapper}>
+              <Text style={styles.tipTitle}>
+                Fique atento aos sinais do seu pet
+              </Text>
+              <Text style={styles.tipText}>
+                Registre qualquer mudança para acompanhar a saúde dele com mais
+                precisão.
+              </Text>
+            </View>
           </View>
-          <View style={styles.tipTextWrapper}>
-            <Text style={styles.tipTitle}>
-              Fique atento aos sinais do seu pet
-            </Text>
-            <Text style={styles.tipText}>
-              Registre qualquer mudança para acompanhar a saúde dele com mais
-              precisão.
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -494,4 +563,5 @@ const styles = StyleSheet.create({
   tipTextWrapper: { flex: 1 },
   tipTitle: { fontSize: 14, fontWeight: "700", color: "#2E2E2E" },
   tipText: { fontSize: 12, color: "#7D7D7D", marginTop: 4 },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
