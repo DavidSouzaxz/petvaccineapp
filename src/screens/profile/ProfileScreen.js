@@ -16,12 +16,20 @@ import { Ionicons, MaterialCommunityIcons  } from "@expo/vector-icons";
 
 export default function ProfileScreen({navigation, onLogout }) {
   const [user, setUser] = useState("");
-  const [email, setEmail] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
 
+   
   useEffect(() => {
-    AsyncStorage.getItem("@userName").then(setUser);
-    AsyncStorage.getItem("@userEmail").then(setEmail);
-  }, []);
+  const loadUserData = async () => {
+    const savedName = await AsyncStorage.getItem("@userName");
+    const savedEmail = await AsyncStorage.getItem("@userEmail");
+
+    setUser(savedName);
+    setOwnerEmail(savedEmail);
+  };
+
+  loadUserData();
+}, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -48,7 +56,7 @@ export default function ProfileScreen({navigation, onLogout }) {
 
             <View style={styles.info}>
               <Text style={styles.name}>{user}</Text>
-              <Text style={styles.email}>{email || "email nao carrega"}</Text>
+              <Text style={styles.email}>{ownerEmail}</Text>
 
               <View style={styles.badge}>
                 <Ionicons name="shield-checkmark" size={15} color="#ff7a00"/>

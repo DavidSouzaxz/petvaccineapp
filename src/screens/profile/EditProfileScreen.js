@@ -89,7 +89,6 @@ export default function EditProfileScreen({ navigation }) {
             placeholder="Digite seu email"
             placeholderTextColor="#999"
           />
-
           <Text style={styles.label}>Telefone</Text>
           <TextInput
             style={styles.input}
