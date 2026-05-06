@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -9,30 +9,59 @@ import {
   ActivityIndicator,
   Switch,
   ScrollView,
-  FlatList,
 } from "react-native";
+import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
-import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import { validateDate, validateTime } from "../../core/validators";
 
-export default function AddVaccineScreen({ navigation, route }) {
-  const { petId, petName, petColor } = route.params;
+const parseDateTime = (value) => {
+  if (!value) return { date: "", time: "" };
+  const normalized = value.replace(" ", "T");
+  const dateObj = new Date(normalized);
+
+  if (!Number.isNaN(dateObj.getTime())) {
+    const pad = (num) => String(num).padStart(2, "0");
+    return {
+      date: `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()}`,
+      time: `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`,
+    };
+  }
+
+  const [datePart, timePart] = normalized.split("T");
+  if (datePart && datePart.includes("-")) {
+    const [year, month, day] = datePart.split("-");
+    return {
+      date: `${day}/${month}/${year}`,
+      time: timePart ? timePart.slice(0, 5) : "",
+    };
+  }
+
+  return { date: "", time: "" };
+};
+
+export default function EditVaccineScreen({ navigation, route }) {
+  const { vaccine, petId, petName, petColor } = route.params;
+  const initialDateTime = useMemo(
+    () => parseDateTime(vaccine?.applicationDate),
+    [vaccine?.applicationDate],
+  );
+
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [isApplied, setIsApplied] = useState(false);
-  const [observations, setObservations] = useState("");
+  const [name, setName] = useState(vaccine?.name || "");
+  const [date, setDate] = useState(initialDateTime.date);
+  const [time, setTime] = useState(initialDateTime.time);
+  const [isApplied, setIsApplied] = useState(!!vaccine?.isApplied);
+  const [observations, setObservations] = useState(vaccine?.observations || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [reminder, setReminder] = useState(false);
+  const [reminder, setReminder] = useState(!!vaccine?.reminder);
 
   const vaccineSuggestions = [
-    "Antirrábica",
+    "Antirrabica",
     "V10",
     "V8",
     "Gripe Canina",
-    "Giárdia",
+    "Giardia",
     "Leishmaniose",
     "V4 Felina",
     "Leucemia Felina",
@@ -67,7 +96,7 @@ export default function AddVaccineScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!name || !date || !time) {
-      Alert.alert("Atenção", "Preencha o nome, data e hora.");
+      Alert.alert("Atencao", "Preencha o nome, data e hora.");
       return;
     }
 
@@ -89,7 +118,7 @@ export default function AddVaccineScreen({ navigation, route }) {
     const [hour, minute] = time.split(":");
     const isoDateTime = `${year}-${month}-${day}T${hour}:${minute}:00`;
 
-    const newVaccine = {
+    const updatedVaccine = {
       petId: petId,
       name: name,
       applicationDate: isoDateTime,
@@ -99,11 +128,11 @@ export default function AddVaccineScreen({ navigation, route }) {
     };
 
     try {
-      await ServiceVaccine.register(newVaccine);
-      Alert.alert("Sucesso", "Vacina cadastrada!");
+      await ServiceVaccine.update(vaccine.id, updatedVaccine);
+      Alert.alert("Sucesso", "Vacina atualizada!");
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Ocorreu um erro ao registrar a vacina.");
+      Alert.alert("Erro", "Ocorreu um erro ao atualizar a vacina.");
       console.log(error);
     } finally {
       setLoading(false);
@@ -124,7 +153,7 @@ export default function AddVaccineScreen({ navigation, route }) {
             color="#F4A361"
             style={{ marginBottom: 8 }}
           />
-          <Text style={styles.headerText}>Adicionar Vacina</Text>
+          <Text style={styles.headerText}>Editar Vacina</Text>
           <Text style={styles.petNameText}>
             para{" "}
             <Text style={{ color: petColor || "#F4A361", fontWeight: "bold" }}>
@@ -148,7 +177,7 @@ export default function AddVaccineScreen({ navigation, route }) {
                 { color: isApplied ? "#4CAF50" : "#FF9800" },
               ]}
             >
-              {isApplied ? "Aplicada" : "Não Aplicada"}
+              {isApplied ? "Aplicada" : "Nao Aplicada"}
             </Text>
           </View>
           {/* <View style={styles.toggleBox}>
@@ -180,7 +209,7 @@ export default function AddVaccineScreen({ navigation, route }) {
                 setName(text);
                 setShowSuggestions(text.length === 0);
               }}
-              placeholder="Ex: Antirrábica, V10..."
+              placeholder="Ex: Antirrabica, V10..."
               placeholderTextColor="#B9B1A9"
               onFocus={() => setShowSuggestions(true)}
             />
@@ -236,7 +265,7 @@ export default function AddVaccineScreen({ navigation, route }) {
             </View>
           </View>
 
-          <Text style={styles.label}>Observações</Text>
+          <Text style={styles.label}>Observacoes</Text>
           <TextInput
             style={[styles.input, { height: 80 }]}
             value={observations}
@@ -254,7 +283,7 @@ export default function AddVaccineScreen({ navigation, route }) {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Salvar na Carteirinha</Text>
+              <Text style={styles.buttonText}>Salvar Alteracoes</Text>
             )}
           </TouchableOpacity>
 
@@ -320,14 +349,6 @@ const styles = StyleSheet.create({
   },
   toggleSwitch: {
     marginBottom: 0,
-  },
-  switchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginHorizontal: 20,
-    marginBottom: 10,
-    marginTop: 0,
   },
   card: {
     backgroundColor: "#FFF",
