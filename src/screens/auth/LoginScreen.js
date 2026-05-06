@@ -35,7 +35,7 @@ export default function LoginScreen({ navigation, onSignIn }) {
         await AsyncStorage.setItem("@token", response.token);
         await AsyncStorage.setItem("@userId", response.userId);
         await AsyncStorage.setItem("@userName", response.name);
-        await AsyncStorage.setItem("@userName", response.name);
+        await AsyncStorage.setItem("@userEmail", email);   
 
         onSignIn(response.token);
       }
