@@ -13,10 +13,13 @@ import {
 import ServicePet from "../../services/ServicePet";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ButtonRollback from "../../components/ButtonRollback";
+import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceUser from "../../services/ServiceUser";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
+import ServiceSignature from "../../services/ServiceSignature";
+import InputDatePicker from "../../components/InputDatePicker";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
@@ -38,6 +41,21 @@ export default function EditPetScreen({ navigation, route }) {
   const [ownerName, setOwnerName] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
+  const [image, setImage] = useState(null);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(editingPet?.photoUrl);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -100,6 +118,7 @@ export default function EditPetScreen({ navigation, route }) {
       setMicrochip(response.microchip);
       setSex(response.sex);
       setNotes(response.observations);
+      setCurrentPhotoUrl(response.photoUrl);
     } catch (error) {
       Alert.alert("Error", "erro ao carregar os dados do pet.");
       console.log(error);
@@ -112,40 +131,43 @@ export default function EditPetScreen({ navigation, route }) {
   }, []);
 
   const handlerSave = async () => {
-    setLoading(true);
     if (!name || !breed) {
-      Alert.alert("Erro", "Preencha todos os campos");
+      Alert.alert("Erro", "Preencha todos os campos obrigatórios");
       return;
     }
-    const birthDateFormat = FormatDateForRequisition(birthDate);
 
-    const petAtualizado = {
-      name,
-      breed,
-      specie: species,
-      color: color,
-      microchip: microchip || null,
-      weight: weight ? Number(weight.replace(",", ".")) : null,
-      birthDate: birthDateFormat,
-      sex: sex,
-      observations: notes,
-      userId: await AsyncStorage.getItem("@userId"),
-    };
+    setLoading(true);
     try {
-      await ServicePet.update(editingPet.id, petAtualizado);
+      let finalPhotoUrl = currentPhotoUrl;
 
+      if (image) {
+        const authData = await ServiceSignature.getSignature();
+        finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
+      }
+
+      const birthDateFormat = FormatDateForRequisition(birthDate);
+
+      const petAtualizado = {
+        name,
+        breed,
+        specie: species,
+        color: color,
+        microchip: microchip || null,
+        weight: weight ? Number(weight.replace(",", ".")) : null,
+        birthDate: birthDateFormat,
+        sex: sex,
+        observations: notes,
+        userId: await AsyncStorage.getItem("@userId"),
+        photoUrl: finalPhotoUrl,
+      };
+
+      await ServicePet.update(editingPet.id, petAtualizado);
       Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-      navigation.navigate({
-        name: "PetsHome",
-        params: { newPet: true },
-        merge: true,
-      });
+      navigation.navigate("PetsHome", { newPet: true });
     } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Nao foi possivel atualizar o pet.");
+      Alert.alert("Erro", "Não foi possível atualizar o pet.");
     } finally {
       setLoading(false);
-      console.log(petAtualizado);
     }
   };
 
@@ -178,10 +200,16 @@ export default function EditPetScreen({ navigation, route }) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
-              source={require("../../../assets/dogProfile.png")}
+              source={
+                image
+                  ? { uri: image }
+                  : currentPhotoUrl
+                    ? { uri: currentPhotoUrl }
+                    : require("../../../assets/dogProfile.png")
+              }
               style={styles.avatarImage}
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
               <Ionicons name="camera" size={16} color="#FFF" />
             </TouchableOpacity>
           </View>
@@ -281,17 +309,17 @@ export default function EditPetScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.fieldLabel}>Data de nascimento</Text>
-          <View style={styles.inputWithIcon}>
-            <TextInput
-              style={styles.inputFlex}
-              value={birthDate}
-              onChangeText={setBirthDate}
-              placeholder="10/05/2022"
-              placeholderTextColor="#B9B1A9"
-            />
-            <Ionicons name="calendar" size={16} color="#B9B1A9" />
-          </View>
+          <InputDatePicker
+            label={"Data de Nascimento"}
+            value={birthDate}
+            onChange={(val) => setBirthDate(val)}
+            styleLabel={{
+              fontSize: 12,
+              color: "#9A948E",
+              marginBottom: 6,
+              fontWeight: "600",
+            }}
+          />
 
           <Text style={styles.fieldLabel}>Peso (kg)</Text>
           <TextInput
