@@ -42,6 +42,15 @@ export default function AddPetScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
 
+  const speciesImages = {
+    Cachorro: require("../../../assets/dogProfile.png"),
+    Gato: require("../../../assets/cat.png"),
+    Coelho: require("../../../assets/coelho.png"),
+    Passaro: require("../../../assets/bird.png"),
+    Hamster: require("../../../assets/hamster.png"),
+    Peixe: require("../../../assets/fish.png"),
+  };
+
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -107,14 +116,14 @@ export default function AddPetScreen({ navigation, route }) {
         name: name,
         specie: species,
         breed: breed,
-        color: color,
+        // color: color,
         birthDate: birthDateFormat,
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
         sex: sex,
         observations: notes,
         userId: userId,
-        photoUrl: finalPhotoUrl, // Enviando a URL final para o back-end
+        photoUrl: finalPhotoUrl,
       };
 
       await ServicePet.register(newPet);
@@ -160,11 +169,7 @@ export default function AddPetScreen({ navigation, route }) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
-              source={
-                image
-                  ? { uri: image }
-                  : require("../../../assets/dogProfile.png")
-              }
+              source={image ? { uri: image } : speciesImages[species]}
               style={styles.avatarImage}
             />
             <TouchableOpacity
@@ -291,14 +296,14 @@ export default function AddPetScreen({ navigation, route }) {
             placeholderTextColor="#B9B1A9"
           />
 
-          <Text style={styles.fieldLabel}>Cor</Text>
+          {/* <Text style={styles.fieldLabel}>Cor</Text>
           <TextInput
             style={styles.input}
             value={color}
             onChangeText={setColor}
             placeholder="Tigrado"
             placeholderTextColor="#B9B1A9"
-          />
+          /> */}
 
           <Text style={styles.fieldLabel}>Microchip (opcional)</Text>
           <TextInput
