@@ -6,6 +6,11 @@ const ServiceOccurrences = {
     return response.data;
   },
 
+  getById: async (id) => {
+    const response = await api.get(`/occurrences/${id}`);
+    return response.data;
+  },
+
   getByIdPet: async (id) => {
     const response = await api.get(`/occurrences/pet/${id}`);
     return response.data;
