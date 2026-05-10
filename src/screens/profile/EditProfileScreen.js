@@ -40,7 +40,8 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f7efe5" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -58,12 +59,9 @@ export default function EditProfileScreen({ navigation }) {
           <View style={styles.headerIcon} />
         </View>
 
-            {/* ajustar */}
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>  
-              {name ? name.charAt(0).toUpperCase() : "A"} 
-            </Text>
+            <Text style={styles.avatarText}>{name[0]}</Text>
           </View>
 
           <TouchableOpacity style={styles.camera}>
@@ -89,7 +87,7 @@ export default function EditProfileScreen({ navigation }) {
             placeholder="Digite seu email"
             placeholderTextColor="#999"
           />
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={styles.label}>Telephone</Text>
           <TextInput
             style={styles.input}
             value={phone}
@@ -98,59 +96,12 @@ export default function EditProfileScreen({ navigation }) {
             placeholderTextColor="#999"
           />
 
-          <Text style={styles.label}>Data de nascimento</Text>
-          <TextInput
-            style={styles.input}
-            value={birth}
-            onChangeText={setBirth}
-            placeholder="00/00/0000"
-            placeholderTextColor="#999"
-          />
-
-          <Text style={styles.label}>Cidade</Text>
-          <TextInput
-            style={styles.input}
-            value={city}
-            onChangeText={setCity}
-            placeholder="Sua cidade"
-            placeholderTextColor="#999"
-          />
-
-          <Text style={styles.label}>Sobre você</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={about}
-            onChangeText={setAbout}
-            placeholder="Conte um pouco sobre você"
-            placeholderTextColor="#999"
-            multiline
-          />
-
-          <Text style={styles.sectionTitle}>
-            Preferências de notificação
-          </Text>
-
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>Lembretes de vacinas</Text>
-            <Switch value={vacinas} onValueChange={setVacinas} />
-          </View>
-
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>Atividades e dicas</Text>
-            <Switch value={dicas} onValueChange={setDicas} />
-          </View>
-
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>Promoções e novidades</Text>
-            <Switch value={promocoes} onValueChange={setPromocoes} />
-          </View>
-
           <TouchableOpacity style={styles.button} onPress={handleSave}>
             <Text style={styles.buttonText}>Salvar alterações</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -169,10 +120,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: StatusBar.currentHeight || 20,
+    paddingTop: 60,
+    paddingHorizontal: 20,
     marginBottom: 25,
-  },
-
+},
   headerIcon: {
     width: 28,
     alignItems: "center",

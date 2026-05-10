@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  StatusBar,
 } from "react-native";
 
-import { StatusBar } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons  } from "@expo/vector-icons";
@@ -18,21 +18,27 @@ export default function ProfileScreen({navigation, onLogout }) {
   const [user, setUser] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
 
-   
-  useEffect(() => {
-  const loadUserData = async () => {
-    const savedName = await AsyncStorage.getItem("@userName");
-    const savedEmail = await AsyncStorage.getItem("@userEmail");
+const loadUserData = async () => {
+  const savedName = await AsyncStorage.getItem("@userName");
+  const savedEmail = await AsyncStorage.getItem("@userEmail");
 
-    setUser(savedName);
-    setOwnerEmail(savedEmail);
-  };
+  setUser(savedName || "");
+  setOwnerEmail(savedEmail || "");
+};
 
+ useEffect(() => {
   loadUserData();
-}, []);
+
+  const unsubscribe = navigation.addListener("focus", () => {
+    loadUserData();
+  });
+
+  return unsubscribe;
+}, [navigation]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.header}>
@@ -165,7 +171,7 @@ export default function ProfileScreen({navigation, onLogout }) {
         </TouchableOpacity>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -177,19 +183,21 @@ const styles = StyleSheet.create({
   },
 
   header: {
-  paddingTop: StatusBar.currentHeight || 20, //emulador bugado
-  paddingHorizontal: 20,
-  paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
 },
 
   title: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: "700",
   },
 
   subtitle: {
     color: "#777",
     marginBottom: 20,
+    marginTop: 4,
+    fontSize: 13,
   },
 
   profileRow: {
