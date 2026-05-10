@@ -114,7 +114,7 @@ export default function EditPetScreen({ navigation, route }) {
           : "",
       );
       setSpecies(response.specie);
-      setColor(response.color);
+      // setColor(response.color);
       setMicrochip(response.microchip);
       setSex(response.sex);
       setNotes(response.observations);
@@ -151,7 +151,7 @@ export default function EditPetScreen({ navigation, route }) {
         name,
         breed,
         specie: species,
-        color: color,
+        // color: color,
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
         birthDate: birthDateFormat,
@@ -330,14 +330,14 @@ export default function EditPetScreen({ navigation, route }) {
             placeholderTextColor="#B9B1A9"
           />
 
-          <Text style={styles.fieldLabel}>Cor</Text>
+          {/* <Text style={styles.fieldLabel}>Cor</Text>
           <TextInput
             style={styles.input}
             value={color}
             onChangeText={setColor}
             placeholder="Tigrado"
             placeholderTextColor="#B9B1A9"
-          />
+          /> */}
 
           <Text style={styles.fieldLabel}>Microchip (opcional)</Text>
           <TextInput

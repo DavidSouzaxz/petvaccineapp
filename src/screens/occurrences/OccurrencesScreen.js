@@ -19,34 +19,29 @@ import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
 
 const OCCURRENCE_FILTERS = [
   { id: "all", label: "Todas", icon: "th-large" },
-  { id: "VOMITING", label: "Vômito", icon: "folder" },
-  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "syringe" },
-  { id: "HECTIC", label: "Muito Agitado", icon: "hospital" },
-  { id: "HAIR_FALLING", label: "Pelo Caindo", icon: "briefcase-medical" },
-  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas", icon: "stethoscope" },
+  { id: "VOMITING", label: "Vômito", icon: "water" },
+  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "apple" },
+  { id: "HECTIC", label: "Muito Agitado", icon: "bolt" },
+  { id: "HAIR_FALLING", label: "Pelo Caindo", icon: "leaf" },
+  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas", icon: "poop" },
   {
     id: "EXCESSIVE_LICKING",
     label: "Lambedura Excessiva",
-    icon: "file-medical-alt",
+    icon: "paw",
   },
 ];
 
 const OCCURRENCE_TYPE_COLORS = {
-  HAIR_FALLING: { accent: "#7922ac", badge: "#f5e3ff", icon: "folder" },
-  VOMITING: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "syringe" },
+  HAIR_FALLING: { accent: "#7922ac", badge: "#f5e3ff", icon: "leaf" },
+  VOMITING: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "water" },
   REDUCE_APPETITE: {
     accent: "#3A7BD5",
     badge: "#E7F0FB",
-    icon: "briefcase-medical",
+    icon: "apple",
   },
-  HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "stethoscope" },
-  HAIR_FALLING: {
-    accent: "#44c564",
-    badge: "#E7F0FB",
-    icon: "file-medical-alt",
-  },
-  LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "file-signature" },
-  EXCESSIVE_LICKING: { accent: "#D0A44B", badge: "#FFF6DD", icon: "tint" },
+  HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "bolt" },
+  LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "poop" },
+  EXCESSIVE_LICKING: { accent: "#D0A44B", badge: "#FFF6DD", icon: "paw" },
 };
 
 export default function OccurrencesScreen({ navigation }) {
@@ -321,7 +316,17 @@ export default function OccurrencesScreen({ navigation }) {
                   OCCURRENCE_TYPE_COLORS[item.type] ||
                   OCCURRENCE_TYPE_COLORS["Outros"];
                 return (
-                  <View key={item.id} style={styles.occurrenceCard}>
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.occurrenceCard}
+                    onPress={() =>
+                      navigation.navigate("OccurrenceDetails", {
+                        occurrenceId: item.id,
+                        petName: selectedPet?.name,
+                      })
+                    }
+                    activeOpacity={0.7}
+                  >
                     <View style={styles.iconWrapper(typeColors.badge)}>
                       <FontAwesome5
                         name={typeColors.icon}
@@ -357,7 +362,7 @@ export default function OccurrencesScreen({ navigation }) {
                       size={18}
                       color="#C4C4C4"
                     />
-                  </View>
+                  </TouchableOpacity>
                 );
               })
           )}

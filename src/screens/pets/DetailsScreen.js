@@ -345,10 +345,10 @@ export default function DetailsScreen({ route, navigation }) {
                   <Text style={{ fontWeight: "600" }}>Sexo:</Text>{" "}
                   {pet.sex || "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
+                {/* <Text style={{ fontSize: 14, marginBottom: 6 }}>
                   <Text style={{ fontWeight: "600" }}>Cor:</Text>{" "}
                   {pet.color || "-"}
-                </Text>
+                </Text> */}
                 <Text style={{ fontSize: 14, marginBottom: 6 }}>
                   <Text style={{ fontWeight: "600" }}>Peso:</Text>{" "}
                   {pet.weight ? `${pet.weight} kg` : "-"}

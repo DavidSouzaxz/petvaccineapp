@@ -20,6 +20,8 @@ import RegisterScreen from "../screens/auth/RegisterScreen";
 import DashboardScreen from "../screens/map/DashboardScreen";
 import OccurrencesScreen from "../screens/occurrences/OccurrencesScreen";
 import OcurrenceRegistrationScreen from "../screens/occurrences/OcurrenceRegistrationScreen";
+import OccurrenceDetailsScreen from "../screens/occurrences/OccurrenceDetailsScreen";
+import OcurrenceEditScreen from "../screens/occurrences/OcurrenceEditScreen";
 import EditProfileScreen from "../screens/profile/EditProfileScreen";
 
 const Tab = createBottomTabNavigator();
@@ -107,6 +109,11 @@ function OccurrencesStack() {
         name="OccurrencesAdd"
         component={OcurrenceRegistrationScreen}
       />
+      <Stack.Screen
+        name="OccurrenceDetails"
+        component={OccurrenceDetailsScreen}
+      />
+      <Stack.Screen name="OccurrencesEdit" component={OcurrenceEditScreen} />
     </Stack.Navigator>
   );
 }
@@ -164,7 +171,7 @@ export default function Routes() {
           let iconName;
           if (route.name === "Home") iconName = "home";
           else if (route.name === "Clinicas") iconName = "map";
-          else if (route.name === "Ocorrencias") iconName = "clipboard";
+          else if (route.name === "Ocorrências") iconName = "clipboard";
           else if (route.name === "Perfil") iconName = "person";
           // else if (route.name === "Pets") iconName = "paw";
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -177,7 +184,7 @@ export default function Routes() {
       {/* <Tab.Screen name="Home" component={HomeStack} /> */}
       <Tab.Screen name="Home" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
-      <Tab.Screen name="Ocorrencias" component={OccurrencesStack} />
+      <Tab.Screen name="Ocorrências" component={OccurrencesStack} />
       <Tab.Screen name="Perfil">
         {() => <ProfileStack onLogout={handleLogout} />}
       </Tab.Screen>
@@ -190,18 +197,11 @@ export default function Routes() {
 function ProfileStack({ onLogout }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      
       <Stack.Screen name="ProfileHome">
-        {(props) => (
-          <ProfileScreen {...props} onLogout={onLogout} />
-        )}
+        {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
       </Stack.Screen>
 
-      <Stack.Screen
-        name="EditProfile"
-        component={EditProfileScreen}
-      />
-
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 }
