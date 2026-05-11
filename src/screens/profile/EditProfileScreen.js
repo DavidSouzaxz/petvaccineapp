@@ -8,35 +8,86 @@ import {
   SafeAreaView,
   ScrollView,
   Switch,
+  ActivityIndicator,
   StatusBar,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import ServiceUser from "../../services/ServiceUser";
+import ServiceSignature from "../../services/ServiceSignature";
 
 export default function EditProfileScreen({ navigation }) {
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [birth, setBirth] = useState("");
   const [city, setCity] = useState("");
   const [about, setAbout] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [image, setImage] = useState(null);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState("");
 
   const [vacinas, setVacinas] = useState(true);
   const [dicas, setDicas] = useState(true);
   const [promocoes, setPromocoes] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem("@userName").then((value) => value && setName(value));
-    AsyncStorage.getItem("@userEmail").then(
-      (value) => value && setEmail(value)
-    );
+    loadingData()
   }, []);
 
+  const loadingData = async () => {
+    const response = await ServiceUser.listById(await AsyncStorage.getItem("@userId"))
+    setName(response.name)
+    setEmail(response.email)
+    setPhone(response.contact)
+    setCurrentPhotoUrl(response.photoUrl)
+    console.log(response)
+  }
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   const handleSave = async () => {
-    await AsyncStorage.setItem("@userName", name);
-    await AsyncStorage.setItem("@userEmail", email);
-    navigation.goBack();
+    setLoading(true);
+    const userId = await AsyncStorage.getItem("@userId");
+
+    let finalPhotoUrl = currentPhotoUrl;
+
+    try {
+      if (image) {
+        const authData = await ServiceSignature.getSignature();
+        finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
+      }
+
+      const dataUser = {
+        name: name,
+        email: email,
+        contact: phone,
+        photoUrl: finalPhotoUrl
+      };
+
+      await ServiceUser.update(userId, dataUser);
+      await AsyncStorage.setItem("@userName", name);
+      setLoading(false);
+      navigation.goBack();
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
   };
 
   return (
@@ -61,10 +112,22 @@ export default function EditProfileScreen({ navigation }) {
 
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{name[0]}</Text>
+            {image ? (
+              <Image
+                source={{ uri: image }}
+                style={styles.avatarImage}
+              />
+            ) : currentPhotoUrl ? (
+              <Image
+                source={{ uri: currentPhotoUrl }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <Text style={styles.avatarText}>{name ? name[0] : ""}</Text>
+            )}
           </View>
 
-          <TouchableOpacity style={styles.camera}>
+          <TouchableOpacity style={styles.camera} onPress={pickImage}>
             <Ionicons name="camera" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -83,6 +146,8 @@ export default function EditProfileScreen({ navigation }) {
           <TextInput
             style={styles.input}
             value={email}
+            editable={false}
+            selectTextOnFocus={false}
             onChangeText={setEmail}
             placeholder="Digite seu email"
             placeholderTextColor="#999"
@@ -97,7 +162,9 @@ export default function EditProfileScreen({ navigation }) {
           />
 
           <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <Text style={styles.buttonText}>Salvar alterações</Text>
+
+            {loading ? (<ActivityIndicator color="#fff" />) : (<Text style={styles.buttonText}>Salvar alterações</Text>)}
+
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -123,7 +190,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     marginBottom: 25,
-},
+  },
   headerIcon: {
     width: 28,
     alignItems: "center",
@@ -153,6 +220,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "700",
     color: "#222",
+  },
+
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
 
   camera: {

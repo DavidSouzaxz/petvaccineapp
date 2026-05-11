@@ -15,6 +15,11 @@ const ServiceUser = {
     const response = await api.get(`/users/${id}`);
     return response.data;
   },
+
+  update: async (id, userData) => {
+    const response = await api.patch(`/users/${id}`, userData);
+    return response.data;
+  },
 };
 
 export default ServiceUser;

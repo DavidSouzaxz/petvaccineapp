@@ -7,34 +7,39 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  Image,
 } from "react-native";
+import ServiceUser from "../../services/ServiceUser";
 
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialCommunityIcons  } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 
-export default function ProfileScreen({navigation, onLogout }) {
+export default function ProfileScreen({ navigation, onLogout }) {
   const [user, setUser] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState("");
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [profileImage, setProfileImage] = useState("")
 
-const loadUserData = async () => {
-  const savedName = await AsyncStorage.getItem("@userName");
-  const savedEmail = await AsyncStorage.getItem("@userEmail");
+  const loadUserData = async () => {
+    const response = await ServiceUser.listById(await AsyncStorage.getItem("@userId"))
+    setUser(response.name)
+    setEmail(response.email)
+    setPhone(response.contact)
+    setProfileImage(response.photoUrl)
+    console.log(response)
+  }
 
-  setUser(savedName || "");
-  setOwnerEmail(savedEmail || "");
-};
-
- useEffect(() => {
-  loadUserData();
-
-  const unsubscribe = navigation.addListener("focus", () => {
+  useEffect(() => {
     loadUserData();
-  });
 
-  return unsubscribe;
-}, [navigation]);
+    const unsubscribe = navigation.addListener("focus", () => {
+      loadUserData();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -52,7 +57,14 @@ const loadUserData = async () => {
 
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{user[0]}</Text>
+                {profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{user ? user[0] : "U"}</Text>
+                )}
               </View>
 
               <View style={styles.camera}>
@@ -62,10 +74,10 @@ const loadUserData = async () => {
 
             <View style={styles.info}>
               <Text style={styles.name}>{user}</Text>
-              <Text style={styles.email}>{ownerEmail}</Text>
+              <Text style={styles.email}>{email}</Text>
 
               <View style={styles.badge}>
-                <Ionicons name="shield-checkmark" size={15} color="#ff7a00"/>
+                <Ionicons name="shield-checkmark" size={15} color="#ff7a00" />
                 <Text style={styles.badgeText}> Tutor responsável</Text>
               </View>
             </View>
@@ -75,15 +87,15 @@ const loadUserData = async () => {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Meus pets</Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.link}>Ver todos</Text>
-                <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
-              </View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={styles.link}>Ver todos</Text>
+              <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
+            </View>
           </View>
 
           <View style={styles.statsRow}>
             <View style={styles.stat}>
-              
+
               <Text style={styles.statNumber}>3</Text>
               <Text style={styles.statLabel}>cadastrados</Text>
             </View>
@@ -91,7 +103,7 @@ const loadUserData = async () => {
             <View style={styles.divider} />
 
             <View style={styles.stat}>
-              
+
               <Text style={styles.statNumber}>2</Text>
               <Text style={styles.statLabel}>em dia</Text>
             </View>
@@ -99,7 +111,7 @@ const loadUserData = async () => {
             <View style={styles.divider} />
 
             <View style={styles.stat}>
-              
+
               <Text style={styles.statNumber}>1</Text>
               <Text style={styles.statLabel}>pendentes</Text>
             </View>
@@ -107,13 +119,13 @@ const loadUserData = async () => {
         </View>
 
         <View style={styles.menuCard}>
-  <Text style={styles.sectionTitle}>Configurações</Text>
+          <Text style={styles.sectionTitle}>Configurações</Text>
 
-          
+
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate("EditProfile")}>
-              
+
             <View style={styles.menuLeft}>
               <View style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}>
                 <Ionicons name="person-outline" size={18} color="#ff7a00" />
@@ -186,7 +198,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-},
+  },
 
   title: {
     fontSize: 22,
@@ -223,6 +235,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
+
   camera: {
     position: "absolute",
     bottom: 0,
@@ -233,7 +251,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-    
+
   },
 
   info: {
@@ -284,19 +302,19 @@ const styles = StyleSheet.create({
   link: {
     color: "#ff7a00",
     marginHorizontal: 5,
-    
+
   },
 
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
-},
+  },
 
   stat: {
     flex: 1,
     alignItems: "flex-start",
     justifyContent: "center",
-    marginLeft: 15,   
+    marginLeft: 15,
   },
 
   statNumber: {
@@ -316,12 +334,12 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-   
+
     fontWeight: "700",
     marginHorizontal: 14,
     marginTop: 14,
     marginBottom: 5,
-},
+  },
 
   menuCard: {
     backgroundColor: "#fff",
@@ -348,7 +366,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-},
+  },
 
   menuText: {
     marginLeft: 10,
@@ -365,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 16,
     elevation: 0.3,
-    
+
   },
 
   helpTitle: {
