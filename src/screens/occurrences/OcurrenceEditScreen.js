@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
   Image,
 } from "react-native";
+import { AlertModal } from "../../components/modals";
 import * as ImagePicker from "expo-image-picker";
 import ButtonRollback from "../../components/ButtonRollback";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -40,8 +40,8 @@ export default function EditOccurrenceScreen({ navigation, route }) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [image, setImage] = useState(null);
-  const [originalImage, setOriginalImage] = useState(null);
-
+  const [originalImage, setOriginalImage] = useState(null); const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   useEffect(() => {
     fetchOccurrenceData();
   }, [occurrenceId]);
@@ -72,7 +72,8 @@ export default function EditOccurrenceScreen({ navigation, route }) {
       }
     } catch (error) {
       console.error("Erro ao carregar ocorrência:", error);
-      Alert.alert("Erro", "Falha ao carregar os dados da ocorrência.");
+      setAlertMessage("Falha ao carregar os dados da ocorrência.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -111,10 +112,8 @@ export default function EditOccurrenceScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!title || !description || !date || !time) {
-      Alert.alert(
-        "Atenção",
-        "Por favor, preencha todos os campos obrigatórios.",
-      );
+      setAlertMessage("Por favor, preencha todos os campos obrigatórios.");
+      setAlertVisible(true);
       return;
     }
 
@@ -142,11 +141,15 @@ export default function EditOccurrenceScreen({ navigation, route }) {
 
       await ServiceOccurrence.update(occurrenceId, updatedOccurrence);
 
-      Alert.alert("Sucesso", "Ocorrência atualizada!");
-      navigation.goBack();
+      setAlertMessage("Ocorrência atualizada!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error) {
       console.log(error);
-      Alert.alert("Erro", "Falha ao atualizar a ocorrência.");
+      setAlertMessage("Falha ao atualizar a ocorrência.");
+      setAlertVisible(true);
     } finally {
       setSaving(false);
     }
@@ -278,6 +281,11 @@ export default function EditOccurrenceScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

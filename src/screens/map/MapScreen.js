@@ -6,8 +6,7 @@ import {
   TouchableOpacity,
   Linking,
   Platform
-} from "react-native";
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+} from "react-native"; import { AlertModal } from "../../components/modals"; import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getNearbyClinics } from "../../services/ServiceMap";
@@ -19,6 +18,8 @@ export default function MapScreen({ navigation }) {
   const [loading, setLoading] = useState(false)
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [region, setRegion] = useState(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -92,7 +93,8 @@ export default function MapScreen({ navigation }) {
       console.log("Deu bom! O usuário foi para o Maps.");
     } else {
       setLoading(false)
-      Alert.alert("Ops!", "Não conseguimos abrir o mapa no seu dispositivo.");
+      setAlertMessage("Não conseguimos abrir o mapa no seu dispositivo.");
+      setAlertVisible(true);
     }
   };
 
@@ -158,6 +160,11 @@ export default function MapScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

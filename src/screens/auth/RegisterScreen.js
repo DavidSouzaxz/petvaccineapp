@@ -5,20 +5,22 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ImageBackground,
-} from "react-native";
-import api from "../../services/api";
+} from "react-native"
+import { AlertModal, ConfirmationModal } from "../../components/modals"
 import ServiceUser from "../../services/ServiceUser";
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [password, setPassword] = useState(""); const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("")
   const handleRegister = async () => {
     if (!name || !email || !password) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+      setAlertMessage("Preencha todos os campos.");
+      setAlertVisible(true);
       return;
     }
     const credentials = {
@@ -30,14 +32,19 @@ export default function RegisterScreen({ navigation }) {
     try {
       await ServiceUser.register(credentials);
 
-      Alert.alert("Sucesso", "Conta criada com sucesso!", [
-        { text: "Fazer Login", onPress: () => navigation.navigate("Login") },
-      ]);
+      setConfirmMessage("Conta criada com sucesso!");
+      setConfirmVisible(true);
     } catch (error) {
       const msg = error.response?.data || "Erro ao cadastrar usuário.";
-      Alert.alert("Erro", msg);
+      setAlertMessage(msg);
+      setAlertVisible(true);
       console.log(error);
     }
+  };
+
+  const handleConfirmSuccess = () => {
+    setConfirmVisible(false);
+    navigation.navigate("Login");
   };
 
   return (
@@ -79,6 +86,17 @@ export default function RegisterScreen({ navigation }) {
           <Text style={styles.linkText}>Já tem conta? Voltar para o Login</Text>
         </TouchableOpacity>
       </View>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
+      <ConfirmationModal
+        visible={confirmVisible}
+        message={confirmMessage}
+        onConfirm={handleConfirmSuccess}
+        onCancel={() => setConfirmVisible(false)}
+      />
     </ImageBackground>
   );
 }

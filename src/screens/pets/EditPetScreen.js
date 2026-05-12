@@ -4,12 +4,12 @@ import {
   TextInput,
   StyleSheet,
   Text,
-  Alert,
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
   Image,
 } from "react-native";
+import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -43,6 +43,10 @@ export default function EditPetScreen({ navigation, route }) {
   const [ownerEmail, setOwnerEmail] = useState("");
   const [image, setImage] = useState(null);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState(editingPet?.photoUrl);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -58,32 +62,26 @@ export default function EditPetScreen({ navigation, route }) {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Excluir Pet",
-      `Tem certeza que deseja excluir ${editingPet?.name}?`,
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await ServicePet.delete(editingPet.id);
-              Alert.alert("Sucesso", "Pet excluido com sucesso!");
-              navigation.navigate("PetsHome", { newPet: true });
-            } catch (error) {
-              Alert.alert("Erro", "Nao foi possivel excluir o pet.");
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ],
-    );
+    setConfirmMessage(`Tem certeza que quer deletar ${editingPet?.name}?`);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmVisible(false);
+    setLoading(true);
+    try {
+      await ServicePet.delete(editingPet.id);
+      setAlertMessage("Pet excluido com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.navigate("PetsHome", { newPet: true });
+      }, 1000);
+    } catch (error) {
+      setAlertMessage("Nao foi possivel excluir o pet.");
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadingUserData = async () => {
@@ -95,7 +93,8 @@ export default function EditPetScreen({ navigation, route }) {
       setOwnerPhone(response.contact);
       setOwnerEmail(response.email);
     } catch (error) {
-      Alert.alert("Error", "erro ao carregar os dados do usuario.");
+      setAlertMessage("erro ao carregar os dados do usuario.");
+      setAlertVisible(true);
       console.log(error);
     }
   };
@@ -120,7 +119,8 @@ export default function EditPetScreen({ navigation, route }) {
       setNotes(response.observations);
       setCurrentPhotoUrl(response.photoUrl);
     } catch (error) {
-      Alert.alert("Error", "erro ao carregar os dados do pet.");
+      setAlertMessage("erro ao carregar os dados do pet.");
+      setAlertVisible(true);
       console.log(error);
     }
   };
@@ -132,7 +132,8 @@ export default function EditPetScreen({ navigation, route }) {
 
   const handlerSave = async () => {
     if (!name || !breed) {
-      Alert.alert("Erro", "Preencha todos os campos obrigatórios");
+      setAlertMessage("Preencha todos os campos obrigatórios");
+      setAlertVisible(true);
       return;
     }
 
@@ -162,10 +163,14 @@ export default function EditPetScreen({ navigation, route }) {
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
-      Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-      navigation.navigate("PetsHome", { newPet: true });
+      setAlertMessage("Pet atualizado com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.navigate("PetsHome", { newPet: true });
+      }, 1000);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível atualizar o pet.");
+      setAlertMessage("Não foi possível atualizar o pet.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -401,6 +406,17 @@ export default function EditPetScreen({ navigation, route }) {
           <Text style={styles.saveButtonText}>Salvar alteracoes</Text>
         )}
       </TouchableOpacity>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
+      <ConfirmationModal
+        visible={confirmVisible}
+        message={confirmMessage}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+      />
     </View>
   );
 }
@@ -416,6 +432,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: "relative",
     minHeight: 48,
+    height: 100,
   },
   titlePage: {
     color: "#2B2B2B",
@@ -430,7 +447,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     position: "absolute",
     right: 0,
-    top: 55,
+    top: 60,
     width: 36,
     height: 36,
     borderRadius: 18,

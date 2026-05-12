@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
   FlatList,
 } from "react-native";
+import { AlertModal } from "../../components/modals";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
@@ -27,6 +27,8 @@ export default function AddVaccineScreen({ navigation, route }) {
   const [observations, setObservations] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [reminder, setReminder] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const vaccineSuggestions = [
     "Antirrábica",
@@ -48,7 +50,8 @@ export default function AddVaccineScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!name || !date || !time) {
-      Alert.alert("Atenção", "Preencha o nome, data e hora.");
+      setAlertMessage("Preencha o nome, data e hora.");
+      setAlertVisible(true);
       return;
     }
 
@@ -67,10 +70,14 @@ export default function AddVaccineScreen({ navigation, route }) {
 
     try {
       await ServiceVaccine.register(newVaccine);
-      Alert.alert("Sucesso", "Vacina cadastrada!");
-      navigation.goBack();
+      setAlertMessage("Vacina cadastrada!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error) {
-      Alert.alert("Error", "Ocorreu um erro ao registrar a vacina.");
+      setAlertMessage("Ocorreu um erro ao registrar a vacina.");
+      setAlertVisible(true);
       console.log(error);
     } finally {
       setLoading(false);
@@ -278,6 +285,11 @@ export default function AddVaccineScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

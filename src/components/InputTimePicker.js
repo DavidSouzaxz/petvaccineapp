@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     borderColor: "#EFE2D7",
     borderRadius: 12,
     paddingHorizontal: 12,
+    paddingVertical: 3,
     flexDirection: "row",
     alignItems: "center",
   },
