@@ -23,6 +23,8 @@ import OcurrenceRegistrationScreen from "../screens/occurrences/OcurrenceRegistr
 import OccurrenceDetailsScreen from "../screens/occurrences/OccurrenceDetailsScreen";
 import OcurrenceEditScreen from "../screens/occurrences/OcurrenceEditScreen";
 import EditProfileScreen from "../screens/profile/EditProfileScreen";
+import CalendarScreen from "../screens/pets/CalendarScreen";
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -89,7 +91,15 @@ function PetStack() {
         component={EditVaccineScreen}
         options={{ title: "Editar Vacina" }}
       />
+
+      <Stack.Screen
+      name="Calendario"
+      component={CalendarScreen}
+      />
+
     </Stack.Navigator>
+
+    
   );
 }
 

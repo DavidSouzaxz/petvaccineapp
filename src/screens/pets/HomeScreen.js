@@ -307,42 +307,26 @@ export default function HomeScreen({ navigation }) {
           </View>
 
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Proximas vacinas</Text>
             <TouchableOpacity
-              style={styles.sectionAction}
-              onPress={() => navigation.navigate("Pets")}
-            >
-              <Text style={styles.sectionActionText}>Ver calendario</Text>
-            </TouchableOpacity>
-          </View>
+            style={styles.calendarCard}
+            onPress={() => navigation.navigate("Calendario")}
+          >
+            <View style={styles.calendarIcon}>
+              <Ionicons name="calendar" size={20} color="#F4A361" />
+            </View>
 
-          <View style={styles.upcomingWrapper}>
-            {upcomingVaccines.length > 0 ? (
-              upcomingVaccines.map((vaccine, index) => (
-                <View
-                  key={vaccine.id || `${vaccine.name}-${index}`}
-                  style={styles.upcomingItem}
-                >
-                  <Image source={dogProfile} style={styles.upcomingAvatar} />
-                  <View style={styles.upcomingInfo}>
-                    <Text style={styles.upcomingPet}>{vaccine.pet?.name}</Text>
-                    <Text style={styles.upcomingVaccine}>{vaccine.name}</Text>
-                  </View>
-                  <View style={styles.upcomingDateWrapper}>
-                    <Ionicons name="calendar-outline" size={14} color="#777" />
-                    <Text style={styles.upcomingDate}>
-                      {FormatDateDisplay(vaccine.applicationDate)}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color="#B5B5B5" />
-                </View>
-              ))
-            ) : (
-              <View style={styles.emptyCard}>
-                <Text style={styles.emptyText}>Sem vacinas cadastradas.</Text>
-              </View>
-            )}
-          </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.calendarTitle}>Calendário</Text>
+              <Text style={styles.calendarSubtitle}>
+                Veja todas as vacinas do seu pet
+              </Text>
+            </View>
+
+            
+              <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
+            </TouchableOpacity>
+            </View>
+          
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
@@ -623,4 +607,45 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  calendarCard: {
+  marginHorizontal: 20,
+  marginBottom: 10,
+  backgroundColor: "#FFF",
+  borderRadius: 16,
+  padding: 14,
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+
+  borderWidth: 1,
+  borderColor: "#F4E7D7",
+
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2,
+},
+
+calendarIcon: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#FFF3E6",
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+calendarTitle: {
+  fontSize: 14,
+  fontWeight: "700",
+  color: "#2B2B2B",
+},
+
+calendarSubtitle: {
+  fontSize: 12,
+  color: "#9A9A9A",
+  marginTop: 2,
+},
 });

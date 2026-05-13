@@ -67,9 +67,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 )}
               </View>
 
-              <View style={styles.camera}>
-                <Ionicons name="camera" size={16} color="#ff7a00" />
-              </View>
             </View>
 
             <View style={styles.info}>
@@ -241,18 +238,6 @@ const styles = StyleSheet.create({
     borderRadius: 45,
   },
 
-  camera: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-
-  },
 
   info: {
     marginLeft: 15,

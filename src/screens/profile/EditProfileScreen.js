@@ -90,6 +90,22 @@ export default function EditProfileScreen({ navigation }) {
     }
   };
 
+  const formatPhone = (value) => {
+  const numbers = value.replace(/\D/g, "");
+
+    if (numbers.length <= 10) {
+      return numbers
+        .replace(/^(\d{2})(\d)/g, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2")
+        .slice(0, 14);
+    }
+
+    return numbers
+      .replace(/^(\d{2})(\d)/g, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+};
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f7efe5" />
@@ -144,21 +160,22 @@ export default function EditProfileScreen({ navigation }) {
 
           <Text style={styles.label}>E-mail</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.inputDisabled]}
             value={email}
             editable={false}
             selectTextOnFocus={false}
             onChangeText={setEmail}
-            placeholder="Digite seu email"
-            placeholderTextColor="#999"
+            placeholderTextColor="#777"
           />
-          <Text style={styles.label}>Telephone</Text>
+          <Text style={styles.label}>Telefone</Text>
           <TextInput
             style={styles.input}
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(text) => setPhone(formatPhone(text))}
             placeholder="(00) 00000-0000"
             placeholderTextColor="#999"
+            keyboardType="phone-pad"
+            maxLength={15}
           />
 
           <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -265,6 +282,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 14,
   },
+
+  inputDisabled: {
+    backgroundColor: "#f5f5f5b4",
+    color: "#747474ff",
+    borderColor: "#ddd",
+},
 
   textArea: {
     height: 80,
