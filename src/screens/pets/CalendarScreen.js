@@ -196,6 +196,7 @@ export default function CalendarioScreen({ navigation }) {
         </TouchableOpacity>
 
         <Calendar
+          locale="pt"
           markedDates={markedDates}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           style={styles.calendar}
