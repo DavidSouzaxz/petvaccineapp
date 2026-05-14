@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,308 +7,329 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
-import { Calendar } from "react-native-calendars";
+import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ServicePet from "../../services/ServicePet";
+import ButtonRollback from "../../components/ButtonRollback";
+
 
 export default function CalendarioScreen({ navigation }) {
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [showPetSelector, setShowPetSelector] = useState(false);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "Selecione uma data";
+
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   async function loadPets() {
-    const userId = await AsyncStorage.getItem("@userId");
     try {
+      setLoading(true);
+
+      const userId = await AsyncStorage.getItem("@userId");
       const data = await ServicePet.getPetsByUser(userId);
+
       setPets(data || []);
-      if (data && data.length > 0) {
+
+      if (data?.length > 0) {
         setSelectedPet(data[0]);
       }
-    } catch (e) {
-      setPets([]);
-    }
-  }
-
-  async function loadVaccines() {
-    if (!selectedPet) return;
-
-    try {
-      const data = await ServiceVaccine.listAll();
-
-      const petVaccines = (data || []).filter(
-        (item) =>
-          item?.pet?.id === selectedPet?.id ||
-          item?.petId === selectedPet?.id
-      );
-
-      const formatted = {};
-
-      petVaccines.forEach((vac) => {
-        const date = vac.applicationDate?.split("T")[0];
-        if (!date) return;
-
-        if (!formatted[date]) formatted[date] = [];
-
-        formatted[date].push({
-          id: vac.id,
-          name: vac.name,
-          applied: vac.isApplied,
-          status: vac.isApplied ? "Aplicada" : "Próxima dose",
-        });
-      });
-
-      setEvents(formatted);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
 
+  async function loadVaccines(pet = selectedPet) {
+  if (!pet) return;
+
+  try {
+    setLoading(true);
+
+    const data = await ServiceVaccine.listAll();
+
+    const petVaccines = (data || []).filter(
+      (item) => item?.pet?.id === pet.id || item?.petId === pet.id
+    );
+
+    const formatted = {};
+
+    petVaccines.forEach((vac) => {
+      let rawDate = vac.applicationDate;
+
+      if (!rawDate) return;
+
+      const date = rawDate.substring(0, 10);
+
+      if (!formatted[date]) {
+        formatted[date] = [];
+      }
+
+      formatted[date].push({
+        id: vac.id,
+        name: vac.name || "Vacina",
+        applied: vac.isApplied,
+        status: vac.isApplied ? "Aplicada" : "Próxima dose",
+      });
+    });
+
+    setEvents(formatted);
+
+    const today = new Date().toISOString().split("T")[0];
+    setSelectedDate(today);
+        } catch (error) {
+          console.log("Erro vacinas:", error);
+        } finally {
+          setLoading(false);
+  }
+}
   useEffect(() => {
     loadPets();
   }, []);
 
   useEffect(() => {
-    loadVaccines();
+    if (selectedPet) loadVaccines(selectedPet);
   }, [selectedPet]);
 
   useFocusEffect(
     useCallback(() => {
-      if (selectedPet) loadVaccines();
+      if (selectedPet) loadVaccines(selectedPet);
     }, [selectedPet])
   );
 
-  const markedDates = {};
+  const markedDates = useMemo(() => {
+    const marks = {};
 
-  Object.keys(events).forEach((date) => {
-    const hasPending = events[date].some((item) => !item.applied);
+    Object.keys(events).forEach((date) => {
+      const hasPending = events[date].some((item) => !item.applied);
 
-    markedDates[date] = {
-      marked: true,
-      dotColor: hasPending ? "#F4A361" : "#47C266",
-    };
-  });
+      marks[date] = {
+        marked: true,
+        dotColor: hasPending ? "#F4A361" : "#47C266",
+      };
+    });
 
-  if (selectedDate) {
-    markedDates[selectedDate] = {
-      ...markedDates[selectedDate],
-      selected: true,
-      selectedColor: "#F4A361",
-    };
+    if (selectedDate) {
+      marks[selectedDate] = {
+        ...marks[selectedDate],
+        selected: true,
+        selectedColor: "#F4A361",
+      };
+    }
+
+    return marks;
+  }, [events, selectedDate]);
+
+  const upcomingVaccines = Object.values(events)
+    .flat()
+    .filter((item) => !item.applied)
+    .slice(0, 3);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
+        <ActivityIndicator size="large" color="#F4A361" />
+      </View>
+    );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
-        <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-            
-          <Ionicons name="chevron-back" size={20} color="#2B2B2B" />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
 
-        <View>
-          <Text style={styles.headerTitle}>Calendário</Text>
-          <Text style={styles.headerSubtitle}>
-            Acompanhe vacinas e próximas doses do seu pet!
-          </Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          backgroundColor="#FFF"
+          color="#B56A2B"
+        />
+
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Calendário de vacinas</Text>
         </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.petCard}
-        onPress={() => setShowPetSelector(true)}
-      >
-        <View style={styles.petInfoRow}>
-          <Image
-            source={
-              selectedPet?.photoUrl
-                ? { uri: selectedPet.photoUrl }
-                : require("../../../assets/dogProfile.png")
-            }
-            style={styles.petImage}
-          />
-          <View>
-            <Text style={styles.petName}>
-              {selectedPet ? selectedPet.name : "Selecione um pet"}
-            </Text>
-            <Text style={styles.petBreed}>
-              {selectedPet ? selectedPet.breed : ""}
-            </Text>
-          </View>
-        </View>
-        <Ionicons name="chevron-down" size={18} color="#777" />
-      </TouchableOpacity>
+        {/* precisa ajustar */}
+        <TouchableOpacity                  
+          style={styles.petCard}
+          onPress={() => setShowPetSelector(true)}
+        >
+          <View style={styles.petInfoRow}>
+            <Image
+              source={
+                selectedPet?.photoUrl
+                  ? { uri: selectedPet.photoUrl }
+                  : require("../../../assets/dogProfile.png")
+              }
+              style={styles.petImage}
+            />
 
-      <Modal
-        visible={showPetSelector}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowPetSelector(false)}
-      >
+            <View>
+              <Text style={styles.petName}>{selectedPet?.name}</Text>
+              <Text style={styles.petBreed}>
+                {selectedPet?.breed || "Sem raça"}
+              </Text>
+            </View>
+          </View>
+
+          <Ionicons name="chevron-down" size={18} color="#999" />
+        </TouchableOpacity>
+
+        <Calendar
+          markedDates={markedDates}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+          style={styles.calendar}
+          theme={{
+            todayTextColor: "#F4A361",
+            arrowColor: "#F4A361",
+            selectedDayBackgroundColor: "#F4A361",
+            selectedDayTextColor: "#FFF",
+            monthTextColor: "#333",
+            textMonthFontWeight: "700",
+            textDayFontWeight: "600",
+          }}
+        />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{formatDate(selectedDate)}</Text>
+
+          {selectedDate && events[selectedDate] ? (
+            events[selectedDate].map((item) => (
+              <View key={item.id} style={styles.eventCard}>
+                <Ionicons
+                  name={item.applied ? "checkmark-circle" : "time"}
+                  size={20}
+                  color={item.applied ? "#47C266" : "#F4A361"}
+                />
+
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                  <Text style={styles.eventTitle}>{item.name}</Text>
+                  <Text style={styles.eventSubtitle}>{item.status}</Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.empty}>Nenhum evento neste dia</Text>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Próximas doses</Text>
+
+          {upcomingVaccines.length > 0 ? (
+            upcomingVaccines.map((item) => (
+              <View key={item.id} style={styles.eventCard}>
+                <Ionicons name="alarm" size={20} color="#F4A361" />
+                <Text style={{ marginLeft: 12, fontWeight: "600" }}>
+                  {item.name}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.empty}>Nenhuma próxima dose</Text>
+          )}
+        </View>
+      </ScrollView>
+
+      <Modal visible={showPetSelector} transparent animationType="slide">
         <TouchableOpacity
-          style={styles.petSelectorOverlay}
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowPetSelector(false)}
         >
-          <View style={styles.petSelectorCard}>
-            <View style={styles.petSelectorHeader}>
-              <Text style={styles.petSelectorTitle}>Selecione um pet</Text>
-              <TouchableOpacity onPress={() => setShowPetSelector(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecione um pet</Text>
+
+            {pets.map((pet) => (
+              <TouchableOpacity
+                key={pet.id}
+                style={styles.petOption}
+                onPress={() => {
+                  setSelectedPet(pet);
+                  setShowPetSelector(false);
+                }}
+              >
+                <Text style={styles.petOptionText}>{pet.name}</Text>
+
+                {selectedPet?.id === pet.id && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={22}
+                    color="#F4A361"
+                  />
+                )}
               </TouchableOpacity>
-            </View>
-
-            <ScrollView>
-              {pets.map((pet) => (
-                <TouchableOpacity
-                  key={pet.id}
-                  style={[
-                    styles.petSelectorItem,
-                    selectedPet?.id === pet.id &&
-                      styles.petSelectorItemActive,
-                  ]}
-                  onPress={() => {
-                    setSelectedPet(pet);
-                    setShowPetSelector(false);
-                  }}
-                >
-                  <View>
-                    <Text
-                      style={[
-                        styles.petSelectorItemName,
-                        selectedPet?.id === pet.id && {
-                          color: "#F49B4B",
-                        },
-                      ]}
-                    >
-                      {pet.name}
-                    </Text>
-                    <Text style={styles.petSelectorItemBreed}>
-                      {pet.breed}
-                    </Text>
-                  </View>
-
-                  {selectedPet?.id === pet.id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color="#F49B4B"
-                    />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            ))}
           </View>
         </TouchableOpacity>
       </Modal>
-
-      <Calendar
-        markedDates={markedDates}
-        onDayPress={(day) => setSelectedDate(day.dateString)}
-        style={styles.calendar}
-        theme={{
-          backgroundColor: "#FFF",
-          calendarBackground: "#FFF",
-          todayTextColor: "#F4A361",
-          arrowColor: "#F4A361",
-          selectedDayBackgroundColor: "#F4A361",
-          textDayFontWeight: "600",
-          textMonthFontWeight: "700",
-          monthTextColor: "#333",
-          textDayStyle: { color: "#333" },
-        }}
-      />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {selectedDate || "Selecione uma data"}
-        </Text>
-
-        {selectedDate && events[selectedDate] ? (
-          events[selectedDate].map((item) => (
-            <View key={item.id} style={styles.eventCard}>
-              <View>
-                <Text style={styles.eventTitle}>{item.name}</Text>
-                <Text style={styles.eventSubtitle}>{item.status}</Text>
-              </View>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.empty}>Nenhum evento neste dia</Text>
-        )}
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: "#FDF4E7" },
+
+  loadingContainer: {
     flex: 1,
-    backgroundColor: "#FFF5EA",
-  },
-
-    header: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 10,
-    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#FDF4E7",
   },
 
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF",
+  topBar: {
+    paddingTop: 58,
+    paddingHorizontal: 20,
+    justifyContent: "center",
+    position: "relative",
+},
+
+  titleContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 58,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#F1E2D1",
-    marginRight: 12,
   },
 
-  headerTitle: {
+  title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#2B2B2B",
-  },
-
-  headerSubtitle: {
-    fontSize: 14,
-    color: "#9B9B9B",
-    marginTop: 4,
-  },
-
-  notificationButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#F1E2D1",
+    color: "#2F2F2F",
+    textAlign: "center",
   },
 
   petCard: {
-    marginTop: 18,
+    marginTop: 60,
     marginHorizontal: 20,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: "#FFF",
+    borderRadius: 18,
     padding: 14,
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-  },
+    alignItems: "center",
+},
 
   petInfoRow: {
     flexDirection: "row",
@@ -316,62 +337,70 @@ const styles = StyleSheet.create({
   },
 
   petImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     marginRight: 12,
   },
 
   petName: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#2D2D2D",
+    fontWeight: "700",
+    color: "#2F2F2F",
   },
 
   petBreed: {
     fontSize: 13,
-    color: "#8E8E8E",
+    color: "#8B7A6B",
     marginTop: 2,
   },
 
   calendar: {
+    marginTop: 18,
     marginHorizontal: 20,
-    marginTop: 10,
-    borderRadius: 22,
+    borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#FFF",
-    elevation: 3,
+    elevation: 2,
   },
 
   section: {
     paddingHorizontal: 20,
-    marginTop: 25,
-    paddingBottom: 40,
+    marginTop: 24,
+    paddingBottom: 20,
   },
 
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#2B2B2B",
-    marginBottom: 15,
+    marginBottom: 14,
+    color: "#2F2F2F",
   },
 
   eventCard: {
     backgroundColor: "#FFF",
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   eventTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
-    color: "#2B2B2B",
+    color: "#2F2F2F",
   },
 
   eventSubtitle: {
-    marginTop: 4,
+    fontSize: 13,
     color: "#777",
+    marginTop: 3,
+  },
+
+  extraInfo: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 4,
   },
 
   empty: {
@@ -380,56 +409,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 
-  petSelectorOverlay: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
 
-  petSelectorCard: {
-    backgroundColor: "#FFFFFF",
+  modalContent: {
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: "80%",
-    paddingBottom: 20,
+    padding: 20,
   },
 
-  petSelectorHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-
-  petSelectorTitle: {
+  modalTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#333",
+    marginBottom: 16,
   },
 
-  petSelectorItem: {
+  petOption: {
+    paddingVertical: 14,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
   },
 
-  petSelectorItemActive: {
-    backgroundColor: "#FFF0E2",
-  },
-
-  petSelectorItemName: {
+  petOptionText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#2D2D2D",
-  },
-
-  petSelectorItemBreed: {
-    fontSize: 12,
-    color: "#8E8E8E",
-    marginTop: 4,
   },
 });
