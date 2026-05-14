@@ -202,6 +202,7 @@ function ProfileStack({ onLogout }) {
       </Stack.Screen>
 
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="PetsScreen" component={PetsScreen} />
     </Stack.Navigator>
   );
 }
