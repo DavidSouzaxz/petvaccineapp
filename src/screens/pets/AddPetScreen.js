@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   TextInput,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { AlertModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
@@ -87,7 +88,7 @@ export default function AddPetScreen({ navigation, route }) {
       setOwnerPhone(response.contact);
       setOwnerEmail(response.email);
     } catch (error) {
-      setAlertMessage("erro ao carregar os dados do usuario.")
+      setAlertMessage("erro ao carregar os dados do usuario.");
       setAlertVisible(true);
       console.log(error);
     }
@@ -97,10 +98,19 @@ export default function AddPetScreen({ navigation, route }) {
     loadUserData();
   }, []);
 
+  // Limpar modal quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+      };
+    }, []),
+  );
+
   const handlerSave = async () => {
     setLoading(true);
     if (!name || !breed) {
-      setAlertMessage("Preencha todos os campos")
+      setAlertMessage("Preencha todos os campos");
       setAlertVisible(true);
       setLoading(false);
       return;
@@ -132,7 +142,7 @@ export default function AddPetScreen({ navigation, route }) {
 
       await ServicePet.register(newPet);
 
-      setAlertMessage("Pet cadastrado com sucesso!")
+      setAlertMessage("Pet cadastrado com sucesso!");
       setAlertVisible(true);
       setTimeout(() => {
         navigation.navigate({

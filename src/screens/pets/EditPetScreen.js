@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   TextInput,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
@@ -129,6 +130,16 @@ export default function EditPetScreen({ navigation, route }) {
     loadingUserData();
     loadingPet();
   }, []);
+
+  // Limpar modais quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+        setConfirmVisible(false);
+      };
+    }, []),
+  );
 
   const handlerSave = async () => {
     if (!name || !breed) {

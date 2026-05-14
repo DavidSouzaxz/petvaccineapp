@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   FlatList,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal } from "../../components/modals";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -29,6 +30,15 @@ export default function AddVaccineScreen({ navigation, route }) {
   const [reminder, setReminder] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  // Limpar modal quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+      };
+    }, []),
+  );
 
   const vaccineSuggestions = [
     "Antirrábica",

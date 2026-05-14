@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal } from "../../components/modals";
 import * as ImagePicker from "expo-image-picker";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -40,11 +41,21 @@ export default function EditOccurrenceScreen({ navigation, route }) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [image, setImage] = useState(null);
-  const [originalImage, setOriginalImage] = useState(null); const [alertVisible, setAlertVisible] = useState(false);
+  const [originalImage, setOriginalImage] = useState(null);
+  const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   useEffect(() => {
     fetchOccurrenceData();
   }, [occurrenceId]);
+
+  // Limpar modal quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+      };
+    }, []),
+  );
 
   const fetchOccurrenceData = async () => {
     try {
