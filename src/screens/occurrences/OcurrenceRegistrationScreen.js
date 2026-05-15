@@ -10,7 +10,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker"; // npx expo install expo-image-picker
+import * as ImagePicker from "expo-image-picker";
 import ButtonRollback from "../../components/ButtonRollback";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ServiceOccurrence from "../../services/ServiceOccurrences";
@@ -273,7 +273,6 @@ const styles = StyleSheet.create({
   tagText: { fontSize: 12, color: "#777", fontWeight: "600" },
   tagTextSelected: { color: "#FFF" },
 
-  // Estilos da Foto
   photoPicker: {
     height: 120,
     backgroundColor: "#FAFAFA",

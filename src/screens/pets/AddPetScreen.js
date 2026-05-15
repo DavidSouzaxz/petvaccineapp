@@ -98,7 +98,6 @@ export default function AddPetScreen({ navigation, route }) {
     loadUserData();
   }, []);
 
-  // Limpar modal quando a tela ganha foco
   useFocusEffect(
     useCallback(() => {
       return () => {
@@ -130,7 +129,7 @@ export default function AddPetScreen({ navigation, route }) {
         name: name,
         specie: species,
         breed: breed,
-        // color: color,
+
         birthDate: birthDateFormat,
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
@@ -385,7 +384,7 @@ export default function AddPetScreen({ navigation, route }) {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Salvar alteracoes</Text>
+          <Text style={styles.saveButtonText}>Salvar</Text>
         )}
       </TouchableOpacity>
       <AlertModal

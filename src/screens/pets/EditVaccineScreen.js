@@ -61,7 +61,6 @@ export default function EditVaccineScreen({ navigation, route }) {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // Limpar modal quando a tela ganha foco
   useFocusEffect(
     useCallback(() => {
       return () => {

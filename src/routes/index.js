@@ -3,9 +3,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../services/api"; // Certifique-se de importar sua instância do axios
-
-// Imports das Telas
+import api from "../services/api";
+import { ActionButton } from "../components/ActionButton";
 import HomeScreen from "../screens/pets/HomeScreen";
 import PetsScreen from "../screens/pets/PetsScreen";
 import DetailsScreen from "../screens/pets/DetailsScreen";
@@ -65,6 +64,11 @@ function PetStack() {
         options={{ headerLeft: () => null }}
       />
       <Stack.Screen
+        name="Pets"
+        component={PetsScreen}
+        options={{ title: "Meus Pets" }}
+      />
+      <Stack.Screen
         name="Details"
         component={DetailsScreen}
         options={{ title: "Vacinas" }}
@@ -114,6 +118,43 @@ function OccurrencesStack() {
         component={OccurrenceDetailsScreen}
       />
       <Stack.Screen name="OccurrencesEdit" component={OcurrenceEditScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PetsListStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="PetsListHome"
+        component={PetsScreen}
+        options={{ headerLeft: () => null }}
+      />
+      <Stack.Screen
+        name="Details"
+        component={DetailsScreen}
+        options={{ title: "Vacinas" }}
+      />
+      <Stack.Screen
+        name="AddPet"
+        component={AddPetScreen}
+        options={{ title: "Novo Pet" }}
+      />
+      <Stack.Screen
+        name="EditPet"
+        component={EditPetScreen}
+        options={{ title: "Editar Pet" }}
+      />
+      <Stack.Screen
+        name="AddVaccine"
+        component={AddVaccineScreen}
+        options={{ title: "Registrar Vacina" }}
+      />
+      <Stack.Screen
+        name="EditVaccine"
+        component={EditVaccineScreen}
+        options={{ title: "Editar Vacina" }}
+      />
     </Stack.Navigator>
   );
 }
@@ -184,6 +225,14 @@ export default function Routes() {
       {/* <Tab.Screen name="Home" component={HomeStack} /> */}
       <Tab.Screen name="Home" component={PetStack} />
       <Tab.Screen name="Clinicas" component={MapStack} />
+      <Tab.Screen
+        name="Add"
+        component={PetsListStack}
+        options={{
+          tabBarLabel: () => null,
+          tabBarButton: (props) => <ActionButton {...props} />,
+        }}
+      />
       <Tab.Screen name="Ocorrências" component={OccurrencesStack} />
       <Tab.Screen name="Perfil">
         {() => <ProfileStack onLogout={handleLogout} />}
@@ -203,6 +252,31 @@ function ProfileStack({ onLogout }) {
 
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="PetsScreen" component={PetsScreen} />
+      <Stack.Screen
+        name="Details"
+        component={DetailsScreen}
+        options={{ title: "Vacinas" }}
+      />
+      <Stack.Screen
+        name="AddPet"
+        component={AddPetScreen}
+        options={{ title: "Novo Pet" }}
+      />
+      <Stack.Screen
+        name="EditPet"
+        component={EditPetScreen}
+        options={{ title: "Editar Pet" }}
+      />
+      <Stack.Screen
+        name="AddVaccine"
+        component={AddVaccineScreen}
+        options={{ title: "Registrar Vacina" }}
+      />
+      <Stack.Screen
+        name="EditVaccine"
+        component={EditVaccineScreen}
+        options={{ title: "Editar Vacina" }}
+      />
     </Stack.Navigator>
   );
 }

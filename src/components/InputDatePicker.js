@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  Modal,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import FormatDateDisplay, {
@@ -41,12 +48,10 @@ export default function InputDatePicker({
 
   const handleDateChange = (event, selectedDate) => {
     if (Platform.OS === "ios") {
-      // No iOS, apenas armazena a data temporária sem fechar o picker
       if (selectedDate) {
         setTempDate(selectedDate);
       }
     } else {
-      // No Android, fecha o picker e confirma a seleção
       setShow(false);
       if (selectedDate) {
         const displayDate = FormatDateDisplay(selectedDate);
@@ -81,8 +86,8 @@ export default function InputDatePicker({
         <Ionicons name="calendar-outline" size={20} color="#E98B3A" />
       </TouchableOpacity>
 
-      {show && (
-        Platform.OS === "ios" ? (
+      {show &&
+        (Platform.OS === "ios" ? (
           <Modal
             transparent={true}
             animationType="slide"
@@ -120,8 +125,7 @@ export default function InputDatePicker({
             maximumDate={new Date()}
             onChange={handleDateChange}
           />
-        )
-      )}
+        ))}
     </View>
   );
 }

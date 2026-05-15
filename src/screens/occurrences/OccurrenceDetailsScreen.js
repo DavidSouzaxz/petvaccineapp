@@ -48,7 +48,6 @@ function OccurrenceDetailsScreen({ route, navigation }) {
       const data = await ServiceOccurrences.getById(occurrenceId);
       setOccurrence(data);
 
-      // Fetch related occurrences (same type)
       if (data && data.petId) {
         const allOccurrences = await ServiceOccurrences.getByIdPet(data.petId);
         const related = allOccurrences

@@ -48,7 +48,6 @@ export default function EditOccurrenceScreen({ navigation, route }) {
     fetchOccurrenceData();
   }, [occurrenceId]);
 
-  // Limpar modal quando a tela ganha foco
   useFocusEffect(
     useCallback(() => {
       return () => {
@@ -340,7 +339,6 @@ const styles = StyleSheet.create({
   tagText: { fontSize: 12, color: "#777", fontWeight: "600" },
   tagTextSelected: { color: "#FFF" },
 
-  // Estilos da Foto
   photoPicker: {
     height: 120,
     backgroundColor: "#FAFAFA",

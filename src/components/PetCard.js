@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     height: 64,
-    backgroundColor: "#f9f9f9", // Adicionei uma cor leve para diferenciar o banner
+    backgroundColor: "#f9f9f9",
     alignItems: "center",
     justifyContent: "flex-end",
   },

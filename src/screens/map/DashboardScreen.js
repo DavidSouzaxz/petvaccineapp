@@ -18,8 +18,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { getNearbyClinics } from "../../services/ServiceMap";
 import CardClinic from "../../components/CardClinic";
-import OpenGoogleMaps from "../../core/OpenGoogleMaps"; // Import corrigido
-
+import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 export default function DashboardScreen({ navigation }) {
   const [markers, setMarkers] = useState([]);
   const [region, setRegion] = useState(null);

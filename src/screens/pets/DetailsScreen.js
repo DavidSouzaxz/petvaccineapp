@@ -9,12 +9,13 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native"; // IMPORTANTE
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import VaccineItem from "../../components/VaccineItem";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
+import { getPetImage } from "../../core/SpeciesImageMap";
 
 export default function DetailsScreen({ route, navigation }) {
   const { pet, petColor = "#F4A361" } = route.params;
@@ -143,11 +144,7 @@ export default function DetailsScreen({ route, navigation }) {
 
           <View style={styles.petCard}>
             <Image
-              source={
-                pet.photoUrl
-                  ? { uri: pet.photoUrl }
-                  : require("../../../assets/dogProfile.png")
-              }
+              source={getPetImage(pet.photoUrl, pet.specie)}
               style={styles.petAvatar}
             />
             <View style={styles.petInfo}>
