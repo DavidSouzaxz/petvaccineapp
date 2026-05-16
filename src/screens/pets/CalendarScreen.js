@@ -20,6 +20,7 @@ import ServicePet from "../../services/ServicePet";
 import ButtonRollback from "../../components/ButtonRollback";
 
 
+
 export default function CalendarioScreen({ navigation }) {
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
@@ -28,6 +29,11 @@ export default function CalendarioScreen({ navigation }) {
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [showPetSelector, setShowPetSelector] = useState(false);
+  const [showDateSelector, setShowDateSelector] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [showMonthSelector, setShowMonthSelector] = useState(false);
+const [showYearSelector, setShowYearSelector] = useState(false);  
+  
 
   const formatDate = (dateString) => {
     if (!dateString) return "Selecione uma data";
@@ -38,6 +44,13 @@ export default function CalendarioScreen({ navigation }) {
       year: "numeric",
     });
   };
+
+  const formatMonthYear = (date) => {
+  return date.toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+};
 
   async function loadPets() {
     try {
@@ -169,7 +182,6 @@ export default function CalendarioScreen({ navigation }) {
         </View>
       </View>
 
-        {/* precisa ajustar */}
         <TouchableOpacity                  
           style={styles.petCard}
           onPress={() => setShowPetSelector(true)}
@@ -195,8 +207,27 @@ export default function CalendarioScreen({ navigation }) {
           <Ionicons name="chevron-down" size={18} color="#999" />
         </TouchableOpacity>
 
+
+
+        <View style={styles.calendarHeader}>
+        <TouchableOpacity
+          onPress={() => {
+            setShowDateSelector(true);
+          }}
+          style={styles.monthButton}
+        >
+          <Text style={styles.monthText}>
+            {formatMonthYear(currentDate)}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#F4A361" />
+        </TouchableOpacity>
+      </View>
+
         <Calendar
-          locale="pt"
+        current={currentDate.toISOString().split("T")[0]}
+          onMonthChange={(month) => {
+            setCurrentDate(new Date(month.timestamp));
+          }}
           markedDates={markedDates}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           style={styles.calendar}
@@ -252,6 +283,8 @@ export default function CalendarioScreen({ navigation }) {
         </View>
       </ScrollView>
 
+
+
       <Modal visible={showPetSelector} transparent animationType="slide">
         <TouchableOpacity
           style={styles.modalOverlay}
@@ -264,13 +297,32 @@ export default function CalendarioScreen({ navigation }) {
             {pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                style={styles.petOption}
+                style={[
+                  styles.petOption,
+                  selectedPet?.id === pet.id && styles.petOptionActive,
+                ]}
                 onPress={() => {
                   setSelectedPet(pet);
                   setShowPetSelector(false);
                 }}
               >
-                <Text style={styles.petOptionText}>{pet.name}</Text>
+                <View style={{ flexDirection:"row", alignItems:"center" }}>
+                  <Image
+                    source={
+                      pet.photoUrl
+                        ? { uri: pet.photoUrl }
+                        : require("../../../assets/dogProfile.png")
+                    }
+                    style={styles.petOptionImage}
+                  />
+
+                  <View style={{ marginLeft: 10 }}>
+                    <Text style={styles.petOptionText}>{pet.name}</Text>
+                    <Text style={styles.petOptionBreed}>
+                      {pet.breed || "Sem raça"}
+                    </Text>
+                  </View>
+                </View>
 
                 {selectedPet?.id === pet.id && (
                   <Ionicons
@@ -284,6 +336,63 @@ export default function CalendarioScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+
+
+     <Modal visible={showDateSelector} transparent animationType="fade">
+  <View style={styles.modalOverlay}>
+    
+    <TouchableOpacity
+      style={StyleSheet.absoluteFill}
+      onPress={() => setShowDateSelector(false)}
+    />
+
+    <View style={styles.dateModal}>
+      <Text style={styles.modalTitle}>Selecionar data</Text>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {Array.from({ length: 24 }, (_, i) => {
+          // 12 meses passado + 12 futuro
+          const date = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() - 12 + i,
+            1
+          );
+
+          const isSelected =
+            date.getMonth() === currentDate.getMonth() &&
+            date.getFullYear() === currentDate.getFullYear();
+
+          return (
+            <TouchableOpacity
+              key={i}
+              style={[
+                styles.dateOption,
+                isSelected && styles.dateOptionActive,
+              ]}
+              onPress={() => {
+                setCurrentDate(date);
+                setShowDateSelector(false);
+              }}
+            >
+              <Text
+                style={[
+                  styles.dateOptionText,
+                  isSelected && styles.dateOptionTextActive,
+                ]}
+              >
+                {date.toLocaleDateString("pt-BR", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
     </View>
   );
 }
@@ -429,14 +538,89 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  petOption: {
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
+ petOption: {
+  paddingVertical: 12,
+  paddingHorizontal: 10,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderBottomWidth: 1,
+  borderBottomColor: "#F2F2F2",
+},
+
+  petOptionActive: {
+    backgroundColor: "#FFF4EC",
+    borderRadius: 12,
+  },
+
+  petOptionImage: {
+    width: 40,
+    height:40,
+    borderRadius: 20,
   },
 
   petOptionText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#2F2F2F",
   },
+
+  petOptionBreed: {
+    fontSize: 12,
+    color: "#9E948C",
+    marginTop: 2,
+  },
+
+
+  calendarHeader: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    alignItems: "center",
+  },
+
+  monthButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#FFF",
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      borderRadius: 25,
+      elevation: 3,
+  },
+
+  monthText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2F2F2F",
+    marginRight: 6,
+  },
+
+  dateModal: {
+    backgroundColor: "#FFF",
+    margin: 20,
+    borderRadius: 20,
+    padding: 20,
+  },
+
+  dateOption: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2F2F2",
+  },
+
+  dateOptionText: {
+    fontSize: 16,
+    color: "#2F2F2F",
+  },
+
+  dateOptionActive: {
+    backgroundColor: "#FFF4EC",
+    borderRadius: 12,
+  },
+
+  dateOptionTextActive: {
+    color: "#F4A361",
+    fontWeight: "700",
+  },
+
 });
