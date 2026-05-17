@@ -18,9 +18,28 @@ export default function InputDatePicker({
   value,
   onChange,
   styleLabel,
+  dateMode = "past",
 }) {
   const [show, setShow] = useState(false);
   const [tempDate, setTempDate] = useState(null);
+
+  const getDateConstraints = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    switch (dateMode) {
+      case "future":
+        return { minimumDate: today, maximumDate: null };
+      case "all":
+        return { minimumDate: null, maximumDate: null };
+      case "past":
+      default:
+        return { minimumDate: null, maximumDate: today };
+    }
+  };
 
   const getDateValue = () => {
     if (!value || typeof value !== "string") return new Date();
@@ -109,7 +128,7 @@ export default function InputDatePicker({
                     value={tempDate || getDateValue()}
                     mode="date"
                     display="spinner"
-                    maximumDate={new Date()}
+                    {...getDateConstraints()}
                     onChange={handleDateChange}
                     textColor="#2B2B2B"
                   />
@@ -122,7 +141,7 @@ export default function InputDatePicker({
             value={getDateValue()}
             mode="date"
             display="default"
-            maximumDate={new Date()}
+            {...getDateConstraints()}
             onChange={handleDateChange}
           />
         ))}

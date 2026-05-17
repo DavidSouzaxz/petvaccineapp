@@ -23,7 +23,9 @@ export default function AddVaccineScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [dateNext, setDateNext] = useState("");
   const [time, setTime] = useState("");
+  const [timeNext, setTimeNext] = useState("");
   const [isApplied, setIsApplied] = useState(false);
   const [observations, setObservations] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -73,7 +75,6 @@ export default function AddVaccineScreen({ navigation, route }) {
       name: name,
       applicationDate: isoDateTime,
       isApplied: isApplied,
-      reminder: reminder,
       observations: observations,
     };
 
@@ -90,6 +91,7 @@ export default function AddVaccineScreen({ navigation, route }) {
       console.log(error);
     } finally {
       setLoading(false);
+      console.log(newVaccine);
     }
   };
 
@@ -213,6 +215,7 @@ export default function AddVaccineScreen({ navigation, route }) {
                 label="Data da Aplicação"
                 value={date}
                 onChange={(val) => setDate(val)}
+                dateMode="past"
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",
@@ -239,8 +242,9 @@ export default function AddVaccineScreen({ navigation, route }) {
             <View style={{ flex: 1 }}>
               <InputDatePicker
                 label="Data para Proxima"
-                value={date}
-                onChange={(val) => setDate(val)}
+                value={dateNext}
+                onChange={(val) => setDateNext(val)}
+                dateMode="future"
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",
@@ -252,8 +256,8 @@ export default function AddVaccineScreen({ navigation, route }) {
             <View style={{ flex: 1 }}>
               <InputTimePicker
                 label="Horário"
-                value={time}
-                onChange={(val) => setTime(val)}
+                value={timeNext}
+                onChange={(val) => setTimeNext(val)}
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",

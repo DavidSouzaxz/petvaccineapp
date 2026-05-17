@@ -43,6 +43,12 @@ const parseDateTime = (value) => {
   return { date: "", time: "" };
 };
 
+const convertDateToISO = (dateString) => {
+  if (!dateString || !dateString.includes("/")) return dateString;
+  const [day, month, year] = dateString.split("/");
+  return `${year}-${month}-${day}`;
+};
+
 export default function EditVaccineScreen({ navigation, route }) {
   const { vaccine, petId, petName, petColor } = route.params;
   const initialDateTime = useMemo(
@@ -114,7 +120,8 @@ export default function EditVaccineScreen({ navigation, route }) {
 
     setLoading(true);
 
-    const isoDateTime = `${date}T${time}:00`;
+    const isoDate = convertDateToISO(date);
+    const isoDateTime = `${isoDate}T${time}:00`;
 
     const updatedVaccine = {
       petId: petId,
@@ -170,6 +177,7 @@ export default function EditVaccineScreen({ navigation, route }) {
           <View style={styles.togglesRow}>
             <TouchableOpacity
               style={styles.checkboxContainer}
+              disabled={isApplied}
               onPress={() => setIsApplied(!isApplied)}
             >
               <Ionicons
@@ -261,6 +269,7 @@ export default function EditVaccineScreen({ navigation, route }) {
                 label="Data da aplicação"
                 value={date}
                 onChange={(val) => setDate(val)}
+                dateMode="past"
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",
@@ -289,6 +298,7 @@ export default function EditVaccineScreen({ navigation, route }) {
                 label="Data para Proxima"
                 value={date}
                 onChange={(val) => setDate(val)}
+                dateMode="future"
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",
