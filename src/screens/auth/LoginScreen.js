@@ -5,10 +5,10 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ImageBackground,
 } from "react-native";
+import { AlertModal } from "../../components/modals";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceUser from "../../services/ServiceUser";
 
@@ -17,11 +17,13 @@ export default function LoginScreen({ navigation, onSignIn }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-
+      setAlertMessage("Por favor, preencha todos os campos.");
+      setAlertVisible(true);
       return;
     }
 
@@ -43,7 +45,8 @@ export default function LoginScreen({ navigation, onSignIn }) {
         onSignIn(response.token);
       }
     } catch (error) {
-      Alert.alert("Erro", "E-mail ou senha inválidos.");
+      setAlertMessage("E-mail ou senha inválidos.");
+      setAlertVisible(true);
       setLoading(false);
     } finally {
       setLoading(false);
@@ -104,6 +107,11 @@ export default function LoginScreen({ navigation, onSignIn }) {
           </TouchableOpacity>
         </View>
       )}
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </ImageBackground>
   );
 }

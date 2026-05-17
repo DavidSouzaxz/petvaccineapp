@@ -5,8 +5,9 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Platform
+  Platform,
 } from "react-native";
+import { AlertModal } from "../../components/modals";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,9 +17,11 @@ import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 
 export default function MapScreen({ navigation }) {
   const [markers, setMarkers] = useState([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [region, setRegion] = useState(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -27,8 +30,8 @@ export default function MapScreen({ navigation }) {
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
@@ -79,20 +82,20 @@ export default function MapScreen({ navigation }) {
         longitudeDelta: 0.05,
       });
 
-      // Chamada inicial
       fetchNearby(latitude, longitude);
     })();
   }, [fetchNearby]);
 
   const handlePress = async (clinic) => {
     const sucesso = await OpenGoogleMaps(clinic);
-    setLoading(true)
+    setLoading(true);
     if (sucesso) {
-      setLoading(false)
+      setLoading(false);
       console.log("Deu bom! O usuário foi para o Maps.");
     } else {
-      setLoading(false)
-      Alert.alert("Ops!", "Não conseguimos abrir o mapa no seu dispositivo.");
+      setLoading(false);
+      setAlertMessage("Não conseguimos abrir o mapa no seu dispositivo.");
+      setAlertVisible(true);
     }
   };
 
@@ -113,15 +116,14 @@ export default function MapScreen({ navigation }) {
             title={m.nome || m.name}
             pinColor="#F4A361"
           >
-            <Callout
-              tooltip
-              onPress={() => OpenGoogleMaps(m)}
-            >
+            <Callout tooltip onPress={() => OpenGoogleMaps(m)}>
               <View style={styles.calloutContainer}>
                 <Text style={styles.calloutTitle} numberOfLines={1}>
                   {m.nome || m.name}
                 </Text>
-                <Text style={styles.calloutSubtitle}>Toque para mais detalhes</Text>
+                <Text style={styles.calloutSubtitle}>
+                  Toque para mais detalhes
+                </Text>
               </View>
             </Callout>
           </Marker>
@@ -158,6 +160,11 @@ export default function MapScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }
@@ -169,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 15,
     padding: 10,
-    width: 180, // LARGURA FIXA PARA O iOS
+    width: 180,
     borderWidth: 1,
     borderColor: "#EEE",
     alignItems: "center",
@@ -220,7 +227,7 @@ const styles = StyleSheet.create({
   buttonText: { color: "white", fontWeight: "bold", fontSize: 15 },
   backButton: {
     position: "absolute",
-    top: 50, // Distância do topo
+    top: 50,
     left: 20,
     backgroundColor: "white",
     padding: 10,

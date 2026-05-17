@@ -9,23 +9,18 @@ export default function InputTimePicker({
   styleLabel,
 }) {
   const handleTextChange = (text) => {
-    // Remove tudo que não é número
     let cleaned = text.replace(/\D/g, "");
 
     if (cleaned.length >= 1) {
-      // Valida o primeiro dígito da hora (máximo 2)
       if (parseInt(cleaned[0]) > 2) cleaned = "2";
     }
     if (cleaned.length >= 2) {
-      // Valida hora completa (máximo 23)
       if (parseInt(cleaned.slice(0, 2)) > 23) cleaned = "23" + cleaned.slice(2);
     }
     if (cleaned.length >= 3) {
-      // Valida primeiro dígito do minuto (máximo 5)
       if (parseInt(cleaned[2]) > 5) cleaned = cleaned.slice(0, 2) + "5";
     }
 
-    // Aplica a máscara HH:mm
     let formatted = cleaned;
     if (cleaned.length > 2) {
       formatted = `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;

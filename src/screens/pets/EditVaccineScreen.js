@@ -1,15 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   Switch,
   ScrollView,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { AlertModal } from "../../components/modals";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -57,6 +58,16 @@ export default function EditVaccineScreen({ navigation, route }) {
   const [observations, setObservations] = useState(vaccine?.observations || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [reminder, setReminder] = useState(!!vaccine?.reminder);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+      };
+    }, []),
+  );
 
   const vaccineSuggestions = [
     "Antirrabica",
@@ -96,7 +107,8 @@ export default function EditVaccineScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!name || !date || !time) {
-      Alert.alert("Atencao", "Preencha o nome, data e hora.");
+      setAlertMessage("Preencha o nome, data e hora.");
+      setAlertVisible(true);
       return;
     }
 
@@ -115,10 +127,14 @@ export default function EditVaccineScreen({ navigation, route }) {
 
     try {
       await ServiceVaccine.update(vaccine.id, updatedVaccine);
-      Alert.alert("Sucesso", "Vacina atualizada!");
-      navigation.goBack();
+      setAlertMessage("Vacina atualizada!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error) {
-      Alert.alert("Erro", "Ocorreu um erro ao atualizar a vacina.");
+      setAlertMessage("Ocorreu um erro ao atualizar a vacina.");
+      setAlertVisible(true);
       console.log(error);
     } finally {
       setLoading(false);
@@ -326,6 +342,11 @@ export default function EditVaccineScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

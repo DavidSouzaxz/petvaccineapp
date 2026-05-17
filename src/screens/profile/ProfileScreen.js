@@ -10,30 +10,54 @@ import {
   Image,
 } from "react-native";
 import ServiceUser from "../../services/ServiceUser";
-
+import ServicePet from "../../services/ServicePet";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
-
 export default function ProfileScreen({ navigation, onLogout }) {
   const [user, setUser] = useState("");
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [profileImage, setProfileImage] = useState("")
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [pets, setPets] = useState([]);
+  const [profileImage, setProfileImage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const petsEmDia = pets.filter(
+    (pet) => pet.vaccines.isApplied === true,
+  ).length;
+  const petsPendentes = pets.filter(
+    (pet) => pet.vaccines.isApplied === false,
+  ).length;
 
   const loadUserData = async () => {
-    const response = await ServiceUser.listById(await AsyncStorage.getItem("@userId"))
-    setUser(response.name)
-    setEmail(response.email)
-    setPhone(response.contact)
-    setProfileImage(response.photoUrl)
-    console.log(response)
-  }
+    const response = await ServiceUser.listById(
+      await AsyncStorage.getItem("@userId"),
+    );
+    setUser(response.name);
+    setEmail(response.email);
+    setPhone(response.contact);
+    setProfileImage(response.photoUrl);
+  };
+
+  const fetchPets = async () => {
+    const userId = await AsyncStorage.getItem("@userId");
+
+    try {
+      setLoading(true);
+      const data = await ServicePet.getPetsByUser(userId);
+      setPets(data || []);
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível carregar os pets.");
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadUserData();
-
+    fetchPets();
     const unsubscribe = navigation.addListener("focus", () => {
       loadUserData();
     });
@@ -45,7 +69,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
       <ScrollView showsVerticalScrollIndicator={false}>
-
         <View style={styles.header}>
           <Text style={styles.title}>Perfil</Text>
           <Text style={styles.subtitle}>
@@ -54,7 +77,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
           </Text>
 
           <View style={styles.profileRow}>
-
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
                 {profileImage ? (
@@ -66,7 +88,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
                   <Text style={styles.avatarText}>{user ? user[0] : "U"}</Text>
                 )}
               </View>
-
             </View>
 
             <View style={styles.info}>
@@ -84,32 +105,33 @@ export default function ProfileScreen({ navigation, onLogout }) {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Meus pets</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={styles.link}>Ver todos</Text>
-              <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
-            </View>
+            <TouchableOpacity onPress={() => navigation.navigate("PetsScreen")}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={styles.link}>Ver todos</Text>
+                <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
+              </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.statsRow}>
             <View style={styles.stat}>
-
-              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statNumber}>{pets.length}</Text>
               <Text style={styles.statLabel}>cadastrados</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.stat}>
-
-              <Text style={styles.statNumber}>2</Text>
+              <Text style={styles.statNumber}>
+                {petsEmDia === 0 ? pets.length : petsEmDia}
+              </Text>
               <Text style={styles.statLabel}>em dia</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.stat}>
-
-              <Text style={styles.statNumber}>1</Text>
+              <Text style={styles.statNumber}>{petsPendentes}</Text>
               <Text style={styles.statLabel}>pendentes</Text>
             </View>
           </View>
@@ -118,13 +140,14 @@ export default function ProfileScreen({ navigation, onLogout }) {
         <View style={styles.menuCard}>
           <Text style={styles.sectionTitle}>Configurações</Text>
 
-
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate("EditProfile")}>
-
+            onPress={() => navigation.navigate("EditProfile")}
+          >
             <View style={styles.menuLeft}>
-              <View style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}
+              >
                 <Ionicons name="person-outline" size={18} color="#ff7a00" />
               </View>
               <Text style={styles.menuText}>Editar perfil</Text>
@@ -134,8 +157,14 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLeft}>
-              <View style={[styles.iconCircle, { backgroundColor: "#7b61ff20" }]}>
-                <Ionicons name="notifications-outline" size={18} color="#7b61ff" />
+              <View
+                style={[styles.iconCircle, { backgroundColor: "#7b61ff20" }]}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={18}
+                  color="#7b61ff"
+                />
               </View>
               <Text style={styles.menuText}>Notificações</Text>
             </View>
@@ -144,8 +173,14 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLeft}>
-              <View style={[styles.iconCircle, { backgroundColor: "#2ecc7120" }]}>
-                <Ionicons name="shield-checkmark-outline" size={18} color="#2ecc71" />
+              <View
+                style={[styles.iconCircle, { backgroundColor: "#2ecc7120" }]}
+              >
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={18}
+                  color="#2ecc71"
+                />
               </View>
               <Text style={styles.menuText}>Privacidade</Text>
             </View>
@@ -154,18 +189,27 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLeft}>
-              <View style={[styles.iconCircle, { backgroundColor: "#3498db20" }]}>
-                <Ionicons name="information-circle-outline" size={18} color="#3498db" />
+              <View
+                style={[styles.iconCircle, { backgroundColor: "#3498db20" }]}
+              >
+                <Ionicons
+                  name="information-circle-outline"
+                  size={18}
+                  color="#3498db"
+                />
               </View>
               <Text style={styles.menuText}>Sobre</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#ccc" />
           </TouchableOpacity>
-
         </View>
 
         <View style={styles.help}>
-          <Ionicons name="chatbubble-ellipses-outline" size={22} color="#ff7a00" />
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={22}
+            color="#ff7a00"
+          />
           <View style={{ marginLeft: 10 }}>
             <Text style={styles.helpTitle}>Precisa de ajuda?</Text>
             <Text style={styles.helpText}>
@@ -178,14 +222,12 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <Ionicons name="exit-outline" size={20} color="#e74c3c" />
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: "#f7efe5",
@@ -238,6 +280,17 @@ const styles = StyleSheet.create({
     borderRadius: 45,
   },
 
+  camera: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   info: {
     marginLeft: 15,
@@ -287,7 +340,6 @@ const styles = StyleSheet.create({
   link: {
     color: "#ff7a00",
     marginHorizontal: 5,
-
   },
 
   statsRow: {
@@ -319,7 +371,6 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-
     fontWeight: "700",
     marginHorizontal: 14,
     marginTop: 14,
@@ -368,7 +419,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 16,
     elevation: 0.3,
-
   },
 
   helpTitle: {
@@ -396,5 +446,4 @@ const styles = StyleSheet.create({
     color: "#e74c3c",
     fontWeight: "600",
   },
-
 });

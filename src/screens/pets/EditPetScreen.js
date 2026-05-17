@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   TextInput,
   StyleSheet,
   Text,
-  Alert,
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -20,10 +21,12 @@ import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
 import ServiceSignature from "../../services/ServiceSignature";
 import InputDatePicker from "../../components/InputDatePicker";
+import { getPetImage } from "../../core/SpeciesImageMap";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const [name, setName] = useState(editingPet?.name ?? "");
   const [breed, setBreed] = useState(editingPet?.breed ?? "");
   const [species, setSpecies] = useState("Cachorro");
@@ -43,6 +46,10 @@ export default function EditPetScreen({ navigation, route }) {
   const [ownerEmail, setOwnerEmail] = useState("");
   const [image, setImage] = useState(null);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState(editingPet?.photoUrl);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -58,32 +65,26 @@ export default function EditPetScreen({ navigation, route }) {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Excluir Pet",
-      `Tem certeza que deseja excluir ${editingPet?.name}?`,
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await ServicePet.delete(editingPet.id);
-              Alert.alert("Sucesso", "Pet excluido com sucesso!");
-              navigation.navigate("PetsHome", { newPet: true });
-            } catch (error) {
-              Alert.alert("Erro", "Nao foi possivel excluir o pet.");
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ],
-    );
+    setConfirmMessage(`Tem certeza que quer deletar ${editingPet?.name}?`);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmVisible(false);
+    setLoading(true);
+    try {
+      await ServicePet.delete(editingPet.id);
+      setAlertMessage("Pet excluido com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.navigate("PetsHome", { newPet: true });
+      }, 1000);
+    } catch (error) {
+      setAlertMessage("Nao foi possivel excluir o pet.");
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadingUserData = async () => {
@@ -95,12 +96,14 @@ export default function EditPetScreen({ navigation, route }) {
       setOwnerPhone(response.contact);
       setOwnerEmail(response.email);
     } catch (error) {
-      Alert.alert("Error", "erro ao carregar os dados do usuario.");
+      setAlertMessage("erro ao carregar os dados do usuario.");
+      setAlertVisible(true);
       console.log(error);
     }
   };
 
   const loadingPet = async () => {
+    setLoading(true);
     const petId = editingPet.id;
 
     try {
@@ -114,29 +117,42 @@ export default function EditPetScreen({ navigation, route }) {
           : "",
       );
       setSpecies(response.specie);
-      // setColor(response.color);
+
       setMicrochip(response.microchip);
       setSex(response.sex);
       setNotes(response.observations);
       setCurrentPhotoUrl(response.photoUrl);
     } catch (error) {
-      Alert.alert("Error", "erro ao carregar os dados do pet.");
+      setAlertMessage("erro ao carregar os dados do pet.");
+      setAlertVisible(true);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadingUserData();
     loadingPet();
+    loadingUserData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+        setConfirmVisible(false);
+      };
+    }, []),
+  );
 
   const handlerSave = async () => {
     if (!name || !breed) {
-      Alert.alert("Erro", "Preencha todos os campos obrigatórios");
+      setAlertMessage("Preencha todos os campos obrigatórios");
+      setAlertVisible(true);
       return;
     }
 
-    setLoading(true);
+    setLoading2(true);
     try {
       let finalPhotoUrl = currentPhotoUrl;
 
@@ -151,7 +167,7 @@ export default function EditPetScreen({ navigation, route }) {
         name,
         breed,
         specie: species,
-        // color: color,
+
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
         birthDate: birthDateFormat,
@@ -162,12 +178,16 @@ export default function EditPetScreen({ navigation, route }) {
       };
 
       await ServicePet.update(editingPet.id, petAtualizado);
-      Alert.alert("Sucesso", "Pet atualizado com sucesso!");
-      navigation.navigate("PetsHome", { newPet: true });
+      setAlertMessage("Pet atualizado com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.navigate("PetsHome", { newPet: true });
+      }, 1000);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível atualizar o pet.");
+      setAlertMessage("Não foi possível atualizar o pet.");
+      setAlertVisible(true);
     } finally {
-      setLoading(false);
+      setLoading2(false);
     }
   };
 
@@ -185,152 +205,164 @@ export default function EditPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <ButtonRollback navigation={navigation} disabled={loading} />
-        <View style={styles.topBar}>
-          <Text style={styles.titlePage}>Editar pet</Text>
-          <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-            <Ionicons name="trash-outline" color="#E14C4C" size={20} />
-          </TouchableOpacity>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#F4A361" />
         </View>
-
-        <View style={styles.avatarSection}>
-          <View style={styles.avatarWrapper}>
-            <Image
-              source={
-                image
-                  ? { uri: image }
-                  : currentPhotoUrl
-                    ? { uri: currentPhotoUrl }
-                    : require("../../../assets/dogProfile.png")
-              }
-              style={styles.avatarImage}
-            />
-            <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
-              <Ionicons name="camera" size={16} color="#FFF" />
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <ButtonRollback navigation={navigation} disabled={loading} />
+          <View style={styles.topBar}>
+            <Text style={styles.titlePage}>Editar pet</Text>
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash-outline" color="#E14C4C" size={20} />
             </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Nome do pet</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder="Sofia"
-            placeholderTextColor="#B9B1A9"
-          />
-
-          <Text style={styles.fieldLabel}>Especie</Text>
-          <TouchableOpacity
-            style={styles.selectInput}
-            onPress={() => setIsSpeciesOpen((current) => !current)}
-          >
-            <View style={styles.selectLeft}>
-              <FontAwesome6
-                name={selectedSpecies.icon}
-                size={16}
-                color="#E98B3A"
+          <View style={styles.avatarSection}>
+            <View style={styles.avatarWrapper}>
+              <Image
+                source={
+                  image ? { uri: image } : getPetImage(currentPhotoUrl, species)
+                }
+                style={styles.avatarImage}
               />
-              <Text style={styles.selectText}>{selectedSpecies.label}</Text>
+              <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
+                <Ionicons name="camera" size={16} color="#FFF" />
+              </TouchableOpacity>
             </View>
-            <Ionicons
-              name={isSpeciesOpen ? "chevron-up" : "chevron-down"}
-              size={16}
-              color="#B9B1A9"
-            />
-          </TouchableOpacity>
-          {isSpeciesOpen && (
-            <View style={styles.selectMenu}>
-              {speciesOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.label}
-                  style={styles.selectMenuItem}
-                  onPress={() => {
-                    setSpecies(option.label);
-                    setIsSpeciesOpen(false);
-                  }}
-                >
-                  <FontAwesome6 name={option.icon} size={16} color="#E98B3A" />
-                  <Text style={styles.selectMenuText}>{option.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          <Text style={styles.fieldLabel}>Raca</Text>
-          <TextInput
-            style={styles.input}
-            value={breed}
-            onChangeText={setBreed}
-            placeholder="Gato SRD"
-            placeholderTextColor="#B9B1A9"
-          />
-
-          <Text style={styles.fieldLabel}>Sexo</Text>
-          <View style={styles.segmentedControl}>
-            <TouchableOpacity
-              style={[
-                styles.segmentItem,
-                sex === "Macho" ? styles.segmentActive : styles.segmentInactive,
-              ]}
-              onPress={() => setSex("Macho")}
-            >
-              <Text
-                style={
-                  sex === "Macho"
-                    ? styles.segmentTextActive
-                    : styles.segmentText
-                }
-              >
-                Macho
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.segmentItem,
-                sex === "Femea" ? styles.segmentActive : styles.segmentInactive,
-              ]}
-              onPress={() => setSex("Femea")}
-            >
-              <Text
-                style={
-                  sex === "Femea"
-                    ? styles.segmentTextActive
-                    : styles.segmentText
-                }
-              >
-                Femea
-              </Text>
-            </TouchableOpacity>
           </View>
 
-          <InputDatePicker
-            label={"Data de Nascimento"}
-            value={birthDate}
-            onChange={(val) => setBirthDate(val)}
-            styleLabel={{
-              fontSize: 12,
-              color: "#9A948E",
-              marginBottom: 6,
-              fontWeight: "600",
-            }}
-          />
+          <View style={styles.card}>
+            <Text style={styles.fieldLabel}>Nome do pet</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Sofia"
+              placeholderTextColor="#B9B1A9"
+            />
 
-          <Text style={styles.fieldLabel}>Peso (kg)</Text>
-          <TextInput
-            style={styles.input}
-            value={weight}
-            onChangeText={setWeight}
-            placeholder="4,2"
-            placeholderTextColor="#B9B1A9"
-          />
+            <Text style={styles.fieldLabel}>Especie</Text>
+            <TouchableOpacity
+              style={styles.selectInput}
+              onPress={() => setIsSpeciesOpen((current) => !current)}
+            >
+              <View style={styles.selectLeft}>
+                <FontAwesome6
+                  name={selectedSpecies.icon}
+                  size={16}
+                  color="#E98B3A"
+                />
+                <Text style={styles.selectText}>{selectedSpecies.label}</Text>
+              </View>
+              <Ionicons
+                name={isSpeciesOpen ? "chevron-up" : "chevron-down"}
+                size={16}
+                color="#B9B1A9"
+              />
+            </TouchableOpacity>
+            {isSpeciesOpen && (
+              <View style={styles.selectMenu}>
+                {speciesOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.label}
+                    style={styles.selectMenuItem}
+                    onPress={() => {
+                      setSpecies(option.label);
+                      setIsSpeciesOpen(false);
+                    }}
+                  >
+                    <FontAwesome6
+                      name={option.icon}
+                      size={16}
+                      color="#E98B3A"
+                    />
+                    <Text style={styles.selectMenuText}>{option.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
-          {/* <Text style={styles.fieldLabel}>Cor</Text>
+            <Text style={styles.fieldLabel}>Raca</Text>
+            <TextInput
+              style={styles.input}
+              value={breed}
+              onChangeText={setBreed}
+              placeholder="Gato SRD"
+              placeholderTextColor="#B9B1A9"
+            />
+
+            <Text style={styles.fieldLabel}>Sexo</Text>
+            <View style={styles.segmentedControl}>
+              <TouchableOpacity
+                style={[
+                  styles.segmentItem,
+                  sex === "Macho"
+                    ? styles.segmentActive
+                    : styles.segmentInactive,
+                ]}
+                onPress={() => setSex("Macho")}
+              >
+                <Text
+                  style={
+                    sex === "Macho"
+                      ? styles.segmentTextActive
+                      : styles.segmentText
+                  }
+                >
+                  Macho
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.segmentItem,
+                  sex === "Femea"
+                    ? styles.segmentActive
+                    : styles.segmentInactive,
+                ]}
+                onPress={() => setSex("Femea")}
+              >
+                <Text
+                  style={
+                    sex === "Femea"
+                      ? styles.segmentTextActive
+                      : styles.segmentText
+                  }
+                >
+                  Femea
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <InputDatePicker
+              label={"Data de Nascimento"}
+              value={birthDate}
+              onChange={(val) => setBirthDate(val)}
+              styleLabel={{
+                fontSize: 12,
+                color: "#9A948E",
+                marginBottom: 6,
+                fontWeight: "600",
+              }}
+            />
+
+            <Text style={styles.fieldLabel}>Peso (kg)</Text>
+            <TextInput
+              style={styles.input}
+              value={weight}
+              onChangeText={setWeight}
+              placeholder="4,2"
+              placeholderTextColor="#B9B1A9"
+            />
+
+            {/* <Text style={styles.fieldLabel}>Cor</Text>
           <TextInput
             style={styles.input}
             value={color}
@@ -339,68 +371,81 @@ export default function EditPetScreen({ navigation, route }) {
             placeholderTextColor="#B9B1A9"
           /> */}
 
-          <Text style={styles.fieldLabel}>Microchip (opcional)</Text>
-          <TextInput
-            style={styles.input}
-            value={microchip}
-            onChangeText={setMicrochip}
-            placeholder="123456789012345"
-            placeholderTextColor="#B9B1A9"
-          />
+            <Text style={styles.fieldLabel}>Microchip (opcional)</Text>
+            <TextInput
+              style={styles.input}
+              value={microchip}
+              onChangeText={setMicrochip}
+              placeholder="123456789012345"
+              placeholderTextColor="#B9B1A9"
+            />
 
-          <Text style={styles.fieldLabel}>Observacoes (opcional)</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Observacoes sobre o pet"
-            placeholderTextColor="#B9B1A9"
-            multiline
-          />
-        </View>
+            <Text style={styles.fieldLabel}>Observacoes (opcional)</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Observacoes sobre o pet"
+              placeholderTextColor="#B9B1A9"
+              multiline
+            />
+          </View>
 
-        <Text style={styles.sectionTitle}>Contatos do responsavel</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Nome</Text>
-          <TextInput
-            style={styles.input}
-            value={ownerName}
-            onChangeText={setOwnerName}
-            placeholder="Ana Lucia"
-            placeholderTextColor="#B9B1A9"
-          />
+          <Text style={styles.sectionTitle}>Contatos do responsavel</Text>
+          <View style={styles.card}>
+            <Text style={styles.fieldLabel}>Nome</Text>
+            <TextInput
+              style={styles.input}
+              value={ownerName}
+              onChangeText={setOwnerName}
+              placeholder="Ana Lucia"
+              placeholderTextColor="#B9B1A9"
+            />
 
-          <Text style={styles.fieldLabel}>Telefone</Text>
-          <TextInput
-            style={styles.input}
-            value={ownerPhone}
-            onChangeText={setOwnerPhone}
-            placeholder="(21) 99999-9999"
-            placeholderTextColor="#B9B1A9"
-          />
+            <Text style={styles.fieldLabel}>Telefone</Text>
+            <TextInput
+              style={styles.input}
+              value={ownerPhone}
+              onChangeText={setOwnerPhone}
+              placeholder="(21) 99999-9999"
+              placeholderTextColor="#B9B1A9"
+            />
 
-          <Text style={styles.fieldLabel}>E-mail</Text>
-          <TextInput
-            style={styles.input}
-            value={ownerEmail}
-            onChangeText={setOwnerEmail}
-            placeholder="analucia@email.com"
-            placeholderTextColor="#B9B1A9"
-          />
-        </View>
-      </ScrollView>
-
-      <TouchableOpacity
-        style={styles.saveButton}
-        onPress={handlerSave}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.saveButtonText}>Salvar alteracoes</Text>
-        )}
-      </TouchableOpacity>
+            <Text style={styles.fieldLabel}>E-mail</Text>
+            <TextInput
+              style={styles.input}
+              value={ownerEmail}
+              onChangeText={setOwnerEmail}
+              placeholder="analucia@email.com"
+              placeholderTextColor="#B9B1A9"
+            />
+          </View>
+        </ScrollView>
+      )}
+      {!loading && (
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handlerSave}
+          disabled={loading2}
+        >
+          {loading2 ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar </Text>
+          )}
+        </TouchableOpacity>
+      )}
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
+      <ConfirmationModal
+        visible={confirmVisible}
+        message={confirmMessage}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+      />
     </View>
   );
 }
@@ -416,6 +461,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: "relative",
     minHeight: 48,
+    height: 100,
   },
   titlePage: {
     color: "#2B2B2B",
@@ -430,7 +476,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     position: "absolute",
     right: 0,
-    top: 55,
+    top: 60,
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -590,4 +636,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   saveButtonText: { color: "#FFF", fontSize: 15, fontWeight: "700" },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServicePet from "../../services/ServicePet";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
+import { getPetImage } from "../../core/SpeciesImageMap";
 
 const { width } = Dimensions.get("window");
 
@@ -192,11 +193,7 @@ export default function HomeScreen({ navigation }) {
                   >
                     <View style={styles.petProfileWrapper}>
                       <Image
-                        source={
-                          pet.photoUrl
-                            ? { uri: pet.photoUrl }
-                            : require("../../../assets/dogProfile.png")
-                        }
+                        source={getPetImage(pet.photoUrl, pet.specie)}
                         style={styles.petProfileImage}
                       />
                     </View>
@@ -350,9 +347,9 @@ export default function HomeScreen({ navigation }) {
         </ScrollView>
       )}
 
-      <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
+      {/* <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
         <Ionicons name="add" size={26} color="#fff" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

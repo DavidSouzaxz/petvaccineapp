@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   TextInput,
   StyleSheet,
   Text,
-  Alert,
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
+import { AlertModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
 import ServiceSignature from "../../services/ServiceSignature";
 import FormatDateDisplay, {
@@ -41,6 +42,8 @@ export default function AddPetScreen({ navigation, route }) {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const speciesImages = {
     Cachorro: require("../../../assets/dogProfile.png"),
@@ -85,7 +88,8 @@ export default function AddPetScreen({ navigation, route }) {
       setOwnerPhone(response.contact);
       setOwnerEmail(response.email);
     } catch (error) {
-      Alert.alert("Error", "erro ao carregar os dados do usuario.");
+      setAlertMessage("erro ao carregar os dados do usuario.");
+      setAlertVisible(true);
       console.log(error);
     }
   };
@@ -94,10 +98,19 @@ export default function AddPetScreen({ navigation, route }) {
     loadUserData();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setAlertVisible(false);
+      };
+    }, []),
+  );
+
   const handlerSave = async () => {
     setLoading(true);
     if (!name || !breed) {
-      Alert.alert("Preencha todos os campos");
+      setAlertMessage("Preencha todos os campos");
+      setAlertVisible(true);
       setLoading(false);
       return;
     }
@@ -116,7 +129,7 @@ export default function AddPetScreen({ navigation, route }) {
         name: name,
         specie: species,
         breed: breed,
-        // color: color,
+
         birthDate: birthDateFormat,
         microchip: microchip || null,
         weight: weight ? Number(weight.replace(",", ".")) : null,
@@ -128,15 +141,19 @@ export default function AddPetScreen({ navigation, route }) {
 
       await ServicePet.register(newPet);
 
-      Alert.alert("Sucesso", "Pet cadastrado com sucesso!");
-      navigation.navigate({
-        name: "PetsHome",
-        params: { newPet: true },
-        merge: true,
-      });
+      setAlertMessage("Pet cadastrado com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.navigate({
+          name: "PetsHome",
+          params: { newPet: true },
+          merge: true,
+        });
+      }, 1000);
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", "Não foi possível registrar o pet.");
+      setAlertMessage("Não foi possível registrar o pet.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -367,9 +384,14 @@ export default function AddPetScreen({ navigation, route }) {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Salvar alteracoes</Text>
+          <Text style={styles.saveButtonText}>Salvar</Text>
         )}
       </TouchableOpacity>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }
