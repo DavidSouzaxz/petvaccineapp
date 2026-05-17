@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServicePet from "../../services/ServicePet";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
+import { getPetImage } from "../../core/SpeciesImageMap";
 
 const { width } = Dimensions.get("window");
 
@@ -192,11 +193,7 @@ export default function HomeScreen({ navigation }) {
                   >
                     <View style={styles.petProfileWrapper}>
                       <Image
-                        source={
-                          pet.photoUrl
-                            ? { uri: pet.photoUrl }
-                            : require("../../../assets/dogProfile.png")
-                        }
+                        source={getPetImage(pet.photoUrl, pet.specie)}
                         style={styles.petProfileImage}
                       />
                     </View>
@@ -308,25 +305,23 @@ export default function HomeScreen({ navigation }) {
 
           <View style={styles.sectionHeader}>
             <TouchableOpacity
-            style={styles.calendarCard}
-            onPress={() => navigation.navigate("Calendario")}
-          >
-            <View style={styles.calendarIcon}>
-              <Ionicons name="calendar" size={20} color="#F4A361" />
-            </View>
+              style={styles.calendarCard}
+              onPress={() => navigation.navigate("Calendario")}
+            >
+              <View style={styles.calendarIcon}>
+                <Ionicons name="calendar" size={20} color="#F4A361" />
+              </View>
 
-            <View style={{ flex: 1 }}>
-              <Text style={styles.calendarTitle}>Calendário</Text>
-              <Text style={styles.calendarSubtitle}>
-                Veja todas as vacinas do seu pet
-              </Text>
-            </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.calendarTitle}>Calendário</Text>
+                <Text style={styles.calendarSubtitle}>
+                  Veja todas as vacinas do seu pet
+                </Text>
+              </View>
 
-            
               <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
             </TouchableOpacity>
-            </View>
-          
+          </View>
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
@@ -609,43 +604,42 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   calendarCard: {
+    marginBottom: 10,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
 
-  marginBottom: 10,
-  backgroundColor: "#FFF",
-  borderRadius: 16,
-  padding: 14,
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 12,
+    borderWidth: 1,
+    borderColor: "#F4E7D7",
 
-  borderWidth: 1,
-  borderColor: "#F4E7D7",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.05,
-  shadowRadius: 4,
-  elevation: 2,
-},
+  calendarIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF3E6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-calendarIcon: {
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: "#FFF3E6",
-  alignItems: "center",
-  justifyContent: "center",
-},
+  calendarTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2B2B2B",
+  },
 
-calendarTitle: {
-  fontSize: 14,
-  fontWeight: "700",
-  color: "#2B2B2B",
-},
-
-calendarSubtitle: {
-  fontSize: 12,
-  color: "#9A9A9A",
-  marginTop: 2,
-},
+  calendarSubtitle: {
+    fontSize: 12,
+    color: "#9A9A9A",
+    marginTop: 2,
+  },
 });
