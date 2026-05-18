@@ -405,9 +405,9 @@ export default function HomeScreen({ navigation }) {
         </ScrollView>
       )}
 
-      {/* <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
+      <TouchableOpacity style={styles.fab} onPress={goToAddPet}>
         <Ionicons name="add" size={26} color="#fff" />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   );
 }
