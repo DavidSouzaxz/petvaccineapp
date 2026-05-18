@@ -20,62 +20,12 @@ import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
 import { NotificationManager } from "../../components/NotificationManager";
 import NotificationToggleButton from "../../components/NotificationToggleButton";
+import { PET_MESSAGES, PET_STATUS, ASSETS } from "../../constants";
 
 const { width } = Dimensions.get("window");
 
 const PET_CARD_WIDTH = width - 40;
 const TIP_CARD_WIDTH = (width - 60) / 3;
-
-const PET_MESSAGES = [
-  {
-    id: "1",
-    title: "Sabia que um ronrono pode ajudar",
-    text: "a reduzir o estresse?",
-    icon: "cat",
-  },
-  {
-    id: "2",
-    title: "Hidratacao e",
-    text: "essencial para a saude do seu pet.",
-    icon: "tint",
-  },
-  {
-    id: "3",
-    title: "Brincadeiras diarias",
-    text: "fortalecem o vinculo entre voces.",
-    icon: "heart",
-  },
-  {
-    id: "4",
-    title: "Um passeio cairia bem",
-    text: "leve seu amigo para sair.",
-    icon: "heart",
-  },
-];
-
-const PET_STATUS = [
-  {
-    label: "Em dia",
-    color: "#2E7D32",
-    backgroundColor: "#E9F7EE",
-    icon: "checkmark-circle",
-  },
-  {
-    label: "Atenção",
-    color: "#C88719",
-    backgroundColor: "#FFF4E0",
-    icon: "alert-circle",
-  },
-  {
-    label: "Atrasado",
-    color: "#C62828",
-    backgroundColor: "#FCE9E9",
-    icon: "close-circle",
-  },
-];
-
-const dogProfile = require("../../../assets/dogProfile.png");
-const reminderIcon = require("../../../assets/clinic.png");
 
 export default function HomeScreen({ navigation }) {
   const [pets, setPets] = useState([]);
@@ -229,10 +179,7 @@ export default function HomeScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.containerImage}>
-            <Image
-              source={require("../../../assets/petcard.png")}
-              style={styles.cardImage}
-            />
+            <Image source={ASSETS.petCard} style={styles.cardImage} />
           </View>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Meus pets</Text>
@@ -354,7 +301,10 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.reminderTitle}>Lembrete</Text>
           <View style={styles.reminderCard}>
             <View style={styles.reminderIconWrapper}>
-              <Image source={reminderIcon} style={styles.reminderIcon} />
+              <Image
+                source={ASSETS.clinicReminder}
+                style={styles.reminderIcon}
+              />
             </View>
             <Text style={styles.reminderText}>
               {vaccines.length > 0

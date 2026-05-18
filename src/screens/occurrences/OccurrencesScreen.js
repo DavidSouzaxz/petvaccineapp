@@ -17,33 +17,10 @@ import ServiceOccurrences from "../../services/ServiceOccurrences";
 import ServicePet from "../../services/ServicePet";
 import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
-
-const OCCURRENCE_FILTERS = [
-  { id: "all", label: "Todas", icon: "th-large" },
-  { id: "VOMITING", label: "Vômito", icon: "water" },
-  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "apple" },
-  { id: "HECTIC", label: "Muito Agitado", icon: "bolt" },
-  { id: "HAIR_FALLING", label: "Pelo Caindo", icon: "leaf" },
-  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas", icon: "poop" },
-  {
-    id: "EXCESSIVE_LICKING",
-    label: "Lambedura Excessiva",
-    icon: "paw",
-  },
-];
-
-const OCCURRENCE_TYPE_COLORS = {
-  HAIR_FALLING: { accent: "#7922ac", badge: "#f5e3ff", icon: "leaf" },
-  VOMITING: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "water" },
-  REDUCE_APPETITE: {
-    accent: "#3A7BD5",
-    badge: "#E7F0FB",
-    icon: "apple",
-  },
-  HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "bolt" },
-  LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "poop" },
-  EXCESSIVE_LICKING: { accent: "#D0A44B", badge: "#FFF6DD", icon: "paw" },
-};
+import {
+  OCCURRENCE_FILTERS,
+  OCCURRENCE_TYPE_COLORS,
+} from "../../constants/occurrences";
 
 export default function OccurrencesScreen({ navigation }) {
   const [occurrences, setOccurrences] = useState([]);

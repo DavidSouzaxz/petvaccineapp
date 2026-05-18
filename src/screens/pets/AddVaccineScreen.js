@@ -41,19 +41,6 @@ export default function AddVaccineScreen({ navigation, route }) {
     }, []),
   );
 
-  const vaccineSuggestions = [
-    "Antirrábica",
-    "V10",
-    "V8",
-    "Gripe Canina",
-    "Giárdia",
-    "Leishmaniose",
-    "V4 Felina",
-    "Leucemia Felina",
-    "Raiva",
-    "Outra...",
-  ];
-
   const handleSuggestion = (suggestion) => {
     setName(suggestion === "Outra..." ? "" : suggestion);
     setShowSuggestions(false);
@@ -198,7 +185,7 @@ export default function AddVaccineScreen({ navigation, route }) {
           </View>
           {showSuggestions && (
             <View style={styles.suggestionBox}>
-              {vaccineSuggestions.map((suggestion) => (
+              {VACCINE_SUGGESTIONS.map((suggestion) => (
                 <TouchableOpacity
                   key={suggestion}
                   style={styles.suggestionItem}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,58 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function PrivacyScreen({ navigation }) {
   const [profilePrivate, setProfilePrivate] = useState(false);
-  const [shareLocation, setShareLocation] = useState(true);
+  const [shareLocation, setShareLocation] = useState(false);
   const [shareData, setShareData] = useState(false);
   const [analytics, setAnalytics] = useState(true);
+  const [locationPermissionStatus, setLocationPermissionStatus] =
+    useState(null);
+
+  useEffect(() => {
+    checkLocationPermission();
+  }, []);
+
+  const checkLocationPermission = async () => {
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setLocationPermissionStatus(status);
+
+      if (status !== "granted") {
+        setShareLocation(false);
+      } else {
+        const savedPref = await AsyncStorage.getItem("@shareLocation");
+        if (savedPref !== null) {
+          setShareLocation(savedPref === "true");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao verificar permissão de localização:", error);
+    }
+  };
+
+  const handleShareLocationChange = async (value) => {
+    if (value) {
+      if (locationPermissionStatus !== "granted") {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        setLocationPermissionStatus(status);
+
+        if (status === "granted") {
+          setShareLocation(true);
+          await AsyncStorage.setItem("@shareLocation", "true");
+        }
+      } else {
+        setShareLocation(true);
+        await AsyncStorage.setItem("@shareLocation", "true");
+      }
+    } else {
+      setShareLocation(false);
+      await AsyncStorage.setItem("@shareLocation", "false");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -63,7 +109,7 @@ export default function PrivacyScreen({ navigation }) {
             </View>
             <Switch
               value={shareLocation}
-              onValueChange={setShareLocation}
+              onValueChange={handleShareLocationChange}
               trackColor={{ false: "#ccc", true: "#ff7a0050" }}
               thumbColor={shareLocation ? "#ff7a00" : "#f4f3f4"}
             />
@@ -71,7 +117,7 @@ export default function PrivacyScreen({ navigation }) {
 
           <View style={styles.divider} />
 
-          <View style={styles.switchRow}>
+          {/* <View style={styles.switchRow}>
             <View style={styles.switchContent}>
               <Text style={styles.switchLabel}>
                 Compartilhar dados de saúde
@@ -86,7 +132,7 @@ export default function PrivacyScreen({ navigation }) {
               trackColor={{ false: "#ccc", true: "#ff7a0050" }}
               thumbColor={shareData ? "#ff7a00" : "#f4f3f4"}
             />
-          </View>
+          </View> */}
 
           <View style={styles.divider} />
 

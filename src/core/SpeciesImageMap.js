@@ -1,19 +1,15 @@
-export const SPECIES_IMAGES = {
-  Cachorro: require("../../assets/dogProfile.png"),
-  Gato: require("../../assets/cat.png"),
-  Coelho: require("../../assets/coelho.png"),
-  Passaro: require("../../assets/bird.png"),
-  Hamster: require("../../assets/hamster.png"),
-  Peixe: require("../../assets/fish.png"),
-};
+import {
+  SPECIES_IMAGES,
+  getSpeciesImage as getSpeciesImageFromConstants,
+  getPetImage as getPetImageFromConstants,
+  AVAILABLE_SPECIES,
+} from "../constants/species";
 
-export const getSpeciesImage = (species) => {
-  return SPECIES_IMAGES[species] || SPECIES_IMAGES.Cachorro;
-};
+// Re-export para manter compatibilidade com imports existentes
+export { AVAILABLE_SPECIES };
 
-export const getPetImage = (photoUrl, species = "Cachorro") => {
-  if (photoUrl) {
-    return { uri: photoUrl };
-  }
-  return getSpeciesImage(species);
-};
+export const SPECIES_IMAGES_LOCAL = SPECIES_IMAGES;
+
+export const getSpeciesImage = getSpeciesImageFromConstants;
+
+export const getPetImage = getPetImageFromConstants;

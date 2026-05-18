@@ -22,6 +22,7 @@ import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
 import ServiceSignature from "../../services/ServiceSignature";
 import InputDatePicker from "../../components/InputDatePicker";
 import { getPetImage } from "../../core/SpeciesImageMap";
+import { SPECIES_OPTIONS } from "../../constants/species";
 
 export default function EditPetScreen({ navigation, route }) {
   const editingPet = route.params?.pet;
@@ -191,17 +192,9 @@ export default function EditPetScreen({ navigation, route }) {
     }
   };
 
-  const speciesOptions = [
-    { label: "Cachorro", icon: "dog" },
-    { label: "Gato", icon: "cat" },
-    { label: "Coelho", icon: "paw" },
-    { label: "Passaro", icon: "dove" },
-    { label: "Hamster", icon: "paw" },
-    { label: "Peixe", icon: "fish" },
-  ];
-
   const selectedSpecies =
-    speciesOptions.find((item) => item.label === species) || speciesOptions[0];
+    SPECIES_OPTIONS.find((item) => item.label === species) ||
+    SPECIES_OPTIONS[0];
 
   return (
     <View style={styles.container}>
@@ -270,7 +263,7 @@ export default function EditPetScreen({ navigation, route }) {
             </TouchableOpacity>
             {isSpeciesOpen && (
               <View style={styles.selectMenu}>
-                {speciesOptions.map((option) => (
+                {SPECIES_OPTIONS.map((option) => (
                   <TouchableOpacity
                     key={option.label}
                     style={styles.selectMenuItem}

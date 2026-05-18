@@ -81,19 +81,6 @@ export default function EditVaccineScreen({ navigation, route }) {
     }, []),
   );
 
-  const vaccineSuggestions = [
-    "Antirrabica",
-    "V10",
-    "V8",
-    "Gripe Canina",
-    "Giardia",
-    "Leishmaniose",
-    "V4 Felina",
-    "Leucemia Felina",
-    "Raiva",
-    "Outra...",
-  ];
-
   const handleDateChange = (text) => {
     const cleaned = text.replace(/\D/g, "");
     let formatted = cleaned;
@@ -260,7 +247,7 @@ export default function EditVaccineScreen({ navigation, route }) {
           </View>
           {showSuggestions && (
             <View style={styles.suggestionBox}>
-              {vaccineSuggestions.map((suggestion) => (
+              {VACCINE_SUGGESTIONS.map((suggestion) => (
                 <TouchableOpacity
                   key={suggestion}
                   style={styles.suggestionItem}

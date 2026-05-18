@@ -20,15 +20,7 @@ import { validateDate, validateTime } from "../../core/validators";
 import InputDatePicker from "../../components/InputDatePicker";
 import InputTimePicker from "../../components/InputTimePicker";
 import { FormatDateForRequisition } from "../../core/FormatDateDisplay";
-
-const OCCURRENCE_TYPES = [
-  { id: "VOMITING", label: "Vômito" },
-  { id: "REDUCE_APPETITE", label: "Apetite Reduzido" },
-  { id: "HECTIC", label: "Muito Agitado" },
-  { id: "HAIR_FALLING", label: "Pelo Caindo" },
-  { id: "LOOSE_STOOLS", label: "Fezes Amolecidas" },
-  { id: "EXCESSIVE_LICKING", label: "Lambedura Excessiva" },
-];
+import { OCCURRENCE_TYPES } from "../../constants/occurrences";
 
 export default function EditOccurrenceScreen({ navigation, route }) {
   const { occurrenceId, petName } = route.params;

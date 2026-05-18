@@ -23,6 +23,7 @@ import ServiceUser from "../../services/ServiceUser";
 import ButtonRollback from "../../components/ButtonRollback";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import InputDatePicker from "../../components/InputDatePicker";
+import { SPECIES_OPTIONS, SPECIES_IMAGES } from "../../constants/species";
 
 export default function AddPetScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -44,15 +45,6 @@ export default function AddPetScreen({ navigation, route }) {
   const [image, setImage] = useState(null);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-
-  const speciesImages = {
-    Cachorro: require("../../../assets/dogProfile.png"),
-    Gato: require("../../../assets/cat.png"),
-    Coelho: require("../../../assets/coelho.png"),
-    Passaro: require("../../../assets/bird.png"),
-    Hamster: require("../../../assets/hamster.png"),
-    Peixe: require("../../../assets/fish.png"),
-  };
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -159,17 +151,9 @@ export default function AddPetScreen({ navigation, route }) {
     }
   };
 
-  const speciesOptions = [
-    { label: "Cachorro", icon: "dog" },
-    { label: "Gato", icon: "cat" },
-    { label: "Coelho", icon: "paw" },
-    { label: "Passaro", icon: "dove" },
-    { label: "Hamster", icon: "paw" },
-    { label: "Peixe", icon: "fish" },
-  ];
-
   const selectedSpecies =
-    speciesOptions.find((item) => item.label === species) || speciesOptions[0];
+    SPECIES_OPTIONS.find((item) => item.label === species) ||
+    SPECIES_OPTIONS[0];
 
   return (
     <View style={styles.container}>
@@ -186,7 +170,7 @@ export default function AddPetScreen({ navigation, route }) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
-              source={image ? { uri: image } : speciesImages[species]}
+              source={image ? { uri: image } : SPECIES_IMAGES[species]}
               style={styles.avatarImage}
             />
             <TouchableOpacity
@@ -230,7 +214,7 @@ export default function AddPetScreen({ navigation, route }) {
           </TouchableOpacity>
           {isSpeciesOpen && (
             <View style={styles.selectMenu}>
-              {speciesOptions.map((option) => (
+              {SPECIES_OPTIONS.map((option) => (
                 <TouchableOpacity
                   key={option.label}
                   style={styles.selectMenuItem}

@@ -13,27 +13,15 @@ import { useFocusEffect } from "@react-navigation/native";
 import ServiceOccurrences from "../../services/ServiceOccurrences";
 import ButtonRollback from "../../components/ButtonRollback";
 import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
-
-const OCCURRENCE_TYPE_COLORS = {
-  HAIR_FALLING: { accent: "#7922ac", badge: "#f5e3ff", icon: "leaf" },
-  VOMITING: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "temperature-high" },
-  REDUCE_APPETITE: {
-    accent: "#3A7BD5",
-    badge: "#E7F0FB",
-    icon: "apple",
-  },
-  HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "bolt" },
-  LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "tint" },
-  EXCESSIVE_LICKING: { accent: "#D0A44B", badge: "#FFF6DD", icon: "paw" },
-};
-
-const FEELING_EMOJIS = {
-  NORMAL: { emoji: "😊", label: "Normal", color: "#44c564" },
-  APATHETIC: { emoji: "😐", label: "Apático", color: "#999999" },
-  ANXIOUS: { emoji: "😟", label: "Inquieto", color: "#9A9A9A" },
-  ANGRY: { emoji: "😠", label: "Enjôado", color: "#F4A361" },
-  VERY_BAD: { emoji: "😢", label: "Muito mal", color: "#999999" },
-};
+import {
+  OCCURRENCE_TYPE_COLORS,
+  getOccurrenceLabel,
+} from "../../constants/occurrences";
+import { FEELING_EMOJIS } from "../../constants/feelings";
+import {
+  getOccurrenceDescription,
+  getSeverityDots,
+} from "../../constants/vaccines";
 
 function OccurrenceDetailsScreen({ route, navigation }) {
   const { occurrenceId, petName } = route.params;
@@ -71,47 +59,6 @@ function OccurrenceDetailsScreen({ route, navigation }) {
       fetchOccurrenceDetails();
     }, [occurrenceId]),
   );
-
-  const filteresType = (type) => {
-    const typeMap = {
-      VOMITING: "Vômito",
-      REDUCE_APPETITE: "Apetite Reduzido",
-      HECTIC: "Muito Agitado",
-      LOOSE_STOOLS: "Fezes Amolecidas",
-      HAIR_FALLING: "Pelo Caindo",
-      EXCESSIVE_LICKING: "Lambedura Excessiva",
-    };
-    return typeMap[type] || type;
-  };
-
-  const getSeverityDots = (severity) => {
-    const severityMap = {
-      LIGHT: 1,
-      MODERATE: 2,
-      SEVERE: 3,
-    };
-    return severityMap[severity] || 1;
-  };
-
-  const getCauseDescription = (type) => {
-    const descriptions = {
-      VOMITING:
-        "Vômitos podem ocorrer por comer rápido, mudança de alimentação, intolerância alimentar, bolas de pelo ou outros fatores. Se persistir, consulte o veterinário.",
-      REDUCE_APPETITE:
-        "A redução de apetite pode ser causada por estresse, mudanças na alimentação ou problemas de saúde. Observe por mais alguns dias e consulte um veterinário se persistir.",
-      HECTIC:
-        "A agitação excessiva pode indicar falta de exercício, estresse ou desconforto. Tente aumentar as atividades físicas e observar o comportamento.",
-      LOOSE_STOOLS:
-        "Fezes amolecidas podem ser causadas por mudança na alimentação, parasitas ou problemas digestivos. Mantenha o pet hidratado e observe.",
-      HAIR_FALLING:
-        "A queda de pelos pode ocorrer por stress, alergias, parasitas ou mudanças sazonais. Consulte o veterinário se a queda for excessiva.",
-      EXCESSIVE_LICKING:
-        "O lambimento excessivo pode indicar coceira, alergias ou comportamento compulsivo. Observe a área e consulte um veterinário se necessário.",
-    };
-    return (
-      descriptions[type] || "Consulte um veterinário para mais informações."
-    );
-  };
 
   if (loading) {
     return (
@@ -185,7 +132,7 @@ function OccurrenceDetailsScreen({ route, navigation }) {
           </View>
           <View style={styles.typeBadge(typeColors.badge)}>
             <Text style={styles.typeBadgeText(typeColors.accent)}>
-              {filteresType(occurrence.type)}
+              {getOccurrenceLabel(occurrence.type)}
             </Text>
           </View>
         </View>
@@ -213,7 +160,7 @@ function OccurrenceDetailsScreen({ route, navigation }) {
             </View>
             <View style={styles.categoryBadge(typeColors.badge)}>
               <Text style={styles.categoryBadgeText(typeColors.accent)}>
-                {filteresType(occurrence.type)}
+                {getOccurrenceLabel(occurrence.type)}
               </Text>
             </View>
           </View>
@@ -306,7 +253,7 @@ function OccurrenceDetailsScreen({ route, navigation }) {
           <View style={styles.tipCard}>
             <Ionicons name="bulb-outline" size={24} color="#F4A361" />
             <Text style={styles.tipText}>
-              {getCauseDescription(occurrence.type)}
+              {getOccurrenceDescription(occurrence.type)}
             </Text>
           </View>
         </View>
