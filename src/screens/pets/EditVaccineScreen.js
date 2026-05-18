@@ -55,11 +55,17 @@ export default function EditVaccineScreen({ navigation, route }) {
     () => parseDateTime(vaccine?.applicationDate),
     [vaccine?.applicationDate],
   );
+  const nextDateTime = useMemo(
+    () => parseDateTime(vaccine?.nextApplicationDate),
+    [vaccine?.nextApplicationDate],
+  );
 
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(vaccine?.name || "");
   const [date, setDate] = useState(initialDateTime.date);
   const [time, setTime] = useState(initialDateTime.time);
+  const [nextDate, setNextDate] = useState(nextDateTime.date);
+  const [nextTime, setNextTime] = useState(nextDateTime.time);
   const [isApplied, setIsApplied] = useState(!!vaccine?.isApplied);
   const [observations, setObservations] = useState(vaccine?.observations || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -121,12 +127,15 @@ export default function EditVaccineScreen({ navigation, route }) {
     setLoading(true);
 
     const isoDate = convertDateToISO(date);
+    const isoNextDate = convertDateToISO(nextDate);
     const isoDateTime = `${isoDate}T${time}:00`;
+    const isoNextDateTime = `${isoNextDate}T${nextTime}:00`;
 
     const updatedVaccine = {
       petId: petId,
       name: name,
       applicationDate: isoDateTime,
+      nextApplicationDate: isoNextDateTime,
       isApplied: isApplied,
       reminder: reminder,
       observations: observations,
@@ -296,8 +305,8 @@ export default function EditVaccineScreen({ navigation, route }) {
             <View style={{ flex: 1 }}>
               <InputDatePicker
                 label="Data para Proxima"
-                value={date}
-                onChange={(val) => setDate(val)}
+                value={nextDate}
+                onChange={(val) => setNextDate(val)}
                 dateMode="future"
                 styleLabel={{
                   fontSize: 13,
@@ -310,8 +319,8 @@ export default function EditVaccineScreen({ navigation, route }) {
             <View style={{ flex: 1 }}>
               <InputTimePicker
                 label="Horário"
-                value={time}
-                onChange={(val) => setTime(val)}
+                value={nextTime}
+                onChange={(val) => setNextTime(val)}
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",

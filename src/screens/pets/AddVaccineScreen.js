@@ -67,13 +67,14 @@ export default function AddVaccineScreen({ navigation, route }) {
     }
 
     setLoading(true);
-
+    const isoNextDateTime = `${dateNext}T${timeNext}:00`;
     const isoDateTime = `${date}T${time}:00`;
 
     const newVaccine = {
       petId: petId,
       name: name,
       applicationDate: isoDateTime,
+      nextApplicationDate: isoNextDateTime,
       isApplied: isApplied,
       observations: observations,
     };

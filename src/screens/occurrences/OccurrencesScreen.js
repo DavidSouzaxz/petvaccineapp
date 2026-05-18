@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceOccurrences from "../../services/ServiceOccurrences";
 import ServicePet from "../../services/ServicePet";
 import { FormatDateTimeDisplay } from "../../core/FormatDateDisplay";
+import { getPetImage } from "../../core/SpeciesImageMap";
 
 const OCCURRENCE_FILTERS = [
   { id: "all", label: "Todas", icon: "th-large" },
@@ -154,11 +155,7 @@ export default function OccurrencesScreen({ navigation }) {
           >
             <View style={styles.petInfoRow}>
               <Image
-                source={
-                  selectedPet && selectedPet.photoUrl
-                    ? { uri: selectedPet.photoUrl }
-                    : require("../../../assets/dogProfile.png")
-                }
+                source={getPetImage(selectedPet?.photoUrl, selectedPet?.specie)}
                 style={styles.petAvatar}
               />
               <View>

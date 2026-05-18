@@ -18,6 +18,8 @@ import ServicePet from "../../services/ServicePet";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
+import { NotificationManager } from "../../components/NotificationManager";
+import NotificationToggleButton from "../../components/NotificationToggleButton";
 
 const { width } = Dimensions.get("window");
 
@@ -59,7 +61,7 @@ const PET_STATUS = [
     icon: "checkmark-circle",
   },
   {
-    label: "Atencao",
+    label: "Atenção",
     color: "#C88719",
     backgroundColor: "#FFF4E0",
     icon: "alert-circle",
@@ -116,8 +118,6 @@ export default function HomeScreen({ navigation }) {
     loadUserName();
   }, []);
 
-  const upcomingVaccines = useMemo(() => vaccines.slice(0, 3), [vaccines]);
-
   const nextVaccineForPet = useCallback(
     (petId) => vaccines.find((item) => item.pet?.id === petId),
     [vaccines],
@@ -135,6 +135,76 @@ export default function HomeScreen({ navigation }) {
     setActiveMenuPetId((current) => (current === petId ? null : petId));
   }, []);
 
+  const getStatusIndex = (vaccines) => {
+    if (!vaccines || vaccines.length === 0) {
+      return 0; // Em dia (padrão)
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    // Encontra a próxima vacina
+    const allVaccines = vaccines
+      .map((v) => {
+        const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
+        return {
+          date: dateProp ? new Date(dateProp) : null,
+        };
+      })
+      .filter((v) => v.date)
+      .sort((a, b) => a.date - b.date);
+
+    if (allVaccines.length === 0) {
+      return 0; // Em dia (padrão)
+    }
+
+    const nextVaccineDate = new Date(allVaccines[0].date);
+    nextVaccineDate.setHours(0, 0, 0, 0);
+
+    // Calcula a diferença em dias
+    const diffTime = nextVaccineDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return 2; // Atrasado
+    } else if (diffDays <= 3) {
+      return 1; // Atenção
+    } else {
+      return 0; // Em dia
+    }
+  };
+
+  const getNextVaccineInfo = (vaccines) => {
+    if (!vaccines || vaccines.length === 0)
+      return { name: "Sem vacinas", dateStr: "--/--/----" };
+
+    const now = new Date();
+
+    // Filtra vacinas futuras e válidas
+    const upcomingVaccines = vaccines
+      .map((v) => {
+        // Trata se o campo vier como nextApplicationDateTime ou nextApplicationDate
+        const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
+        return {
+          name: v.name,
+          date: dateProp ? new Date(dateProp) : null,
+        };
+      })
+      .filter((v) => v.date && v.date > now) // Apenas datas futuras
+      .sort((a, b) => a.date - b.date); // Ordena da mais próxima para a mais distante
+
+    if (upcomingVaccines.length === 0) {
+      return { name: "Sem vacinas", dateStr: "--/--/----" };
+    }
+
+    const closest = upcomingVaccines[0];
+
+    // Formata a data para DD/MM/AAAA
+    const dateStr = closest.date.toLocaleDateString("pt-BR");
+
+    return { name: closest.name, dateStr };
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
@@ -142,19 +212,11 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerGreeting}>Hi, {userName}</Text>
-          <Text style={styles.headerSubtitle}>Seja bem-vinda!</Text>
+          <Text style={styles.headerSubtitle}>Seja bem-vindo!</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => setNotifications(!notifications)}
-          style={styles.notificationButton}
-        >
-          <Ionicons
-            name={notifications ? "notifications" : "notifications-outline"}
-            size={22}
-            color="#333"
-          />
-          <View style={styles.notificationDot} />
-        </TouchableOpacity>
+        <View>
+          <NotificationToggleButton />
+        </View>
       </View>
 
       {loading ? (
@@ -183,9 +245,9 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.petListWrapper}>
             {pets.length > 0 ? (
               pets.map((pet, index) => {
-                const status = PET_STATUS[index % PET_STATUS.length];
-                const nextVaccine = nextVaccineForPet(pet.id);
-
+                const statusIndex = getStatusIndex(pet.vaccines);
+                const status = PET_STATUS[statusIndex];
+                const nextVaccine = getNextVaccineInfo(pet.vaccines);
                 return (
                   <View
                     key={pet.id || `${pet.name}-${index}`}
@@ -200,7 +262,7 @@ export default function HomeScreen({ navigation }) {
                     <View style={styles.petInfo}>
                       <Text style={styles.petName}>{pet.name}</Text>
                       <Text style={styles.petMeta}>
-                        {pet.breed || "Sem raca"}
+                        {pet.breed || "Sem raça"}
                         {pet.age ? ` - ${pet.age}` : ""}
                       </Text>
                       <View
@@ -224,7 +286,7 @@ export default function HomeScreen({ navigation }) {
                     <View style={styles.petVaccineInfo}>
                       <Text style={styles.petVaccineLabel}>Proxima vacina</Text>
                       <Text style={styles.petVaccineName}>
-                        {nextVaccine?.name || "Sem vacinas"}
+                        {nextVaccine.name}
                       </Text>
                       <View style={styles.petVaccineDateRow}>
                         <Ionicons
@@ -233,9 +295,7 @@ export default function HomeScreen({ navigation }) {
                           color="#888"
                         />
                         <Text style={styles.petVaccineDate}>
-                          {nextVaccine?.applicationDate
-                            ? FormatDateDisplay(nextVaccine.applicationDate)
-                            : "--/--/----"}
+                          {nextVaccine.dateStr}
                         </Text>
                       </View>
                     </View>
@@ -305,25 +365,23 @@ export default function HomeScreen({ navigation }) {
 
           <View style={styles.sectionHeader}>
             <TouchableOpacity
-            style={styles.calendarCard}
-            onPress={() => navigation.navigate("Calendario")}
-          >
-            <View style={styles.calendarIcon}>
-              <Ionicons name="calendar" size={20} color="#F4A361" />
-            </View>
+              style={styles.calendarCard}
+              onPress={() => navigation.navigate("Calendario")}
+            >
+              <View style={styles.calendarIcon}>
+                <Ionicons name="calendar" size={20} color="#F4A361" />
+              </View>
 
-            <View style={{ flex: 1 }}>
-              <Text style={styles.calendarTitle}>Calendário</Text>
-              <Text style={styles.calendarSubtitle}>
-                Veja todas as vacinas do seu pet
-              </Text>
-            </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.calendarTitle}>Calendário</Text>
+                <Text style={styles.calendarSubtitle}>
+                  Veja todas as vacinas do seu pet
+                </Text>
+              </View>
 
-            
               <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
             </TouchableOpacity>
-            </View>
-          
+          </View>
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
@@ -606,43 +664,42 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   calendarCard: {
+    marginBottom: 10,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
 
-  marginBottom: 10,
-  backgroundColor: "#FFF",
-  borderRadius: 16,
-  padding: 14,
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 12,
+    borderWidth: 1,
+    borderColor: "#F4E7D7",
 
-  borderWidth: 1,
-  borderColor: "#F4E7D7",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.05,
-  shadowRadius: 4,
-  elevation: 2,
-},
+  calendarIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF3E6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-calendarIcon: {
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: "#FFF3E6",
-  alignItems: "center",
-  justifyContent: "center",
-},
+  calendarTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2B2B2B",
+  },
 
-calendarTitle: {
-  fontSize: 14,
-  fontWeight: "700",
-  color: "#2B2B2B",
-},
-
-calendarSubtitle: {
-  fontSize: 12,
-  color: "#9A9A9A",
-  marginTop: 2,
-},
+  calendarSubtitle: {
+    fontSize: 12,
+    color: "#9A9A9A",
+    marginTop: 2,
+  },
 });

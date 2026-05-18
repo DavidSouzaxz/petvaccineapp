@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#FDF1E7"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.PetCard"
     },
     "web": {
       "favicon": "./assets/favicon.png"
