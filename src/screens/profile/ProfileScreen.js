@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import ServiceUser from "../../services/ServiceUser";
 import ServicePet from "../../services/ServicePet";
@@ -31,13 +32,20 @@ export default function ProfileScreen({ navigation, onLogout }) {
   ).length;
 
   const loadUserData = async () => {
-    const response = await ServiceUser.listById(
-      await AsyncStorage.getItem("@userId"),
-    );
-    setUser(response.name);
-    setEmail(response.email);
-    setPhone(response.contact);
-    setProfileImage(response.photoUrl);
+    setLoading(true);
+    try {
+      const response = await ServiceUser.listById(
+        await AsyncStorage.getItem("@userId"),
+      );
+      setUser(response.name);
+      setEmail(response.email);
+      setPhone(response.contact);
+      setProfileImage(response.photoUrl);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchPets = async () => {
@@ -68,161 +76,180 @@ export default function ProfileScreen({ navigation, onLogout }) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Perfil</Text>
-          <Text style={styles.subtitle}>
-            Gerencie sua conta e cuide{"\n"}
-            cada vez melhor dos seus pets.
-          </Text>
+      {loading ? (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#ff7a00" />
+        </View>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Perfil</Text>
+            <Text style={styles.subtitle}>
+              Gerencie sua conta e cuide{"\n"}
+              cada vez melhor dos seus pets.
+            </Text>
 
-          <View style={styles.profileRow}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                {profileImage ? (
-                  <Image
-                    source={{ uri: profileImage }}
-                    style={styles.avatarImage}
-                  />
-                ) : (
-                  <Text style={styles.avatarText}>{user ? user[0] : "U"}</Text>
-                )}
+            <View style={styles.profileRow}>
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  {profileImage ? (
+                    <Image
+                      source={{ uri: profileImage }}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <Text style={styles.avatarText}>
+                      {user ? user[0] : "U"}
+                    </Text>
+                  )}
+                </View>
               </View>
-            </View>
 
-            <View style={styles.info}>
-              <Text style={styles.name}>{user}</Text>
-              <Text style={styles.email}>{email}</Text>
+              <View style={styles.info}>
+                <Text style={styles.name}>{user}</Text>
+                <Text style={styles.email}>{email}</Text>
 
-              <View style={styles.badge}>
-                <Ionicons name="shield-checkmark" size={15} color="#ff7a00" />
-                <Text style={styles.badgeText}> Tutor responsável</Text>
+                <View style={styles.badge}>
+                  <Ionicons name="shield-checkmark" size={15} color="#ff7a00" />
+                  <Text style={styles.badgeText}> Tutor responsável</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Meus pets</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("PetsScreen")}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.link}>Ver todos</Text>
-                <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Meus pets</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("PetsScreen")}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text style={styles.link}>Ver todos</Text>
+                  <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.statsRow}>
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>{pets.length}</Text>
+                <Text style={styles.statLabel}>cadastrados</Text>
               </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>
+                  {petsEmDia === 0 ? pets.length : petsEmDia}
+                </Text>
+                <Text style={styles.statLabel}>em dia</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>{petsPendentes}</Text>
+                <Text style={styles.statLabel}>pendentes</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.menuCard}>
+            <Text style={styles.sectionTitle}>Configurações</Text>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate("EditProfile")}
+            >
+              <View style={styles.menuLeft}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}
+                >
+                  <Ionicons name="person-outline" size={18} color="#ff7a00" />
+                </View>
+                <Text style={styles.menuText}>Editar perfil</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate("Notifications")}
+            >
+              <View style={styles.menuLeft}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: "#7b61ff20" }]}
+                >
+                  <Ionicons
+                    name="notifications-outline"
+                    size={18}
+                    color="#7b61ff"
+                  />
+                </View>
+                <Text style={styles.menuText}>Notificações</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate("Privacy")}
+            >
+              <View style={styles.menuLeft}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: "#2ecc7120" }]}
+                >
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={18}
+                    color="#2ecc71"
+                  />
+                </View>
+                <Text style={styles.menuText}>Privacidade</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate("About")}
+            >
+              <View style={styles.menuLeft}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: "#3498db20" }]}
+                >
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={18}
+                    color="#3498db"
+                  />
+                </View>
+                <Text style={styles.menuText}>Sobre</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#ccc" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.statsRow}>
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>{pets.length}</Text>
-              <Text style={styles.statLabel}>cadastrados</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>
-                {petsEmDia === 0 ? pets.length : petsEmDia}
+          <View style={styles.help}>
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={22}
+              color="#ff7a00"
+            />
+            <View style={{ marginLeft: 10 }}>
+              <Text style={styles.helpTitle}>Precisa de ajuda?</Text>
+              <Text style={styles.helpText}>
+                Fale conosco ou acesse a central.
               </Text>
-              <Text style={styles.statLabel}>em dia</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>{petsPendentes}</Text>
-              <Text style={styles.statLabel}>pendentes</Text>
             </View>
           </View>
-        </View>
 
-        <View style={styles.menuCard}>
-          <Text style={styles.sectionTitle}>Configurações</Text>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate("EditProfile")}
-          >
-            <View style={styles.menuLeft}>
-              <View
-                style={[styles.iconCircle, { backgroundColor: "#ff7a0020" }]}
-              >
-                <Ionicons name="person-outline" size={18} color="#ff7a00" />
-              </View>
-              <Text style={styles.menuText}>Editar perfil</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
+          <TouchableOpacity style={styles.logout} onPress={onLogout}>
+            <Ionicons name="exit-outline" size={20} color="#e74c3c" />
+            <Text style={styles.logoutText}>Sair da conta</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLeft}>
-              <View
-                style={[styles.iconCircle, { backgroundColor: "#7b61ff20" }]}
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={18}
-                  color="#7b61ff"
-                />
-              </View>
-              <Text style={styles.menuText}>Notificações</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLeft}>
-              <View
-                style={[styles.iconCircle, { backgroundColor: "#2ecc7120" }]}
-              >
-                <Ionicons
-                  name="shield-checkmark-outline"
-                  size={18}
-                  color="#2ecc71"
-                />
-              </View>
-              <Text style={styles.menuText}>Privacidade</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLeft}>
-              <View
-                style={[styles.iconCircle, { backgroundColor: "#3498db20" }]}
-              >
-                <Ionicons
-                  name="information-circle-outline"
-                  size={18}
-                  color="#3498db"
-                />
-              </View>
-              <Text style={styles.menuText}>Sobre</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#ccc" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.help}>
-          <Ionicons
-            name="chatbubble-ellipses-outline"
-            size={22}
-            color="#ff7a00"
-          />
-          <View style={{ marginLeft: 10 }}>
-            <Text style={styles.helpTitle}>Precisa de ajuda?</Text>
-            <Text style={styles.helpText}>
-              Fale conosco ou acesse a central.
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.logout} onPress={onLogout}>
-          <Ionicons name="exit-outline" size={20} color="#e74c3c" />
-          <Text style={styles.logoutText}>Sair da conta</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -231,6 +258,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f7efe5",
+  },
+
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
 
   header: {

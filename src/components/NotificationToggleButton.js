@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity, StyleSheet, View } from "react-native"; // Importado o View e removido o Text
+import { TouchableOpacity, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NotificationManager } from "./NotificationManager";
 
 export default function NotificationToggleButton() {
   const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
     const loadSetting = async () => {
-      const storedSetting = await AsyncStorage.getItem("@notificationsEnabled");
+      const storedSetting = await AsyncStorage.getItem(
+        "@notificationsEnabledVaccine",
+      );
       setIsEnabled(storedSetting === "true");
     };
     loadSetting();
@@ -17,12 +18,11 @@ export default function NotificationToggleButton() {
 
   const handleToggle = async () => {
     const newState = !isEnabled;
-    const success =
-      await NotificationManager.toggleNotificationSetting(newState);
-
-    if (success || !newState) {
-      setIsEnabled(newState);
-    }
+    setIsEnabled(newState);
+    await AsyncStorage.setItem(
+      "@notificationsEnabledVaccine",
+      newState.toString(),
+    );
   };
 
   return (

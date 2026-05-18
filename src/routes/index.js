@@ -23,7 +23,9 @@ import OccurrenceDetailsScreen from "../screens/occurrences/OccurrenceDetailsScr
 import OcurrenceEditScreen from "../screens/occurrences/OcurrenceEditScreen";
 import EditProfileScreen from "../screens/profile/EditProfileScreen";
 import CalendarScreen from "../screens/pets/CalendarScreen";
-
+import NotificationsScreen from "../screens/profile/NotificationsScreen";
+import PrivacyScreen from "../screens/profile/PrivacyScreen";
+import AboutScreen from "../screens/profile/AboutScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -96,14 +98,8 @@ function PetStack() {
         options={{ title: "Editar Vacina" }}
       />
 
-      <Stack.Screen
-      name="Calendario"
-      component={CalendarScreen}
-      />
-
+      <Stack.Screen name="Calendario" component={CalendarScreen} />
     </Stack.Navigator>
-
-    
   );
 }
 
@@ -261,6 +257,9 @@ function ProfileStack({ onLogout }) {
       </Stack.Screen>
 
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} />
+      <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="PetsScreen" component={PetsScreen} />
       <Stack.Screen
         name="Details"

@@ -6,17 +6,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
-} from "react-native"
-import { AlertModal, ConfirmationModal } from "../../components/modals"
+} from "react-native";
+import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServiceUser from "../../services/ServiceUser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); const [alertVisible, setAlertVisible] = useState(false);
+  const [password, setPassword] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmVisible, setConfirmVisible] = useState(false);
-  const [confirmMessage, setConfirmMessage] = useState("")
+  const [confirmMessage, setConfirmMessage] = useState("");
   const handleRegister = async () => {
     if (!name || !email || !password) {
       setAlertMessage("Preencha todos os campos.");
@@ -33,6 +35,10 @@ export default function RegisterScreen({ navigation }) {
       await ServiceUser.register(credentials);
 
       setConfirmMessage("Conta criada com sucesso!");
+      await AsyncStorage.setItem("@notificationsEnabled", false);
+      await AsyncStorage.setItem("@notificationsEnabledSaude", false);
+      await AsyncStorage.setItem("@notificationsEnabledVaccine", false);
+      await AsyncStorage.setItem("@notificationsEnabledPromotions", false);
       setConfirmVisible(true);
     } catch (error) {
       const msg = error.response?.data || "Erro ao cadastrar usuário.";

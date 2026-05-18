@@ -36,17 +36,25 @@ export default function EditProfileScreen({ navigation }) {
   const [promocoes, setPromocoes] = useState(false);
 
   useEffect(() => {
-    loadingData()
+    loadingData();
   }, []);
 
   const loadingData = async () => {
-    const response = await ServiceUser.listById(await AsyncStorage.getItem("@userId"))
-    setName(response.name)
-    setEmail(response.email)
-    setPhone(response.contact)
-    setCurrentPhotoUrl(response.photoUrl)
-    console.log(response)
-  }
+    setLoading(true);
+    try {
+      const response = await ServiceUser.listById(
+        await AsyncStorage.getItem("@userId"),
+      );
+      setName(response.name);
+      setEmail(response.email);
+      setPhone(response.contact);
+      setCurrentPhotoUrl(response.photoUrl);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -77,7 +85,7 @@ export default function EditProfileScreen({ navigation }) {
         name: name,
         email: email,
         contact: phone,
-        photoUrl: finalPhotoUrl
+        photoUrl: finalPhotoUrl,
       };
 
       await ServiceUser.update(userId, dataUser);
@@ -91,7 +99,7 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const formatPhone = (value) => {
-  const numbers = value.replace(/\D/g, "");
+    const numbers = value.replace(/\D/g, "");
 
     if (numbers.length <= 10) {
       return numbers
@@ -104,87 +112,92 @@ export default function EditProfileScreen({ navigation }) {
       .replace(/^(\d{2})(\d)/g, "($1) $2")
       .replace(/(\d{5})(\d)/, "$1-$2")
       .slice(0, 15);
-};
+  };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f7efe5" />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.headerIcon}
-          >
-            <Ionicons name="arrow-back" size={24} color="#222" />
-          </TouchableOpacity>
-
-          <Text style={styles.title}>Editar perfil</Text>
-
-          <View style={styles.headerIcon} />
+      {loading ? (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#ff7a00" />
         </View>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.headerIcon}
+            >
+              <Ionicons name="arrow-back" size={24} color="#222" />
+            </TouchableOpacity>
 
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            {image ? (
-              <Image
-                source={{ uri: image }}
-                style={styles.avatarImage}
-              />
-            ) : currentPhotoUrl ? (
-              <Image
-                source={{ uri: currentPhotoUrl }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <Text style={styles.avatarText}>{name ? name[0] : ""}</Text>
-            )}
+            <Text style={styles.title}>Editar perfil</Text>
+
+            <View style={styles.headerIcon} />
           </View>
 
-          <TouchableOpacity style={styles.camera} onPress={pickImage}>
-            <Ionicons name="camera" size={16} color="#fff" />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.avatarImage} />
+              ) : currentPhotoUrl ? (
+                <Image
+                  source={{ uri: currentPhotoUrl }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <Text style={styles.avatarText}>{name ? name[0] : ""}</Text>
+              )}
+            </View>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Nome</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder="Digite seu nome"
-            placeholderTextColor="#999"
-          />
+            <TouchableOpacity style={styles.camera} onPress={pickImage}>
+              <Ionicons name="camera" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
-          <Text style={styles.label}>E-mail</Text>
-          <TextInput
-            style={[styles.input, styles.inputDisabled]}
-            value={email}
-            editable={false}
-            selectTextOnFocus={false}
-            onChangeText={setEmail}
-            placeholderTextColor="#777"
-          />
-          <Text style={styles.label}>Telefone</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={(text) => setPhone(formatPhone(text))}
-            placeholder="(00) 00000-0000"
-            placeholderTextColor="#999"
-            keyboardType="phone-pad"
-            maxLength={15}
-          />
+          <View style={styles.card}>
+            <Text style={styles.label}>Nome</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Digite seu nome"
+              placeholderTextColor="#999"
+            />
 
-          <TouchableOpacity style={styles.button} onPress={handleSave}>
+            <Text style={styles.label}>E-mail</Text>
+            <TextInput
+              style={[styles.input, styles.inputDisabled]}
+              value={email}
+              editable={false}
+              selectTextOnFocus={false}
+              onChangeText={setEmail}
+              placeholderTextColor="#777"
+            />
+            <Text style={styles.label}>Telefone</Text>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={(text) => setPhone(formatPhone(text))}
+              placeholder="(00) 00000-0000"
+              placeholderTextColor="#999"
+              keyboardType="phone-pad"
+              maxLength={15}
+            />
 
-            {loading ? (<ActivityIndicator color="#fff" />) : (<Text style={styles.buttonText}>Salvar alterações</Text>)}
-
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Salvar alterações</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -194,7 +207,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f7efe5",
   },
-
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 30,
@@ -287,7 +310,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5b4",
     color: "#747474ff",
     borderColor: "#ddd",
-},
+  },
 
   textArea: {
     height: 80,

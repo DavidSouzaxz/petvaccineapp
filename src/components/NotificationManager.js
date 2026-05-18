@@ -2,8 +2,6 @@ import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Platform } from "react-native";
 
-const ASYNC_STORAGE_KEY = "@notificationsEnabled";
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -48,12 +46,12 @@ export const NotificationManager = {
         const hasPermission = await NotificationManager.requestPermissions();
         if (!hasPermission) return false;
 
-        await AsyncStorage.setItem(ASYNC_STORAGE_KEY, "true");
+        await AsyncStorage.setItem("@notificationsEnabled", "true");
         return true;
       } else {
         // Se desativar, limpa todas as notificações locais agendadas para o futuro
         await Notifications.cancelAllScheduledNotificationsAsync();
-        await AsyncStorage.setItem(ASYNC_STORAGE_KEY, "false");
+        await AsyncStorage.setItem("@notificationsEnabled", "false");
         return false;
       }
     } catch (error) {
@@ -69,7 +67,7 @@ export const NotificationManager = {
     nextApplicationDate,
   ) => {
     try {
-      const isEnabled = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
+      const isEnabled = await AsyncStorage.getItem("@notificationsEnabled");
 
       // Se estiver explicitamente "false" ou nulo (não configurado), ignora
       if (isEnabled !== "true") return;
