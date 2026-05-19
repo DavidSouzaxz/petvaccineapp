@@ -17,6 +17,7 @@ import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import { validateDate, validateTime } from "../../core/validators";
 import InputDatePicker from "../../components/InputDatePicker";
 import InputTimePicker from "../../components/InputTimePicker";
+import { VACCINE_SUGGESTIONS } from "../../constants"
 
 export default function AddVaccineScreen({ navigation, route }) {
   const { petId, petName, petColor } = route.params;
