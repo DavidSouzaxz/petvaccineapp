@@ -189,57 +189,62 @@ export default function HomeScreen({ navigation }) {
                 const status = PET_STATUS[statusIndex];
                 const nextVaccine = getNextVaccineInfo(pet.vaccines);
                 return (
-                  <View
-                    key={pet.id || `${pet.name}-${index}`}
-                    style={styles.petCard}
-                  >
-                    <View style={styles.petProfileWrapper}>
-                      <Image
-                        source={getPetImage(pet.photoUrl, pet.specie)}
-                        style={styles.petProfileImage}
-                      />
-                    </View>
-                    <View style={styles.petInfo}>
-                      <Text style={styles.petName}>{pet.name}</Text>
-                      <Text style={styles.petMeta}>
-                        {pet.breed || "Sem raça"}
-                        {pet.age ? ` - ${pet.age}` : ""}
-                      </Text>
+                  <View>
+                    <TouchableOpacity onPress={() => {
+                      navigation.navigate("Details", { pet });
+                    }}>
                       <View
-                        style={[
-                          styles.statusBadge,
-                          { backgroundColor: status.backgroundColor },
-                        ]}
+                        key={pet.id || `${pet.name}-${index}`}
+                        style={styles.petCard}
                       >
-                        <Ionicons
-                          name={status.icon}
-                          size={14}
-                          color={status.color}
-                        />
-                        <Text
-                          style={[styles.statusText, { color: status.color }]}
-                        >
-                          {status.label}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={styles.petVaccineInfo}>
-                      <Text style={styles.petVaccineLabel}>Proxima vacina</Text>
-                      <Text style={styles.petVaccineName}>
-                        {nextVaccine.name}
-                      </Text>
-                      <View style={styles.petVaccineDateRow}>
-                        <Ionicons
-                          name="calendar-outline"
-                          size={14}
-                          color="#888"
-                        />
-                        <Text style={styles.petVaccineDate}>
-                          {nextVaccine.dateStr}
-                        </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity
+
+                        <View style={styles.petProfileWrapper}>
+                          <Image
+                            source={getPetImage(pet.photoUrl, pet.specie)}
+                            style={styles.petProfileImage}
+                          />
+                        </View>
+                        <View style={styles.petInfo}>
+                          <Text style={styles.petName}>{pet.name}</Text>
+                          <Text style={styles.petMeta}>
+                            {pet.breed || "Sem raça"}
+                            {pet.age ? ` - ${pet.age}` : ""}
+                          </Text>
+                          <View
+                            style={[
+                              styles.statusBadge,
+                              { backgroundColor: status.backgroundColor },
+                            ]}
+                          >
+                            <Ionicons
+                              name={status.icon}
+                              size={14}
+                              color={status.color}
+                            />
+                            <Text
+                              style={[styles.statusText, { color: status.color }]}
+                            >
+                              {status.label}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.petVaccineInfo}>
+                          <Text style={styles.petVaccineLabel}>Proxima vacina</Text>
+                          <Text style={styles.petVaccineName}>
+                            {nextVaccine.name}
+                          </Text>
+                          <View style={styles.petVaccineDateRow}>
+                            <Ionicons
+                              name="calendar-outline"
+                              size={14}
+                              color="#888"
+                            />
+                            <Text style={styles.petVaccineDate}>
+                              {nextVaccine.dateStr}
+                            </Text>
+                          </View>
+                        </View>
+                        {/* <TouchableOpacity
                       style={styles.moreButton}
                       onPress={() => openMenu(pet.id)}
                     >
@@ -248,39 +253,42 @@ export default function HomeScreen({ navigation }) {
                         size={16}
                         color="#999"
                       />
-                    </TouchableOpacity>
-                    {activeMenuPetId === pet.id && (
-                      <View style={styles.menuCard}>
-                        <TouchableOpacity
-                          style={styles.menuItem}
-                          onPress={() => {
-                            closeMenu();
-                            navigation.navigate("Details", { pet });
-                          }}
-                        >
-                          <Ionicons
-                            name="eye-outline"
-                            size={16}
-                            color="#6F5A49"
-                          />
-                          <Text style={styles.menuText}>Visualizar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.menuItem, styles.menuItemLast]}
-                          onPress={() => {
-                            closeMenu();
-                            navigation.navigate("EditPet", { pet });
-                          }}
-                        >
-                          <Ionicons
-                            name="pencil-outline"
-                            size={16}
-                            color="#6F5A49"
-                          />
-                          <Text style={styles.menuText}>Editar</Text>
-                        </TouchableOpacity>
+                    </TouchableOpacity> */}
+                        {/* {activeMenuPetId === pet.id && (
+                        <View style={styles.menuCard}>
+                          <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                              closeMenu();
+                              navigation.navigate("Details", { pet });
+                            }}
+                          >
+                            <Ionicons
+                              name="eye-outline"
+                              size={16}
+                              color="#6F5A49"
+                            />
+                            <Text style={styles.menuText}>Visualizar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.menuItem, styles.menuItemLast]}
+                            onPress={() => {
+                              closeMenu();
+                              navigation.navigate("EditPet", { pet });
+                            }}
+                          >
+                            <Ionicons
+                              name="pencil-outline"
+                              size={16}
+                              color="#6F5A49"
+                            />
+                            <Text style={styles.menuText}>Editar</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )} */}
+
                       </View>
-                    )}
+                    </TouchableOpacity>
                   </View>
                 );
               })
