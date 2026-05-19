@@ -17,6 +17,7 @@ import ButtonRollback from "../../components/ButtonRollback";
 import { validateDate, validateTime } from "../../core/validators";
 import InputDatePicker from "../../components/InputDatePicker";
 import InputTimePicker from "../../components/InputTimePicker";
+import { VACCINE_SUGGESTIONS } from "../../constants"
 
 const parseDateTime = (value) => {
   if (!value) return { date: "", time: "" };
@@ -336,7 +337,7 @@ export default function EditVaccineScreen({ navigation, route }) {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Salvar Alteracoes</Text>
+              <Text style={styles.buttonText}>Salvar Alterações</Text>
             )}
           </TouchableOpacity>
 
