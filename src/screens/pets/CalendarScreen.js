@@ -18,6 +18,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ServicePet from "../../services/ServicePet";
 import ButtonRollback from "../../components/ButtonRollback";
+import MonthYearPickerModal from "../../components/modals/MonthYearPickerModal";
+import "../../constants/calender";
 
 export default function CalendarioScreen({ navigation }) {
   const [events, setEvents] = useState({});
@@ -27,6 +29,9 @@ export default function CalendarioScreen({ navigation }) {
   const [selectedPet, setSelectedPet] = useState(null);
   const [showPetSelector, setShowPetSelector] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
+
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "Selecione uma data";
@@ -35,6 +40,12 @@ export default function CalendarioScreen({ navigation }) {
       month: "long",
       year: "numeric",
     });
+  };
+
+  const handleMonthYearConfirm = (date) => {
+    console.log("Clicado")
+    setCurrentDate(date);
+    setShowMonthYearPicker(false);
   };
 
   async function loadPets() {
@@ -84,8 +95,8 @@ export default function CalendarioScreen({ navigation }) {
           status: vac.isApplied
             ? "Aplicada"
             : isLate
-            ? "Atrasada"
-            : "Próxima dose",
+              ? "Atrasada"
+              : "Próxima dose",
         });
       });
 
@@ -167,8 +178,8 @@ export default function CalendarioScreen({ navigation }) {
             backgroundColor: item.applied
               ? "#E8F7EE"
               : item.late
-              ? "#FDECEA"
-              : "#FFF4EC",
+                ? "#FDECEA"
+                : "#FFF4EC",
           },
         ]}
       >
@@ -177,16 +188,16 @@ export default function CalendarioScreen({ navigation }) {
             item.applied
               ? "checkmark-circle"
               : item.late
-              ? "alert-circle"
-              : "time"
+                ? "alert-circle"
+                : "time"
           }
           size={20}
           color={
             item.applied
               ? "#47C266"
               : item.late
-              ? "#E74C3C"
-              : "#F4A361"
+                ? "#E74C3C"
+                : "#F4A361"
           }
         />
       </View>
@@ -197,8 +208,8 @@ export default function CalendarioScreen({ navigation }) {
           {item.date
             ? new Date(item.date).toLocaleDateString("pt-BR")
             : item.applied
-            ? "Dose aplicada"
-            : "Próxima dose"}
+              ? "Dose aplicada"
+              : "Próxima dose"}
         </Text>
       </View>
 
@@ -209,8 +220,8 @@ export default function CalendarioScreen({ navigation }) {
             backgroundColor: item.applied
               ? "#E8F7EE"
               : item.late
-              ? "#FDECEA"
-              : "#FFF4EC",
+                ? "#FDECEA"
+                : "#FFF4EC",
           },
         ]}
       >
@@ -219,8 +230,8 @@ export default function CalendarioScreen({ navigation }) {
             color: item.applied
               ? "#47C266"
               : item.late
-              ? "#E74C3C"
-              : "#F4A361",
+                ? "#E74C3C"
+                : "#F4A361",
             fontWeight: "700",
             fontSize: 12,
           }}
@@ -236,7 +247,7 @@ export default function CalendarioScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
 
       <ScrollView showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 50 }}>
+        contentContainerStyle={{ paddingBottom: 50 }}>
         <View style={styles.topBar}>
           <ButtonRollback
             navigation={navigation}
@@ -272,24 +283,36 @@ export default function CalendarioScreen({ navigation }) {
           <Ionicons name="chevron-down" size={18} color="#999" />
         </TouchableOpacity>
 
-        <Calendar
-          current={currentDate.toISOString().split("T")[0]}
-          onMonthChange={(m) =>
-            setCurrentDate(new Date(m.timestamp))
-          }
-          markedDates={markedDates}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
-          theme={{
-            todayTextColor: "#F4A361",
-            arrowColor: "#F4A361",
-            selectedDayBackgroundColor: "#F4A361",
-            selectedDayTextColor: "#FFF",
-            textDayFontSize: 14,
-            textMonthFontSize: 14,
-            textDayHeaderFontSize: 10,
-          }}
-        />
+        <View style={{ position: "relative" }}>
+          <Calendar
+            key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
+            locale="pt-br"
+            current={currentDate.toISOString().split("T")[0]}
+            onMonthChange={(m) =>
+              setCurrentDate(new Date(m.timestamp))
+            }
+            markedDates={markedDates}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
+            theme={{
+              todayTextColor: "#F4A361",
+              arrowColor: "#F4A361",
+              selectedDayBackgroundColor: "#F4A361",
+              selectedDayTextColor: "#FFF",
+              textDayFontSize: 14,
+              textMonthFontSize: 14,
+              textDayHeaderFontSize: 10,
+            }}
+          />
+          <TouchableOpacity
+            style={styles.calendarHeaderOverlay}
+            onPress={() => {
+              console.log("Clicado no header do calendar");
+              setShowMonthYearPicker(true);
+            }}
+            activeOpacity={0.7}
+          />
+        </View>
 
         <View style={styles.legendContainer}>
           <View style={styles.legendItem}>
@@ -334,25 +357,25 @@ export default function CalendarioScreen({ navigation }) {
         </View>
 
         <View style={styles.section}>
-            <View style={styles.vaccineCard}>
+          <View style={styles.vaccineCard}>
 
-              <View style={styles.vaccineHeader}>
-                <Text style={styles.vaccineDate}>Próximas doses</Text>
-              </View>
-
-              <View style={styles.divider} />
-
-             
-              {upcomingVaccines.length ? (
-                upcomingVaccines.map(renderItem)
-              ) : (
-                <Text style={styles.empty}>
-                  Nenhuma próxima dose
-                </Text>
-              )}
-
+            <View style={styles.vaccineHeader}>
+              <Text style={styles.vaccineDate}>Próximas doses</Text>
             </View>
+
+            <View style={styles.divider} />
+
+
+            {upcomingVaccines.length ? (
+              upcomingVaccines.map(renderItem)
+            ) : (
+              <Text style={styles.empty}>
+                Nenhuma próxima dose
+              </Text>
+            )}
+
           </View>
+        </View>
       </ScrollView>
 
       <Modal visible={showPetSelector} transparent animationType="slide">
@@ -369,7 +392,7 @@ export default function CalendarioScreen({ navigation }) {
                 style={[
                   styles.petOption,
                   selectedPet?.id === pet.id &&
-                    styles.petOptionActive,
+                  styles.petOptionActive,
                 ]}
                 onPress={() => {
                   setSelectedPet(pet);
@@ -407,6 +430,13 @@ export default function CalendarioScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <MonthYearPickerModal
+        visible={showMonthYearPicker}
+        value={currentDate}
+        onConfirm={handleMonthYearConfirm}
+        onCancel={() => setShowMonthYearPicker(false)}
+      />
     </View>
   );
 }
@@ -482,6 +512,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#FFF",
     elevation: 2,
+  },
+
+  calendarHeaderOverlay: {
+    position: "absolute",
+
+    top: 20,
+    left: 145,
+    right: 100,
+    height: 45,
+    width: 100,
+    zIndex: 10,
   },
 
   section: {

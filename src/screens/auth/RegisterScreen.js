@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
   ImageBackground,
 } from "react-native";
 import { AlertModal, ConfirmationModal } from "../../components/modals";
@@ -16,10 +17,12 @@ export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
+  const [loading, setLoading] = useState(false)
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const handleRegister = async () => {
+    setLoading(true)
     if (!name || !email || !password) {
       setAlertMessage("Preencha todos os campos.");
       setAlertVisible(true);
@@ -32,19 +35,22 @@ export default function RegisterScreen({ navigation }) {
     };
 
     try {
-      await ServiceUser.register(credentials);
 
+      await ServiceUser.register(credentials);
       setConfirmMessage("Conta criada com sucesso!");
-      await AsyncStorage.setItem("@notificationsEnabled", false);
-      await AsyncStorage.setItem("@notificationsEnabledSaude", false);
-      await AsyncStorage.setItem("@notificationsEnabledVaccine", false);
-      await AsyncStorage.setItem("@notificationsEnabledPromotions", false);
+      await AsyncStorage.setItem("@notificationsEnabled", JSON.stringify(false));
+      await AsyncStorage.setItem("@notificationsEnabledSaude", JSON.stringify(false));
+      await AsyncStorage.setItem("@notificationsEnabledVaccine", JSON.stringify(false));
+      await AsyncStorage.setItem("@notificationsEnabledPromotions", JSON.stringify(false));
       setConfirmVisible(true);
     } catch (error) {
+
       const msg = error.response?.data || "Erro ao cadastrar usuário.";
       setAlertMessage(msg);
       setAlertVisible(true);
       console.log(error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -85,7 +91,12 @@ export default function RegisterScreen({ navigation }) {
         />
 
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Cadastrar</Text>
+          )}
+
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.goBack()}>
