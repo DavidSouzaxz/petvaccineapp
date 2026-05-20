@@ -189,15 +189,13 @@ export default function HomeScreen({ navigation }) {
                 const status = PET_STATUS[statusIndex];
                 const nextVaccine = getNextVaccineInfo(pet.vaccines);
                 return (
-                  <View>
-                    <TouchableOpacity onPress={() => {
-                      navigation.navigate("Details", { pet });
-                    }}>
-                      <View
-                        key={pet.id || `${pet.name}-${index}`}
-                        style={styles.petCard}
-                      >
-
+                  <View key={pet.id || `${pet.name}-${index}`}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("Details", { pet });
+                      }}
+                    >
+                      <View style={styles.petCard}>
                         <View style={styles.petProfileWrapper}>
                           <Image
                             source={getPetImage(pet.photoUrl, pet.specie)}
@@ -222,14 +220,19 @@ export default function HomeScreen({ navigation }) {
                               color={status.color}
                             />
                             <Text
-                              style={[styles.statusText, { color: status.color }]}
+                              style={[
+                                styles.statusText,
+                                { color: status.color },
+                              ]}
                             >
                               {status.label}
                             </Text>
                           </View>
                         </View>
                         <View style={styles.petVaccineInfo}>
-                          <Text style={styles.petVaccineLabel}>Proxima vacina</Text>
+                          <Text style={styles.petVaccineLabel}>
+                            Proxima vacina
+                          </Text>
                           <Text style={styles.petVaccineName}>
                             {nextVaccine.name}
                           </Text>
@@ -286,7 +289,6 @@ export default function HomeScreen({ navigation }) {
                           </TouchableOpacity>
                         </View>
                       )} */}
-
                       </View>
                     </TouchableOpacity>
                   </View>
