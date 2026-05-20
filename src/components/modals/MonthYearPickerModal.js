@@ -15,8 +15,12 @@ export default function MonthYearPickerModal({
   onConfirm,
   onCancel,
 }) {
-  const [selectedYear, setSelectedYear] = useState(value?.getFullYear() || new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(value?.getMonth() || new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(
+    value?.getFullYear() || new Date().getFullYear(),
+  );
+  const [selectedMonth, setSelectedMonth] = useState(
+    value?.getMonth() || new Date().getMonth(),
+  );
 
   useEffect(() => {
     if (value) {
@@ -26,8 +30,18 @@ export default function MonthYearPickerModal({
   }, [value, visible]);
 
   const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
   ];
 
   const currentYear = new Date().getFullYear();
@@ -51,7 +65,7 @@ export default function MonthYearPickerModal({
             <TouchableOpacity onPress={onCancel}>
               <Text style={styles.cancelButton}>Cancelar</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Selecione Mês e Ano</Text>
+
             <TouchableOpacity onPress={handleConfirm}>
               <Text style={styles.confirmButton}>Confirmar</Text>
             </TouchableOpacity>
@@ -76,7 +90,8 @@ export default function MonthYearPickerModal({
                     <Text
                       style={[
                         styles.pickerOptionText,
-                        selectedMonth === index && styles.pickerOptionTextSelected,
+                        selectedMonth === index &&
+                          styles.pickerOptionTextSelected,
                       ]}
                     >
                       {month}
@@ -104,7 +119,8 @@ export default function MonthYearPickerModal({
                     <Text
                       style={[
                         styles.pickerOptionText,
-                        selectedYear === year && styles.pickerOptionTextSelected,
+                        selectedYear === year &&
+                          styles.pickerOptionTextSelected,
                       ]}
                     >
                       {year}
