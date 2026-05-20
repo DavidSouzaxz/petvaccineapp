@@ -228,9 +228,20 @@ export default function ProfileScreen({ navigation, onLogout }) {
               </View>
               <Ionicons name="chevron-forward" size={18} color="#ccc" />
             </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={onLogout}>
+              <View style={styles.menuLeft}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: "#e74d3c57" }]}
+                >
+                  <Ionicons name="exit-outline" size={20} color="#e74c3c" />
+                </View>
+                <Text style={styles.menuText}>Sair</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#ccc" />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.help}>
+          {/* <View style={styles.help}>
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={22}
@@ -247,7 +258,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <TouchableOpacity style={styles.logout} onPress={onLogout}>
             <Ionicons name="exit-outline" size={20} color="#e74c3c" />
             <Text style={styles.logoutText}>Sair da conta</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       )}
     </View>
@@ -420,7 +431,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     margin: 20,
     borderRadius: 16,
-    marginBottom: 0,
+    marginBottom: 30,
     elevation: 0.6,
   },
 
@@ -453,11 +464,10 @@ const styles = StyleSheet.create({
 
   help: {
     flexDirection: "row",
-    backgroundColor: "#fdf0e1ff",
-    margin: 20,
+
+    margin: 10,
     padding: 15,
     borderRadius: 16,
-    elevation: 0.3,
   },
 
   helpTitle: {
@@ -473,6 +483,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ffe1deff",
+
     margin: 20,
     padding: 15,
     borderRadius: 16,
