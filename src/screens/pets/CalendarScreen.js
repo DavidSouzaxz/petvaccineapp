@@ -97,6 +97,7 @@ export default function CalendarioScreen({ navigation }) {
 
           formatted[date].push({
             id: vac.id,
+            uniqueId: `${vac.id}-${date}-applied`,
             name: vac.name || "Vacina",
             applied: vac.isApplied,
             late: isLate,
@@ -123,6 +124,7 @@ export default function CalendarioScreen({ navigation }) {
           if (!vacinaAplicadaExistente) {
             formatted[date].push({
               id: vac.id,
+              uniqueId: `${vac.id}-${date}-next`,
               name: vac.name || "Vacina",
               applied: false,
               late: date < today,
@@ -212,7 +214,7 @@ export default function CalendarioScreen({ navigation }) {
   }
 
   const renderItem = (item) => (
-    <View key={item.id} style={styles.vaccineItem}>
+    <View key={item.uniqueId} style={styles.vaccineItem}>
       <View
         style={[
           styles.iconCircle,
