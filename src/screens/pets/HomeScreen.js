@@ -154,8 +154,9 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Hi, {userName}</Text>
+          <Text style={styles.headerGreeting}>Olá, {userName}</Text>
           <Text style={styles.headerSubtitle}>Seja bem-vindo!</Text>
+          
         </View>
         <View>
           <NotificationToggleButton />
@@ -314,26 +315,6 @@ export default function HomeScreen({ navigation }) {
                 ? `${vaccines.length} vacina(s) pendente(s)`
                 : "Nenhuma vacina pendente!"}
             </Text>
-          </View>
-
-          <View style={styles.sectionHeader}>
-            <TouchableOpacity
-              style={styles.calendarCard}
-              onPress={() => navigation.navigate("Calendario")}
-            >
-              <View style={styles.calendarIcon}>
-                <Ionicons name="calendar" size={20} color="#F4A361" />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <Text style={styles.calendarTitle}>Calendário</Text>
-                <Text style={styles.calendarSubtitle}>
-                  Veja todas as vacinas do seu pet
-                </Text>
-              </View>
-
-              <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
-            </TouchableOpacity>
           </View>
 
           <View style={styles.sectionHeader}>

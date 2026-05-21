@@ -16,6 +16,7 @@ import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
+import { Calendar } from "react-native-calendars";
 
 export default function DetailsScreen({ route, navigation }) {
   const { pet, petColor = "#F4A361" } = route.params;
@@ -23,6 +24,44 @@ export default function DetailsScreen({ route, navigation }) {
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines || []);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("Vacinas");
+  const [selectedDate, setSelectedDate] = useState(null);
+
+const markedDates = useMemo(() => {
+  const marks = {};
+
+  vaccines.forEach((item) => {
+    // aplicacao
+    if (item.applicationDate) {
+      const date = item.applicationDate.substring(0, 10);
+
+      marks[date] = {
+        marked: true,
+        dotColor: item.isApplied ? "#47C266" : "#F4A361",
+      };
+    }
+
+    // prox dose
+    if (item.nextApplicationDate) {
+      const nextDate = item.nextApplicationDate.substring(0, 10);
+
+      marks[nextDate] = {
+        marked: true,
+        dotColor: "#F4A361", 
+      };
+    }
+  });
+
+  if (selectedDate) {
+    marks[selectedDate] = {
+      ...marks[selectedDate],
+      selected: true,
+      selectedColor: "#F4A361",
+    };
+  }
+
+  return marks;
+}, [vaccines, selectedDate]);
+
 
   const handleEditVaccine = (item) => {
     navigation.navigate("EditVaccine", {
@@ -270,6 +309,28 @@ export default function DetailsScreen({ route, navigation }) {
                 />
                 <Text style={styles.addButtonText}>Adicionar vacina</Text>
               </TouchableOpacity>
+
+              <Text style={styles.sectionTitle}>Calendario de vacinas</Text>
+
+
+        <TouchableOpacity
+          style={styles.calendarCard}
+          onPress={() => navigation.navigate("Calendario", { pet })}
+        >
+          <View style={styles.calendarIcon}>
+            <Ionicons name="calendar" size={20} color="#F4A361" />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={styles.calendarTitle}>Abrir calendário</Text>
+            <Text style={styles.calendarSubtitle}>
+              Veja todas as vacinas no calendário
+            </Text>
+          </View>
+
+          <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
+        </TouchableOpacity>
+
 
               <Text style={styles.sectionTitle}>Historico de vacinas</Text>
               <View style={styles.historyCard}>
@@ -607,4 +668,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
+  calendarCard: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FFF",
+  marginHorizontal: 20,
+  padding: 14,
+  borderRadius: 16,
+  marginBottom: 12,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2,
+},
+
+calendarIcon: {
+  width: 36,
+  height: 36,
+  borderRadius: 10,
+  backgroundColor: "#FFF4E8",
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 12,
+},
+
+calendarTitle: {
+  fontSize: 14,
+  fontWeight: "700",
+  color: "#2F2F2F",
+},
+
+calendarSubtitle: {
+  fontSize: 12,
+  color: "#9A9A9A",
+  marginTop: 2,
+},
 });

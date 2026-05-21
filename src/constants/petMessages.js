@@ -6,26 +6,26 @@
 export const PET_MESSAGES = [
   {
     id: "1",
-    title: "Sabia que um ronrono pode ajudar",
-    text: "a reduzir o estresse?",
+    title: "O ronronar dos gatos",
+    text: "ajuda a reduzir o estresse e acalmar.",
     icon: "cat",
   },
   {
     id: "2",
-    title: "Hidratacao e",
-    text: "essencial para a saude do seu pet.",
+    title: "Manter seu pet hidratado",
+    text: "é essencial para a saúde e o bem-estar.",
     icon: "tint",
   },
   {
     id: "3",
-    title: "Brincadeiras diarias",
-    text: "fortalecem o vinculo entre voces.",
+    title: "Brincadeiras diárias",
+    text: "fortalecem o vínculo e deixam seu pet mais feliz.",
     icon: "heart",
   },
   {
     id: "4",
     title: "Um passeio cairia bem",
-    text: "leve seu amigo para sair.",
-    icon: "heart",
+    text: "leve seu amigo para sair e explorar.",
+    icon: "laugh-beam",
   },
 ];

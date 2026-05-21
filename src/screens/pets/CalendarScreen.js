@@ -31,17 +31,19 @@ export default function CalendarioScreen({ navigation }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
 
-
-
   const formatDate = (dateString) => {
-    if (!dateString) return "Selecione uma data";
-    return new Date(dateString).toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  if (!dateString) return "Selecione uma data";
 
+  const [year, month, day] = dateString.split("-");
+
+  const months = [
+    "janeiro", "fevereiro", "março", "abril",
+    "maio", "junho", "julho", "agosto",
+    "setembro", "outubro", "novembro", "dezembro"
+  ];
+
+  return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
+};
   const handleMonthYearConfirm = (date) => {
     console.log("Clicado")
     setCurrentDate(date);
@@ -76,7 +78,6 @@ export default function CalendarioScreen({ navigation }) {
       );
 
       const formatted = {};
-      const today = new Date().toISOString().split("T")[0];
 
       petVaccines.forEach((vac) => {
         if (!vac.applicationDate) return;
@@ -150,7 +151,17 @@ export default function CalendarioScreen({ navigation }) {
     return marks;
   }, [events, selectedDate]);
 
-  const today = new Date().toISOString().split("T")[0];
+  const getToday = () => {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const today = getToday();
 
   const upcomingVaccines = Object.entries(events)
     .flatMap(([date, items]) =>
@@ -205,12 +216,12 @@ export default function CalendarioScreen({ navigation }) {
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventSubtitle}>
-          {item.date
-            ? new Date(item.date).toLocaleDateString("pt-BR")
-            : item.applied
-              ? "Dose aplicada"
-              : "Próxima dose"}
-        </Text>
+              {item.date
+                ? formatDate(item.date)
+                : item.applied
+                  ? "Dose aplicada"
+                  : "Próxima dose"}
+            </Text>
       </View>
 
       <View
@@ -258,6 +269,7 @@ export default function CalendarioScreen({ navigation }) {
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Calendário de vacinas</Text>
           </View>
+          <View style={styles.titleDivider} />
         </View>
 
         <TouchableOpacity
@@ -362,9 +374,6 @@ export default function CalendarioScreen({ navigation }) {
             <View style={styles.vaccineHeader}>
               <Text style={styles.vaccineDate}>Próximas doses</Text>
             </View>
-
-            <View style={styles.divider} />
-
 
             {upcomingVaccines.length ? (
               upcomingVaccines.map(renderItem)
