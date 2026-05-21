@@ -32,18 +32,18 @@ export default function CalendarioScreen({ navigation }) {
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
 
   const formatDate = (dateString) => {
-  if (!dateString) return "Selecione uma data";
+    if (!dateString) return "Selecione uma data";
 
-  const [year, month, day] = dateString.split("-");
+    const [year, month, day] = dateString.split("-");
 
-  const months = [
-    "janeiro", "fevereiro", "março", "abril",
-    "maio", "junho", "julho", "agosto",
-    "setembro", "outubro", "novembro", "dezembro"
-  ];
+    const months = [
+      "janeiro", "fevereiro", "março", "abril",
+      "maio", "junho", "julho", "agosto",
+      "setembro", "outubro", "novembro", "dezembro"
+    ];
 
-  return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
-};
+    return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
+  };
   const handleMonthYearConfirm = (date) => {
     console.log("Clicado")
     setCurrentDate(date);
@@ -79,26 +79,57 @@ export default function CalendarioScreen({ navigation }) {
 
       const formatted = {};
 
+      // Obter data de hoje
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const today = `${year}-${month}-${day}`;
+
       petVaccines.forEach((vac) => {
-        if (!vac.applicationDate) return;
+        // Processar applicationDate
+        if (vac.applicationDate) {
+          const date = vac.applicationDate.substring(0, 10);
 
-        const date = vac.applicationDate.substring(0, 10);
+          if (!formatted[date]) formatted[date] = [];
 
-        if (!formatted[date]) formatted[date] = [];
+          const isLate = !vac.isApplied && date < today;
 
-        const isLate = !vac.isApplied && date < today;
+          formatted[date].push({
+            id: vac.id,
+            name: vac.name || "Vacina",
+            applied: vac.isApplied,
+            late: isLate,
+            status: vac.isApplied
+              ? "Aplicada"
+              : isLate
+                ? "Atrasada"
+                : "Próxima dose",
+          });
+        }
 
-        formatted[date].push({
-          id: vac.id,
-          name: vac.name || "Vacina",
-          applied: vac.isApplied,
-          late: isLate,
-          status: vac.isApplied
-            ? "Aplicada"
-            : isLate
-              ? "Atrasada"
-              : "Próxima dose",
-        });
+        // Processar nextApplicationDate
+        if (vac.nextApplicationDate) {
+          const date = vac.nextApplicationDate.substring(0, 10);
+
+          if (!formatted[date]) formatted[date] = [];
+
+          // Verificar se já existe uma vacina com o mesmo nome aplicada nessa data
+          const vacinaAplicadaExistente = formatted[date].some(
+            (item) => item.name === (vac.name || "Vacina") && item.applied
+          );
+
+          // Só adicionar se não houver versão aplicada
+          if (!vacinaAplicadaExistente) {
+            formatted[date].push({
+              id: vac.id,
+              name: vac.name || "Vacina",
+              applied: false,
+              late: date < today,
+              status: date < today ? "Atrasada" : "Próxima dose",
+            });
+          }
+        }
       });
 
       setEvents(formatted);
@@ -216,12 +247,12 @@ export default function CalendarioScreen({ navigation }) {
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventSubtitle}>
-              {item.date
-                ? formatDate(item.date)
-                : item.applied
-                  ? "Dose aplicada"
-                  : "Próxima dose"}
-            </Text>
+          {item.date
+            ? formatDate(item.date)
+            : item.applied
+              ? "Dose aplicada"
+              : "Próxima dose"}
+        </Text>
       </View>
 
       <View
