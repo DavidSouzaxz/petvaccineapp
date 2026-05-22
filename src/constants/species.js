@@ -10,6 +10,7 @@ export const SPECIES_IMAGES = {
   Passaro: require("../../assets/bird.png"),
   Hamster: require("../../assets/hamster.png"),
   Peixe: require("../../assets/fish.png"),
+  Outro: require("../../assets/outro.png"),
 };
 
 /**
@@ -22,6 +23,7 @@ export const SPECIES_OPTIONS = [
   { label: "Passaro", icon: "dove" },
   { label: "Hamster", icon: "paw" },
   { label: "Peixe", icon: "fish" },
+  { label: "Outro", icon: "horse" },
 ];
 
 /**
