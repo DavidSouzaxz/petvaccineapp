@@ -107,15 +107,23 @@ export default function AddOccurrenceScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="#FFF7F1"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Nova Ocorrência</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: 20 }}
       >
-        <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
-          <ButtonRollback navigation={navigation} disabled={loading} />
-        </View>
-
-        <View style={styles.headerBox}>
+        <View style={styles.containerCircle}>
           <View
             style={[
               styles.iconCircle,
@@ -124,16 +132,11 @@ export default function AddOccurrenceScreen({ navigation, route }) {
           >
             <MaterialCommunityIcons
               name="camera-plus-outline"
-              size={35}
+              size={28}
               color={petColor || "#F4A361"}
             />
           </View>
-          <Text style={styles.headerText}>Nova Ocorrência</Text>
-          <Text style={styles.petNameText}>
-            Relato para <Text style={{ fontWeight: "bold" }}>{petName}</Text>
-          </Text>
         </View>
-
         <View style={styles.card}>
           <Text style={styles.label}>Tipo</Text>
           <View style={styles.tagContainer}>
@@ -228,16 +231,23 @@ export default function AddOccurrenceScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
-  headerBox: { alignItems: "center", marginBottom: 20, marginTop: 10 },
+  headerBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
+  },
+  containerCircle: { justifyContent: "center", flexDirection: "row" },
   iconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 120,
+    height: 120,
+    borderRadius: 55,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
   },
-  headerText: { fontSize: 24, fontWeight: "bold", color: "#2B2B2B" },
+  headerText: { fontSize: 18, fontWeight: "bold", color: "#2B2B2B" },
   petNameText: { fontSize: 16, color: "#666" },
   card: {
     backgroundColor: "#FFF",

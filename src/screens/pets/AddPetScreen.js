@@ -157,16 +157,21 @@ export default function AddPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Cadastrar</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <ButtonRollback navigation={navigation} disabled={loading} />
-        <View style={styles.topBar}>
-          <Text style={styles.titlePage}>Cadastrar pet</Text>
-          <View style={styles.headerSpacer} />
-        </View>
-
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <Image
@@ -272,7 +277,7 @@ export default function AddPetScreen({ navigation, route }) {
                     : styles.segmentText
                 }
               >
-                Femea
+                Fêmea
               </Text>
             </TouchableOpacity>
           </View>
@@ -383,24 +388,25 @@ export default function AddPetScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
-  topBar: {
-    flexDirection: "row",
+
+  headerBox: {
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 60,
-    paddingBottom: 10,
-    position: "relative",
-    minHeight: 48,
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
-  titlePage: {
-    color: "#2B2B2B",
+  headerText: {
     fontSize: 18,
-    fontWeight: "700",
-    position: "absolute",
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    pointerEvents: "none",
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+  titleBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
   headerSpacer: { width: 36, height: 36 },
   avatarSection: {

@@ -94,12 +94,21 @@ function OccurrenceDetailsScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="#FFF7F1"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Detalhes Ocorrência</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <ButtonRollback navigation={navigation} disabled={false} />
-
         <View style={styles.headerBox}>
           <FontAwesome5
             name={typeColors.icon}
@@ -107,7 +116,7 @@ function OccurrenceDetailsScreen({ route, navigation }) {
             color="#F4A361"
             style={{ marginBottom: 8 }}
           />
-          <Text style={styles.headerText}>{occurrence.title}</Text>
+          <Text style={styles.titleText}>{occurrence.title}</Text>
           <Text style={styles.petNameText}>
             Detalhes de{" "}
             <Text style={{ color: "#F4A361", fontWeight: "bold" }}>
@@ -345,11 +354,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
   headerBox: {
     alignItems: "center",
-    marginTop: 40,
-    paddingTop: 30,
-    marginBottom: 20,
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
   headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+  titleText: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#F4A361",

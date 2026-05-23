@@ -78,7 +78,7 @@ export default function EditPetScreen({ navigation, route }) {
       setAlertMessage("Pet excluido com sucesso!");
       setAlertVisible(true);
       setTimeout(() => {
-        navigation.navigate("PetsHome", { newPet: true });
+        navigation.pop();
       }, 1000);
     } catch (error) {
       setAlertMessage("Nao foi possivel excluir o pet.");
@@ -182,7 +182,7 @@ export default function EditPetScreen({ navigation, route }) {
       setAlertMessage("Pet atualizado com sucesso!");
       setAlertVisible(true);
       setTimeout(() => {
-        navigation.navigate("PetsHome", { newPet: true });
+        navigation.pop();
       }, 1000);
     } catch (error) {
       setAlertMessage("Não foi possível atualizar o pet.");
@@ -198,6 +198,17 @@ export default function EditPetScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Editar</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#F4A361" />
@@ -207,16 +218,7 @@ export default function EditPetScreen({ navigation, route }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <ButtonRollback navigation={navigation} disabled={loading} />
-          <View style={styles.topBar}>
-            <Text style={styles.titlePage}>Editar pet</Text>
-            <TouchableOpacity
-              onPress={handleDelete}
-              style={styles.deleteButton}
-            >
-              <Ionicons name="trash-outline" color="#E14C4C" size={20} />
-            </TouchableOpacity>
-          </View>
+          {/* <ButtonRollback navigation={navigation} disabled={loading} /> */}
 
           <View style={styles.avatarSection}>
             <View style={styles.avatarWrapper}>
@@ -230,6 +232,12 @@ export default function EditPetScreen({ navigation, route }) {
                 <Ionicons name="camera" size={16} color="#FFF" />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash-outline" color="#E14C4C" size={20} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.card}>
@@ -329,7 +337,7 @@ export default function EditPetScreen({ navigation, route }) {
                       : styles.segmentText
                   }
                 >
-                  Femea
+                  Fêmea
                 </Text>
               </TouchableOpacity>
             </View>
@@ -446,15 +454,25 @@ export default function EditPetScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
-  topBar: {
-    flexDirection: "row",
+
+  headerBox: {
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 60,
-    paddingBottom: 10,
-    position: "relative",
-    minHeight: 48,
-    height: 100,
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+  titleBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
   titlePage: {
     color: "#2B2B2B",
@@ -468,8 +486,8 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     position: "absolute",
-    right: 0,
-    top: 60,
+    right: 10,
+    top: 15,
     width: 36,
     height: 36,
     borderRadius: 18,
