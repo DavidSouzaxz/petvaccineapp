@@ -181,19 +181,25 @@ export default function OccurrencesScreen({ navigation }) {
                       }}
                     >
                       <View style={styles.petSelectorItemContent}>
-                        <Text
-                          style={[
-                            styles.petSelectorItemName,
-                            selectedPet &&
-                              selectedPet.id === pet.id &&
-                              styles.petSelectorItemNameActive,
-                          ]}
-                        >
-                          {pet.name}
-                        </Text>
-                        <Text style={styles.petSelectorItemBreed}>
-                          {pet.breed}
-                        </Text>
+                        <Image
+                          source={getPetImage(pet.photoUrl, pet.specie)}
+                          style={styles.petSelectorItemImage}
+                        />
+                        <View>
+                          <Text
+                            style={[
+                              styles.petSelectorItemName,
+                              selectedPet &&
+                                selectedPet.id === pet.id &&
+                                styles.petSelectorItemNameActive,
+                            ]}
+                          >
+                            {pet.name}
+                          </Text>
+                          <Text style={styles.petSelectorItemBreed}>
+                            {pet.breed}
+                          </Text>
+                        </View>
                       </View>
                       {selectedPet && selectedPet.id === pet.id && (
                         <Ionicons
@@ -448,6 +454,14 @@ const styles = StyleSheet.create({
   },
   petSelectorItemContent: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  petSelectorItemImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
   },
   petSelectorItemName: {
     fontSize: 16,

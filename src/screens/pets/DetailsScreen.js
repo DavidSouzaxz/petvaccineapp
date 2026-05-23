@@ -26,42 +26,41 @@ export default function DetailsScreen({ route, navigation }) {
   const [activeTab, setActiveTab] = useState("Vacinas");
   const [selectedDate, setSelectedDate] = useState(null);
 
-const markedDates = useMemo(() => {
-  const marks = {};
+  const markedDates = useMemo(() => {
+    const marks = {};
 
-  vaccines.forEach((item) => {
-    // aplicacao
-    if (item.applicationDate) {
-      const date = item.applicationDate.substring(0, 10);
+    vaccines.forEach((item) => {
+      // aplicacao
+      if (item.applicationDate) {
+        const date = item.applicationDate.substring(0, 10);
 
-      marks[date] = {
-        marked: true,
-        dotColor: item.isApplied ? "#47C266" : "#F4A361",
+        marks[date] = {
+          marked: true,
+          dotColor: item.isApplied ? "#47C266" : "#F4A361",
+        };
+      }
+
+      // prox dose
+      if (item.nextApplicationDate) {
+        const nextDate = item.nextApplicationDate.substring(0, 10);
+
+        marks[nextDate] = {
+          marked: true,
+          dotColor: "#F4A361",
+        };
+      }
+    });
+
+    if (selectedDate) {
+      marks[selectedDate] = {
+        ...marks[selectedDate],
+        selected: true,
+        selectedColor: "#F4A361",
       };
     }
 
-    // prox dose
-    if (item.nextApplicationDate) {
-      const nextDate = item.nextApplicationDate.substring(0, 10);
-
-      marks[nextDate] = {
-        marked: true,
-        dotColor: "#F4A361", 
-      };
-    }
-  });
-
-  if (selectedDate) {
-    marks[selectedDate] = {
-      ...marks[selectedDate],
-      selected: true,
-      selectedColor: "#F4A361",
-    };
-  }
-
-  return marks;
-}, [vaccines, selectedDate]);
-
+    return marks;
+  }, [vaccines, selectedDate]);
 
   const handleEditVaccine = (item) => {
     navigation.navigate("EditVaccine", {
@@ -155,6 +154,17 @@ const markedDates = useMemo(() => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Detalhes Pet</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -165,29 +175,21 @@ const markedDates = useMemo(() => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.topBar}>
-            <ButtonRollback
-              navigation={navigation}
-              backgroundColor="#FFF"
-              color="#B56A2B"
-              disabled={loading}
-            />
-            <View style={styles.flexSpacer} />
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => navigation.navigate("EditPet", { pet })}
-            >
-              <Ionicons name="pencil-outline" size={20} color="#B56A2B" />
-            </TouchableOpacity>
-          </View>
-
           <View style={styles.petCard}>
             <Image
               source={getPetImage(pet.photoUrl, pet.specie)}
               style={styles.petAvatar}
             />
             <View style={styles.petInfo}>
-              <Text style={styles.petName}>{pet.name}</Text>
+              <View style={styles.rowEdit}>
+                <Text style={styles.petName}>{pet.name}</Text>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => navigation.navigate("EditPet", { pet })}
+                >
+                  <Ionicons name="pencil-outline" size={20} color="#B56A2B" />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.petMeta}>
                 {pet.breed || "Sem raca"}
                 {pet.age ? ` - ${pet.age}` : ""}
@@ -312,25 +314,23 @@ const markedDates = useMemo(() => {
 
               <Text style={styles.sectionTitle}>Calendario de vacinas</Text>
 
+              <TouchableOpacity
+                style={styles.calendarCard}
+                onPress={() => navigation.navigate("Calendario", { pet })}
+              >
+                <View style={styles.calendarIcon}>
+                  <Ionicons name="calendar" size={20} color="#F4A361" />
+                </View>
 
-        <TouchableOpacity
-          style={styles.calendarCard}
-          onPress={() => navigation.navigate("Calendario", { pet })}
-        >
-          <View style={styles.calendarIcon}>
-            <Ionicons name="calendar" size={20} color="#F4A361" />
-          </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.calendarTitle}>Abrir calendário</Text>
+                  <Text style={styles.calendarSubtitle}>
+                    Veja todas as vacinas no calendário
+                  </Text>
+                </View>
 
-          <View style={{ flex: 1 }}>
-            <Text style={styles.calendarTitle}>Abrir calendário</Text>
-            <Text style={styles.calendarSubtitle}>
-              Veja todas as vacinas no calendário
-            </Text>
-          </View>
-
-          <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
-        </TouchableOpacity>
-
+                <Ionicons name="chevron-forward" size={18} color="#B5B5B5" />
+              </TouchableOpacity>
 
               <Text style={styles.sectionTitle}>Historico de vacinas</Text>
               <View style={styles.historyCard}>
@@ -469,14 +469,19 @@ const markedDates = useMemo(() => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
-  scrollContent: { paddingBottom: 40 },
-  topBar: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    flexDirection: "row",
+  headerBox: {
     alignItems: "center",
-    justifyContent: "flex-start",
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+  scrollContent: { paddingBottom: 40 },
   screenTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -507,6 +512,11 @@ const styles = StyleSheet.create({
   },
   petAvatar: { width: 72, height: 72, borderRadius: 18, marginRight: 14 },
   petInfo: { flex: 1 },
+  rowEdit: {
+    flexDirection: "row",
+    position: "relative",
+    justifyContent: "space-between",
+  },
   petName: { fontSize: 20, fontWeight: "700", color: "#2F2F2F" },
   petMeta: { fontSize: 13, color: "#8B7A6B", marginTop: 4 },
   petStatus: {
@@ -670,39 +680,39 @@ const styles = StyleSheet.create({
   },
 
   calendarCard: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#FFF",
-  marginHorizontal: 20,
-  padding: 14,
-  borderRadius: 16,
-  marginBottom: 12,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.05,
-  shadowRadius: 4,
-  elevation: 2,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    marginHorizontal: 20,
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 
-calendarIcon: {
-  width: 36,
-  height: 36,
-  borderRadius: 10,
-  backgroundColor: "#FFF4E8",
-  justifyContent: "center",
-  alignItems: "center",
-  marginRight: 12,
-},
+  calendarIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#FFF4E8",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
 
-calendarTitle: {
-  fontSize: 14,
-  fontWeight: "700",
-  color: "#2F2F2F",
-},
+  calendarTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2F2F2F",
+  },
 
-calendarSubtitle: {
-  fontSize: 12,
-  color: "#9A9A9A",
-  marginTop: 2,
-},
+  calendarSubtitle: {
+    fontSize: 12,
+    color: "#9A9A9A",
+    marginTop: 2,
+  },
 });

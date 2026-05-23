@@ -20,6 +20,7 @@ import ServicePet from "../../services/ServicePet";
 import ButtonRollback from "../../components/ButtonRollback";
 import MonthYearPickerModal from "../../components/modals/MonthYearPickerModal";
 import "../../constants/calender";
+import { SPECIES_OPTIONS, SPECIES_IMAGES } from "../../constants/species";
 
 export default function CalendarioScreen({ navigation }) {
   const [events, setEvents] = useState({});
@@ -30,6 +31,7 @@ export default function CalendarioScreen({ navigation }) {
   const [showPetSelector, setShowPetSelector] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
+  const [image, setImage] = useState(null);
 
   const formatDate = (dateString) => {
     if (!dateString) return "Selecione uma data";
@@ -37,15 +39,24 @@ export default function CalendarioScreen({ navigation }) {
     const [year, month, day] = dateString.split("-");
 
     const months = [
-      "janeiro", "fevereiro", "março", "abril",
-      "maio", "junho", "julho", "agosto",
-      "setembro", "outubro", "novembro", "dezembro"
+      "janeiro",
+      "fevereiro",
+      "março",
+      "abril",
+      "maio",
+      "junho",
+      "julho",
+      "agosto",
+      "setembro",
+      "outubro",
+      "novembro",
+      "dezembro",
     ];
 
     return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
   };
   const handleMonthYearConfirm = (date) => {
-    console.log("Clicado")
+    console.log("Clicado");
     setCurrentDate(date);
     setShowMonthYearPicker(false);
   };
@@ -74,7 +85,7 @@ export default function CalendarioScreen({ navigation }) {
       const data = await ServiceVaccine.listAll();
 
       const petVaccines = (data || []).filter(
-        (item) => item?.pet?.id === pet.id || item?.petId === pet.id
+        (item) => item?.pet?.id === pet.id || item?.petId === pet.id,
       );
 
       const formatted = {};
@@ -117,7 +128,7 @@ export default function CalendarioScreen({ navigation }) {
 
           // Verificar se já existe uma vacina com o mesmo nome aplicada nessa data
           const vacinaAplicadaExistente = formatted[date].some(
-            (item) => item.name === (vac.name || "Vacina") && item.applied
+            (item) => item.name === (vac.name || "Vacina") && item.applied,
           );
 
           // Só adicionar se não houver versão aplicada
@@ -154,7 +165,7 @@ export default function CalendarioScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       if (selectedPet) loadVaccines(selectedPet);
-    }, [selectedPet])
+    }, [selectedPet]),
   );
 
   const markedDates = useMemo(() => {
@@ -163,7 +174,7 @@ export default function CalendarioScreen({ navigation }) {
     Object.keys(events).forEach((date) => {
       const hasLate = events[date].some((item) => item.late);
       const hasPending = events[date].some(
-        (item) => !item.applied && !item.late
+        (item) => !item.applied && !item.late,
       );
 
       let dotColor = "#47C266";
@@ -197,9 +208,7 @@ export default function CalendarioScreen({ navigation }) {
   const today = getToday();
 
   const upcomingVaccines = Object.entries(events)
-    .flatMap(([date, items]) =>
-      items.map((item) => ({ ...item, date }))
-    )
+    .flatMap(([date, items]) => items.map((item) => ({ ...item, date })))
     .filter((item) => !item.applied && item.date >= today)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 3);
@@ -236,13 +245,7 @@ export default function CalendarioScreen({ navigation }) {
                 : "time"
           }
           size={20}
-          color={
-            item.applied
-              ? "#47C266"
-              : item.late
-                ? "#E74C3C"
-                : "#F4A361"
-          }
+          color={item.applied ? "#47C266" : item.late ? "#E74C3C" : "#F4A361"}
         />
       </View>
 
@@ -271,11 +274,7 @@ export default function CalendarioScreen({ navigation }) {
       >
         <Text
           style={{
-            color: item.applied
-              ? "#47C266"
-              : item.late
-                ? "#E74C3C"
-                : "#F4A361",
+            color: item.applied ? "#47C266" : item.late ? "#E74C3C" : "#F4A361",
             fontWeight: "700",
             fontSize: 12,
           }}
@@ -290,8 +289,10 @@ export default function CalendarioScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
 
-      <ScrollView showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 50 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 50 }}
+      >
         <View style={styles.topBar}>
           <ButtonRollback
             navigation={navigation}
@@ -314,7 +315,8 @@ export default function CalendarioScreen({ navigation }) {
               source={
                 selectedPet?.photoUrl
                   ? { uri: selectedPet.photoUrl }
-                  : require("../../../assets/dogProfile.png")
+                  : SPECIES_IMAGES[selectedPet?.specie] ||
+                    SPECIES_IMAGES["Cachorro"]
               }
               style={styles.petImage}
             />
@@ -333,9 +335,7 @@ export default function CalendarioScreen({ navigation }) {
             key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
             locale="pt-br"
             current={currentDate.toISOString().split("T")[0]}
-            onMonthChange={(m) =>
-              setCurrentDate(new Date(m.timestamp))
-            }
+            onMonthChange={(m) => setCurrentDate(new Date(m.timestamp))}
             markedDates={markedDates}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
@@ -379,9 +379,7 @@ export default function CalendarioScreen({ navigation }) {
         <View style={styles.section}>
           <View style={styles.vaccineCard}>
             <View style={styles.vaccineHeader}>
-              <Text style={styles.vaccineDate}>
-                {formatDate(selectedDate)}
-              </Text>
+              <Text style={styles.vaccineDate}>{formatDate(selectedDate)}</Text>
               <View style={styles.vaccineBadgeTop}>
                 <Text style={styles.vaccineBadgeTopText}>
                   {events[selectedDate]?.length || 0} eventos
@@ -394,16 +392,13 @@ export default function CalendarioScreen({ navigation }) {
             {events[selectedDate]?.length ? (
               events[selectedDate].map(renderItem)
             ) : (
-              <Text style={styles.empty}>
-                Nenhum evento neste dia
-              </Text>
+              <Text style={styles.empty}>Nenhum evento neste dia</Text>
             )}
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.vaccineCard}>
-
             <View style={styles.vaccineHeader}>
               <Text style={styles.vaccineDate}>Próximas doses</Text>
             </View>
@@ -411,11 +406,8 @@ export default function CalendarioScreen({ navigation }) {
             {upcomingVaccines.length ? (
               upcomingVaccines.map(renderItem)
             ) : (
-              <Text style={styles.empty}>
-                Nenhuma próxima dose
-              </Text>
+              <Text style={styles.empty}>Nenhuma próxima dose</Text>
             )}
-
           </View>
         </View>
       </ScrollView>
@@ -433,8 +425,7 @@ export default function CalendarioScreen({ navigation }) {
                 key={pet.id}
                 style={[
                   styles.petOption,
-                  selectedPet?.id === pet.id &&
-                  styles.petOptionActive,
+                  selectedPet?.id === pet.id && styles.petOptionActive,
                 ]}
                 onPress={() => {
                   setSelectedPet(pet);
@@ -446,14 +437,13 @@ export default function CalendarioScreen({ navigation }) {
                     source={
                       pet.photoUrl
                         ? { uri: pet.photoUrl }
-                        : require("../../../assets/dogProfile.png")
+                        : SPECIES_IMAGES[pet.specie] ||
+                          SPECIES_IMAGES["Cachorro"]
                     }
                     style={styles.petOptionImage}
                   />
                   <View style={{ marginLeft: 10 }}>
-                    <Text style={styles.petOptionText}>
-                      {pet.name}
-                    </Text>
+                    <Text style={styles.petOptionText}>{pet.name}</Text>
                     <Text style={styles.petOptionBreed}>
                       {pet.breed || "Sem raça"}
                     </Text>
@@ -461,11 +451,7 @@ export default function CalendarioScreen({ navigation }) {
                 </View>
 
                 {selectedPet?.id === pet.id && (
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={22}
-                    color="#F4A361"
-                  />
+                  <Ionicons name="checkmark-circle" size={22} color="#F4A361" />
                 )}
               </TouchableOpacity>
             ))}
