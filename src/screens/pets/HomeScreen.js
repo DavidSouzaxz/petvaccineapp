@@ -18,6 +18,7 @@ import ServicePet from "../../services/ServicePet";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
+import { getLatestVaccines } from "../../core/GetLatestVaccines";
 import { NotificationManager } from "../../components/NotificationManager";
 import NotificationToggleButton from "../../components/NotificationToggleButton";
 import { PET_MESSAGES, PET_STATUS, ASSETS } from "../../constants";
@@ -90,10 +91,15 @@ export default function HomeScreen({ navigation }) {
       return 0;
     }
 
+    const latestVaccines = getLatestVaccines(vaccines);
+    if (latestVaccines.length === 0) {
+      return 0;
+    }
+
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const allVaccines = vaccines
+    const allVaccines = latestVaccines
       .map((v) => {
         const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
         return {
@@ -126,7 +132,11 @@ export default function HomeScreen({ navigation }) {
     if (!vaccines || vaccines.length === 0)
       return { name: "Sem vacinas", dateStr: "--/--/----" };
 
-    const allVaccines = vaccines
+    const latestVaccines = getLatestVaccines(vaccines);
+    if (latestVaccines.length === 0)
+      return { name: "Sem vacinas", dateStr: "--/--/----" };
+
+    const allVaccines = latestVaccines
       .map((v) => {
         const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
         return {
@@ -156,7 +166,6 @@ export default function HomeScreen({ navigation }) {
         <View>
           <Text style={styles.headerGreeting}>Olá, {userName}</Text>
           <Text style={styles.headerSubtitle}>Seja bem-vindo!</Text>
-          
         </View>
         <View>
           <NotificationToggleButton />

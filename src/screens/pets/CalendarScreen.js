@@ -19,6 +19,7 @@ import ServiceVaccine from "../../services/ServiceVaccine";
 import ServicePet from "../../services/ServicePet";
 import ButtonRollback from "../../components/ButtonRollback";
 import MonthYearPickerModal from "../../components/modals/MonthYearPickerModal";
+import { getLatestVaccines } from "../../core/GetLatestVaccines";
 import "../../constants/calender";
 import { SPECIES_OPTIONS, SPECIES_IMAGES } from "../../constants/species";
 
@@ -88,6 +89,9 @@ export default function CalendarioScreen({ navigation }) {
         (item) => item?.pet?.id === pet.id || item?.petId === pet.id,
       );
 
+      // Obter apenas as vacinas mais recentes de cada tipo
+      const latestVaccines = getLatestVaccines(petVaccines);
+
       const formatted = {};
 
       // Obter data de hoje
@@ -97,51 +101,41 @@ export default function CalendarioScreen({ navigation }) {
       const day = String(now.getDate()).padStart(2, "0");
       const today = `${year}-${month}-${day}`;
 
+      // Processar applicationDate (bolinhas verdes) - usando TODAS as vacinas aplicadas
       petVaccines.forEach((vac) => {
-        // Processar applicationDate
-        if (vac.applicationDate) {
+        if (vac.applicationDate && vac.isApplied) {
           const date = vac.applicationDate.substring(0, 10);
 
           if (!formatted[date]) formatted[date] = [];
-
-          const isLate = !vac.isApplied && date < today;
 
           formatted[date].push({
             id: vac.id,
             uniqueId: `${vac.id}-${date}-applied`,
             name: vac.name || "Vacina",
-            applied: vac.isApplied,
-            late: isLate,
-            status: vac.isApplied
-              ? "Aplicada"
-              : isLate
-                ? "Atrasada"
-                : "Próxima dose",
+            applied: true,
+            late: false,
+            status: "Aplicada",
           });
         }
+      });
 
-        // Processar nextApplicationDate
+      // Processar nextApplicationDate (bolinhas laranja) - usando apenas ÚLTIMAS vacinas
+      latestVaccines.forEach((vac) => {
         if (vac.nextApplicationDate) {
           const date = vac.nextApplicationDate.substring(0, 10);
 
           if (!formatted[date]) formatted[date] = [];
 
-          // Verificar se já existe uma vacina com o mesmo nome aplicada nessa data
-          const vacinaAplicadaExistente = formatted[date].some(
-            (item) => item.name === (vac.name || "Vacina") && item.applied,
-          );
+          const isLate = date < today;
 
-          // Só adicionar se não houver versão aplicada
-          if (!vacinaAplicadaExistente) {
-            formatted[date].push({
-              id: vac.id,
-              uniqueId: `${vac.id}-${date}-next`,
-              name: vac.name || "Vacina",
-              applied: false,
-              late: date < today,
-              status: date < today ? "Atrasada" : "Próxima dose",
-            });
-          }
+          formatted[date].push({
+            id: vac.id,
+            uniqueId: `${vac.id}-${date}-next`,
+            name: vac.name || "Vacina",
+            applied: false,
+            late: isLate,
+            status: isLate ? "Atrasada" : "Próxima dose",
+          });
         }
       });
 

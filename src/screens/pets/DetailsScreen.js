@@ -113,7 +113,7 @@ export default function DetailsScreen({ route, navigation }) {
 
     if (hasPending) {
       return {
-        label: "Atencao",
+        label: "Atenção",
         color: "#C88719",
         background: "#FFF4E0",
         icon: "time",
