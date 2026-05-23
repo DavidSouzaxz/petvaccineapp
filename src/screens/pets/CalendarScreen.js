@@ -124,7 +124,10 @@ export default function CalendarioScreen({ navigation }) {
 
           if (!formatted[date]) formatted[date] = [];
 
-          const isLate = date < today;
+          // Verificar se já existe uma vacina com o mesmo nome aplicada nessa data
+          const vacinaAplicadaExistente = formatted[date].some(
+            (item) => item.name === (vac.name || "Vacina") && item.applied,
+          );
 
           formatted[date].push({
             id: vac.id,
