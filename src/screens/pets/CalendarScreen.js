@@ -94,16 +94,13 @@ export default function CalendarioScreen({ navigation }) {
 
       const formatted = {};
 
-      // Obter data de hoje
+      // DATA DE HOJE
       const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const today = `${year}-${month}-${day}`;
+      const today = now.toISOString().split("T")[0];
 
-      // Processar applicationDate (bolinhas verdes) - usando TODAS as vacinas aplicadas
+      // Processar TODAS as vacinas - aplicadas e não aplicadas
       petVaccines.forEach((vac) => {
-        if (vac.applicationDate && vac.isApplied) {
+        if (vac.applicationDate) {
           const date = vac.applicationDate.substring(0, 10);
 
           if (!formatted[date]) formatted[date] = [];
@@ -112,16 +109,15 @@ export default function CalendarioScreen({ navigation }) {
             id: vac.id,
             uniqueId: `${vac.id}-${date}-applied`,
             name: vac.name || "Vacina",
-            applied: true,
+            applied: vac.isApplied,
             late: false,
-            status: "Aplicada",
+            isFirstDose: !vac.isApplied,
+            date,
           });
         }
-      });
 
-      // Processar nextApplicationDate (bolinhas laranja) - usando apenas ÚLTIMAS vacinas
-      latestVaccines.forEach((vac) => {
-        if (vac.nextApplicationDate) {
+        // PRÓXIMA DOSE (SÓ SE JÁ FOI APLICADA)
+        if (vac.nextApplicationDate && vac.isApplied) {
           const date = vac.nextApplicationDate.substring(0, 10);
 
           if (!formatted[date]) formatted[date] = [];
@@ -134,7 +130,8 @@ export default function CalendarioScreen({ navigation }) {
             name: vac.name || "Vacina",
             applied: false,
             late: isLate,
-            status: isLate ? "Atrasada" : "Próxima dose",
+            isFirstDose: false,
+            date,
           });
         }
       });
@@ -168,7 +165,7 @@ export default function CalendarioScreen({ navigation }) {
     Object.keys(events).forEach((date) => {
       const hasLate = events[date].some((item) => item.late);
       const hasPending = events[date].some(
-        (item) => !item.applied && !item.late,
+        (item) => !item.applied && !item.late && !item.isFirstDose,
       );
 
       let dotColor = "#47C266";
@@ -203,9 +200,16 @@ export default function CalendarioScreen({ navigation }) {
 
   const upcomingVaccines = Object.entries(events)
     .flatMap(([date, items]) => items.map((item) => ({ ...item, date })))
-    .filter((item) => !item.applied && item.date >= today)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 3);
+    .filter((item) => {
+      const itemDate = new Date(item.date);
+
+      return (
+        !item.applied &&
+        itemDate.getMonth() === currentDate.getMonth() &&
+        itemDate.getFullYear() === currentDate.getFullYear()
+      );
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   if (loading) {
     return (
@@ -226,7 +230,9 @@ export default function CalendarioScreen({ navigation }) {
               ? "#E8F7EE"
               : item.late
                 ? "#FDECEA"
-                : "#FFF4EC",
+                : item.isFirstDose
+                  ? "#FFF4EC"
+                  : "#FFF4EC",
           },
         ]}
       >
@@ -245,13 +251,7 @@ export default function CalendarioScreen({ navigation }) {
 
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.eventTitle}>{item.name}</Text>
-        <Text style={styles.eventSubtitle}>
-          {item.date
-            ? formatDate(item.date)
-            : item.applied
-              ? "Dose aplicada"
-              : "Próxima dose"}
-        </Text>
+        <Text style={styles.eventSubtitle}>{formatDate(item.date)}</Text>
       </View>
 
       <View
@@ -262,18 +262,32 @@ export default function CalendarioScreen({ navigation }) {
               ? "#E8F7EE"
               : item.late
                 ? "#FDECEA"
-                : "#FFF4EC",
+                : item.isFirstDose
+                  ? "#EAF3FF"
+                  : "#FFF4EC",
           },
         ]}
       >
         <Text
           style={{
-            color: item.applied ? "#47C266" : item.late ? "#E74C3C" : "#F4A361",
+            color: item.applied
+              ? "#47C266"
+              : item.late
+                ? "#E74C3C"
+                : item.isFirstDose
+                  ? "#4A90E2"
+                  : "#F4A361",
             fontWeight: "700",
             fontSize: 12,
           }}
         >
-          {item.status || "Próxima"}
+          {item.applied
+            ? "Aplicada"
+            : item.late
+              ? "Atrasada"
+              : item.isFirstDose
+                ? "Primeira dose"
+                : "Próxima dose"}
         </Text>
       </View>
     </View>
@@ -310,7 +324,7 @@ export default function CalendarioScreen({ navigation }) {
                 selectedPet?.photoUrl
                   ? { uri: selectedPet.photoUrl }
                   : SPECIES_IMAGES[selectedPet?.specie] ||
-                    SPECIES_IMAGES["Cachorro"]
+                  SPECIES_IMAGES["Cachorro"]
               }
               style={styles.petImage}
             />
@@ -341,6 +355,7 @@ export default function CalendarioScreen({ navigation }) {
               textDayFontSize: 14,
               textMonthFontSize: 14,
               textDayHeaderFontSize: 10,
+              textMonthFontWeight: "700",
             }}
           />
           <TouchableOpacity
@@ -432,7 +447,7 @@ export default function CalendarioScreen({ navigation }) {
                       pet.photoUrl
                         ? { uri: pet.photoUrl }
                         : SPECIES_IMAGES[pet.specie] ||
-                          SPECIES_IMAGES["Cachorro"]
+                        SPECIES_IMAGES["Cachorro"]
                     }
                     style={styles.petOptionImage}
                   />
