@@ -66,82 +66,81 @@ export default function CalendarioScreen({ navigation }) {
   }
 
   async function loadVaccines(pet = selectedPet) {
-    if (!pet) return;
+  if (!pet) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const data = await ServiceVaccine.listAll();
+    const data = await ServiceVaccine.listAll();
 
-      const petVaccines = (data || []).filter(
-        (item) => item?.pet?.id === pet.id || item?.petId === pet.id
-      );
+    const petVaccines = (data || []).filter(
+      (item) => item?.pet?.id === pet.id || item?.petId === pet.id
+    );
 
-      const formatted = {};
+    const formatted = {};
 
-      // Obter data de hoje
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const today = `${year}-${month}-${day}`;
+    // DATA DE HOJE
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
 
-      petVaccines.forEach((vac) => {
-        // Processar applicationDate
-        if (vac.applicationDate) {
-          const date = vac.applicationDate.substring(0, 10);
+    petVaccines.forEach((vac) => {
 
-          if (!formatted[date]) formatted[date] = [];
+  // DATA DE APLICAÇÃO (SE EXISTIR)         VERIFICARRRRRRRRRRR
+    if (vac.applicationDate) {
+  const date = vac.applicationDate.substring(0, 10);
 
-          const isLate = !vac.isApplied && date < today;
+  if (!formatted[date]) formatted[date] = [];
 
-          formatted[date].push({
-            id: vac.id,
-            uniqueId: `${vac.id}-${date}-applied`,
-            name: vac.name || "Vacina",
-            applied: vac.isApplied,
-            late: isLate,
-            status: vac.isApplied
-              ? "Aplicada"
-              : isLate
-                ? "Atrasada"
-                : "Próxima dose",
-          });
-        }
+  const isLate = !vac.isApplied && date < today;
 
-        // Processar nextApplicationDate
-        if (vac.nextApplicationDate) {
-          const date = vac.nextApplicationDate.substring(0, 10);
+  formatted[date].push({
+    id: vac.id,
+    uniqueId: `${vac.id}-${date}-applied`,
+    name: vac.name || "Vacina",
 
-          if (!formatted[date]) formatted[date] = [];
+    applied: vac.isApplied,
+    late: isLate,
 
-          // Verificar se já existe uma vacina com o mesmo nome aplicada nessa data
-          const vacinaAplicadaExistente = formatted[date].some(
-            (item) => item.name === (vac.name || "Vacina") && item.applied
-          );
+    // 👉 PRIMEIRA DOSE = NÃO aplicada
+    isFirstDose: !vac.isApplied,
 
-          // Só adicionar se não houver versão aplicada
-          if (!vacinaAplicadaExistente) {
-            formatted[date].push({
-              id: vac.id,
-              uniqueId: `${vac.id}-${date}-next`,
-              name: vac.name || "Vacina",
-              applied: false,
-              late: date < today,
-              status: date < today ? "Atrasada" : "Próxima dose",
-            });
-          }
-        }
-      });
+    date: date,
+  });
+}
 
-      setEvents(formatted);
-      setSelectedDate(today);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+  // PRÓXIMA DOSE (SÓ SE JÁ FOI APLICADA)
+  if (vac.nextApplicationDate && vac.isApplied) {
+  const date = vac.nextApplicationDate.substring(0, 10);
+
+  if (!formatted[date]) formatted[date] = [];
+
+  const isLate = date < today;
+
+  formatted[date].push({
+    id: vac.id,
+    uniqueId: `${vac.id}-${date}-next`,
+    name: vac.name || "Vacina",
+
+    applied: false,
+    late: isLate,
+
+    isFirstDose: false,
+
+    date: date,
+  });
+}
+
+});
+
+    setEvents(formatted);
+    setSelectedDate(today);
+
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     loadPets();
@@ -163,7 +162,7 @@ export default function CalendarioScreen({ navigation }) {
     Object.keys(events).forEach((date) => {
       const hasLate = events[date].some((item) => item.late);
       const hasPending = events[date].some(
-        (item) => !item.applied && !item.late
+        (item) => !item.applied && !item.late && !item.isFirstDose
       );
 
       let dotColor = "#47C266";
@@ -197,12 +196,19 @@ export default function CalendarioScreen({ navigation }) {
   const today = getToday();
 
   const upcomingVaccines = Object.entries(events)
-    .flatMap(([date, items]) =>
-      items.map((item) => ({ ...item, date }))
-    )
-    .filter((item) => !item.applied && item.date >= today)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 3);
+  .flatMap(([date, items]) =>
+    items.map((item) => ({ ...item, date }))
+  )
+  .filter((item) => {
+    const itemDate = new Date(item.date);
+
+    return (
+      !item.applied &&
+      itemDate.getMonth() === currentDate.getMonth() &&
+      itemDate.getFullYear() === currentDate.getFullYear()
+    );
+  })
+  .sort((a, b) => a.date.localeCompare(b.date));
 
   if (loading) {
     return (
@@ -223,7 +229,9 @@ export default function CalendarioScreen({ navigation }) {
               ? "#E8F7EE"
               : item.late
                 ? "#FDECEA"
-                : "#FFF4EC",
+                : item.isFirstDose
+                  ? "#FFF4EC"
+                  : "#FFF4EC",
           },
         ]}
       >
@@ -249,40 +257,46 @@ export default function CalendarioScreen({ navigation }) {
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventSubtitle}>
-          {item.date
-            ? formatDate(item.date)
-            : item.applied
-              ? "Dose aplicada"
-              : "Próxima dose"}
+           {formatDate(item.date)}
         </Text>
       </View>
 
-      <View
-        style={[
-          styles.badge,
-          {
-            backgroundColor: item.applied
-              ? "#E8F7EE"
-              : item.late
-                ? "#FDECEA"
-                : "#FFF4EC",
-          },
-        ]}
-      >
-        <Text
-          style={{
-            color: item.applied
-              ? "#47C266"
-              : item.late
-                ? "#E74C3C"
-                : "#F4A361",
-            fontWeight: "700",
-            fontSize: 12,
-          }}
-        >
-          {item.status || "Próxima"}
-        </Text>
-      </View>
+  <View
+  style={[
+    styles.badge,
+    {
+      backgroundColor: item.applied
+        ? "#E8F7EE"
+        : item.late
+          ? "#FDECEA"
+          : item.isFirstDose
+            ? "#EAF3FF"
+            : "#FFF4EC",
+    },
+  ]}
+>
+    <Text
+      style={{
+        color: item.applied
+          ? "#47C266"   
+          : item.late
+            ? "#E74C3C"
+            : item.isFirstDose
+              ? "#4A90E2"
+              : "#F4A361",
+        fontWeight: "700",
+        fontSize: 12,
+      }}
+    >
+      {item.applied
+      ? "Aplicada"
+      : item.late
+        ? "Atrasada"
+      : item.isFirstDose
+        ? "Primeira dose"
+        : "Próxima dose"}
+    </Text>
+  </View>
     </View>
   );
 
@@ -347,6 +361,7 @@ export default function CalendarioScreen({ navigation }) {
               textDayFontSize: 14,
               textMonthFontSize: 14,
               textDayHeaderFontSize: 10,
+              textMonthFontWeight: "700",
             }}
           />
           <TouchableOpacity
