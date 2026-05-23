@@ -54,7 +54,7 @@ export default function PetsScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
-        <ButtonRollback navigation={navigation} disabled={loading} />
+        {/* <ButtonRollback navigation={navigation} disabled={loading} /> */}
 
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Meus Pets</Text>
