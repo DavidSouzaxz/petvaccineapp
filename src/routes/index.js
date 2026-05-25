@@ -161,7 +161,14 @@ function PetsListStack() {
         component={EditVaccineScreen}
         options={{ title: "Editar Vacina" }}
       />
+
+      <Stack.Screen 
+        name="Calendario"
+        component={CalendarScreen} 
+      />
     </Stack.Navigator>
+
+    
   );
 }
 
