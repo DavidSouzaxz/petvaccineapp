@@ -17,7 +17,7 @@ import ButtonRollback from "../../components/ButtonRollback";
 import { validateDate, validateTime } from "../../core/validators";
 import InputDatePicker from "../../components/InputDatePicker";
 import InputTimePicker from "../../components/InputTimePicker";
-import { VACCINE_SUGGESTIONS } from "../../constants"
+import { VACCINE_SUGGESTIONS } from "../../constants";
 
 const parseDateTime = (value) => {
   if (!value) return { date: "", time: "" };
@@ -147,21 +147,32 @@ export default function EditVaccineScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}></Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
+        {/* <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
           <ButtonRollback navigation={navigation} disabled={loading} />
-        </View>
-        <View style={styles.headerBox}>
+        </View> */}
+        <View style={styles.titleBox}>
           <FontAwesome6
             name="syringe"
             size={32}
             color="#F4A361"
             style={{ marginBottom: 8 }}
           />
-          <Text style={styles.headerText}>Editar Vacina</Text>
+          <Text style={styles.titleText}>Editar Vacina</Text>
           <Text style={styles.petNameText}>
             para{" "}
             <Text style={{ color: petColor || "#F4A361", fontWeight: "bold" }}>
@@ -360,12 +371,24 @@ export default function EditVaccineScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1", padding: 0 },
+  titleBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 20,
+  },
   headerBox: {
     alignItems: "center",
-    marginTop: 60,
-    marginBottom: 10,
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
   headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+  titleText: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#F4A361",
