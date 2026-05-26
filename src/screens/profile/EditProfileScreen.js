@@ -13,7 +13,7 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-
+import ButtonRollback from "../../components/ButtonRollback";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import ServiceUser from "../../services/ServiceUser";
@@ -116,7 +116,17 @@ export default function EditProfileScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f7efe5" />
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Editar perfil</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
       {loading ? (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#ff7a00" />
@@ -126,18 +136,7 @@ export default function EditProfileScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.headerIcon}
-            >
-              <Ionicons name="arrow-back" size={24} color="#222" />
-            </TouchableOpacity>
 
-            <Text style={styles.title}>Editar perfil</Text>
-
-            <View style={styles.headerIcon} />
-          </View>
 
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
@@ -207,6 +206,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f7efe5",
   },
+  headerBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
   loadingOverlay: {
     position: "absolute",
     top: 0,
@@ -243,6 +254,7 @@ const styles = StyleSheet.create({
   },
 
   avatarContainer: {
+    marginTop: 20,
     alignItems: "center",
     marginBottom: 18,
   },

@@ -57,10 +57,10 @@ export default function CalendarioScreen({ navigation }) {
     return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
   };
   const handleMonthYearConfirm = (date) => {
-  console.log("Clicado");
-  setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
-  setShowMonthYearPicker(false);
-};
+    console.log("Clicado");
+    setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
+    setShowMonthYearPicker(false);
+  };
 
   async function loadPets() {
     try {
@@ -94,60 +94,60 @@ export default function CalendarioScreen({ navigation }) {
 
       const formatted = {};
 
-    // DATA DE HOJE
-    const now = new Date();
-    const today = new Date().toLocaleDateString("en-CA");     //pra pegar o dia de hoje
+      // DATA DE HOJE
+      const now = new Date();
+      const today = new Date().toLocaleDateString("en-CA");     //pra pegar o dia de hoje
 
-    
-    petVaccines.forEach((vac) => {
 
-  // DATA DE APLICAÇÃO
-  if (vac.applicationDate) {
-    const date = vac.applicationDate.substring(0, 10);
+      petVaccines.forEach((vac) => {
 
-    if (!formatted[date]) formatted[date] = [];
+        // DATA DE APLICAÇÃO
+        if (vac.applicationDate) {
+          const date = vac.applicationDate.substring(0, 10);
 
-    const isLate = !vac.isApplied && date < today;
-    const isPending = !vac.isApplied && date >= today;
+          if (!formatted[date]) formatted[date] = [];
 
-    formatted[date].push({
-      id: vac.id,
-      uniqueId: `${vac.id}-${date}-applied`,
-      name: vac.name || "Vacina",
+          const isLate = !vac.isApplied && date < today;
+          const isPending = !vac.isApplied && date >= today;
 
-      applied: vac.isApplied,
-      late: isLate,
-      pending: isPending,
-      isNextDose: false, 
+          formatted[date].push({
+            id: vac.id,
+            uniqueId: `${vac.id}-${date}-applied`,
+            name: vac.name || "Vacina",
 
-      date: date,
-    });
-  }
+            applied: vac.isApplied,
+            late: isLate,
+            pending: isPending,
+            isNextDose: false,
 
-  // PRÓXIMA DOSE
-  if (vac.nextApplicationDate && vac.isApplied) {
-    const date = vac.nextApplicationDate.substring(0, 10);
+            date: date,
+          });
+        }
 
-    if (!formatted[date]) formatted[date] = [];
+        // PRÓXIMA DOSE
+        if (vac.nextApplicationDate && vac.isApplied) {
+          const date = vac.nextApplicationDate.substring(0, 10);
 
-    const isLate = date < today;
+          if (!formatted[date]) formatted[date] = [];
 
-    formatted[date].push({
-      id: vac.id,
-      uniqueId: `${vac.id}-${date}-next`,
-      name: vac.name || "Vacina",
+          const isLate = date < today;
 
-      applied: false,
-      late: isLate,
+          formatted[date].push({
+            id: vac.id,
+            uniqueId: `${vac.id}-${date}-next`,
+            name: vac.name || "Vacina",
 
-      pending: false, 
-      isNextDose: true, 
+            applied: false,
+            late: isLate,
 
-      date: date,
-    });
-  }
+            pending: false,
+            isNextDose: true,
 
-});
+            date: date,
+          });
+        }
+
+      });
 
       setEvents(formatted);
       setSelectedDate(today);
@@ -182,8 +182,8 @@ export default function CalendarioScreen({ navigation }) {
 
       let dotColor = "#47C266";
       if (hasLate) dotColor = "#E74C3C";
-        else if (hasPending) dotColor = "#F4A361";
-        else if (hasNextDose) dotColor = "#F7D154";
+      else if (hasPending) dotColor = "#F4A361";
+      else if (hasNextDose) dotColor = "#F7D154";
 
       marks[date] = { marked: true, dotColor };
     });
@@ -259,14 +259,14 @@ export default function CalendarioScreen({ navigation }) {
           }
           size={20}
           color={
-              item.applied
-                ? "#47C266"
-                : item.late
-                  ? "#E74C3C"
-                  : item.isNextDose
-                    ? "#F7D154" //  próxima dose
-                    : "#F4A361" //  pendente
-            }
+            item.applied
+              ? "#47C266"
+              : item.late
+                ? "#E74C3C"
+                : item.isNextDose
+                  ? "#F7D154" //  próxima dose
+                  : "#F4A361" //  pendente
+          }
         />
       </View>
 
@@ -275,65 +275,64 @@ export default function CalendarioScreen({ navigation }) {
         <Text style={styles.eventSubtitle}>{formatDate(item.date)}</Text>
       </View>
 
-  <View
-  style={[
-    styles.badge,
-    {
-      backgroundColor: item.applied
-            ? "#E8F7EE"
+      <View
+        style={[
+          styles.badge,
+          {
+            backgroundColor: item.applied
+              ? "#E8F7EE"
+              : item.late
+                ? "#FDECEA"
+                : item.isNextDose
+                  ? "#FFF9E6" //  leve
+                  : "#FFF4EC", //  leve
+          },
+        ]}
+      >
+        <Text
+          style={{
+            color: item.applied
+              ? "#47C266"
+              : item.late
+                ? "#E74C3C"
+                : item.isNextDose
+                  ? "#F7D154" //  próxima dose
+                  : "#F4A361", //  pendente
+            fontWeight: "700",
+            fontSize: 12,
+          }}
+        >
+          {item.applied
+            ? "Aplicada"
             : item.late
-              ? "#FDECEA"
+              ? "Atrasada"
               : item.isNextDose
-                ? "#FFF9E6" //  leve
-                : "#FFF4EC", //  leve
-    },
-  ]}
->
-    <Text
-      style={{
-        color: item.applied
-          ? "#47C266"
-          : item.late
-            ? "#E74C3C"
-            : item.isNextDose
-              ? "#F7D154" //  próxima dose
-              : "#F4A361", //  pendente
-        fontWeight: "700",
-        fontSize: 12,
-      }}
-    >
-      {item.applied
-        ? "Aplicada"
-        : item.late
-          ? "Atrasada"
-          : item.isNextDose
-            ? "Próxima dose"
-            : "Pendente"}
-    </Text>
-  </View>
+                ? "Próxima dose"
+                : "Pendente"}
+        </Text>
+      </View>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
+      <View style={styles.topBar}>
+        <ButtonRollback
+          navigation={navigation}
+          disabled={loading}
+          backgroundColor="transparent"
+        />
+        <View style={styles.headerBox}>
+          <Text style={styles.headerText}>Calendário de vacinas</Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50 }}
       >
-        <View style={styles.topBar}>
-          <ButtonRollback
-            navigation={navigation}
-            backgroundColor="#FFF"
-            color="#B56A2B"
-          />
 
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Calendário de vacinas</Text>
-          </View>
-          <View style={styles.titleDivider} />
-        </View>
 
         <TouchableOpacity
           style={styles.petCard}
@@ -365,8 +364,8 @@ export default function CalendarioScreen({ navigation }) {
             locale="pt-br"
             current={currentDate.toLocaleDateString("en-CA")}
             onMonthChange={(m) => {
-  setCurrentDate(new Date(m.year, m.month - 1, 1));
-}}
+              setCurrentDate(new Date(m.year, m.month - 1, 1));
+            }}
             markedDates={markedDates}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
@@ -516,11 +515,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#FDF4E7",
   },
 
-  topBar: {
-    paddingTop: 58,
-    paddingHorizontal: 20,
-    justifyContent: "center",
+  headerBox: {
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 58,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
   },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2B2B2B",
+  },
+
 
   titleContainer: {
     position: "absolute",
@@ -537,7 +544,7 @@ const styles = StyleSheet.create({
   },
 
   petCard: {
-    marginTop: 60,
+    marginTop: 20,
     marginHorizontal: 20,
     backgroundColor: "#FFF",
     borderRadius: 18,
