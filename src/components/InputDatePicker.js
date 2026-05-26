@@ -35,6 +35,8 @@ export default function InputDatePicker({
         return { minimumDate: today, maximumDate: null };
       case "all":
         return { minimumDate: null, maximumDate: null };
+      case "yesterday":
+        return { minimumDate: null, maximumDate: yesterday };
       case "past":
       default:
         return { minimumDate: null, maximumDate: today };
@@ -106,6 +108,7 @@ export default function InputDatePicker({
         value={tempDate || getDateValue()}
         mode="date"
         dateMode={dateMode}
+        excludeToday={dateMode === "yesterday"}
         onConfirm={handleConfirmDate}
         onCancel={handleCancelDate}
       />

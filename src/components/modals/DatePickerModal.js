@@ -18,6 +18,7 @@ export default function DatePickerModal({
   value,
   mode = "date",
   dateMode = "past",
+  excludeToday = false,
   onConfirm,
   onCancel,
 }) {
@@ -53,8 +54,13 @@ export default function DatePickerModal({
           animated: false,
         });
 
+        // Calcular índice do mês nas meses permitidos
+        const maxMonthInYear = getMaxMonthInYear(selectedYear);
+        const permittedMonthsList = months.slice(0, maxMonthInYear + 1);
+        const monthIndex = permittedMonthsList.indexOf(months[selectedMonth]);
+
         monthScrollRef.current?.scrollTo({
-          y: selectedMonth * optionHeight,
+          y: monthIndex >= 0 ? monthIndex * optionHeight : selectedMonth * optionHeight,
           animated: false,
         });
 
@@ -65,6 +71,14 @@ export default function DatePickerModal({
       }, 100);
     }
   }, [visible, selectedDay, selectedMonth, selectedYear]);
+
+  // Validar e ajustar mês se necessário quando ano muda
+  useEffect(() => {
+    const maxMonthInYear = getMaxMonthInYear(selectedYear);
+    if (selectedMonth > maxMonthInYear) {
+      setSelectedMonth(maxMonthInYear);
+    }
+  }, [selectedYear]);
 
   const months = [
     "Janeiro",
@@ -83,6 +97,8 @@ export default function DatePickerModal({
 
   const getDateConstraints = () => {
     const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
     switch (dateMode) {
       case "future":
@@ -94,7 +110,8 @@ export default function DatePickerModal({
         return { minYear: 1980, maxYear: today.getFullYear() + 50 };
       case "past":
       default:
-        return { minYear: 1980, maxYear: today.getFullYear() };
+        const maxYear = excludeToday ? yesterday.getFullYear() : today.getFullYear();
+        return { minYear: 1980, maxYear };
     }
   };
 
@@ -102,17 +119,72 @@ export default function DatePickerModal({
     return new Date(year, month + 1, 0).getDate();
   };
 
+  const getMaxMonthInYear = (year) => {
+    if (!excludeToday) return 11; // Todos os 12 meses (0-11)
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (year === today.getFullYear()) {
+      return yesterday.getMonth(); // Máximo é o mês anterior (ou o mês atual se o dia for maior que 1)
+    }
+
+    return 11; // Anos anteriores permitem todos os meses
+  };
+
+  const getMaxDayInMonth = (month, year) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
+    const isYesterdayMonth = month === yesterday.getMonth() && year === yesterday.getFullYear();
+
+    if (excludeToday && isCurrentMonth) {
+      // Permite dias até ontem (dia anterior ao atual)
+      return today.getDate() - 1;
+    }
+
+    if (excludeToday && isYesterdayMonth && isCurrentMonth === false) {
+      // Se for um mês anterior ao atual
+      return yesterday.getDate();
+    }
+
+    return getDaysInMonth(month, year);
+  };
+
   const constraints = getDateConstraints();
   const years = Array.from(
     { length: constraints.maxYear - constraints.minYear + 1 },
     (_, i) => constraints.minYear + i,
   );
+
+  // Filtrar meses permitidos
+  const maxMonthInYear = getMaxMonthInYear(selectedYear);
+  const permittedMonths = months.slice(0, maxMonthInYear + 1);
+
   const days = Array.from(
-    { length: getDaysInMonth(selectedMonth, selectedYear) },
+    { length: getMaxDayInMonth(selectedMonth, selectedYear) },
     (_, i) => i + 1,
   );
 
   const handleConfirm = () => {
+    // Validar se a data é permitida
+    if (excludeToday) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const selectedDate = new Date(selectedYear, selectedMonth, selectedDay);
+
+      if (selectedDate > yesterday) {
+        // Se a data selecionada é futura ou hoje, ajustar para ontem
+        onConfirm(yesterday);
+        return;
+      }
+    }
+
     const newDate = new Date(selectedYear, selectedMonth, selectedDay);
     onConfirm(newDate);
   };
@@ -185,18 +257,20 @@ export default function DatePickerModal({
                 const index = Math.round(
                   e.nativeEvent.contentOffset.y / ITEM_HEIGHT
                 );
-                setSelectedMonth(index);
+                if (index < permittedMonths.length) {
+                  setSelectedMonth(months.indexOf(permittedMonths[index]));
+                }
               }}
               contentContainerStyle={{
                 paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
               }}
             >
-              {months.map((month, index) => (
+              {permittedMonths.map((month, index) => (
                 <View key={month} style={styles.item}>
                   <Text
                     style={[
                       styles.text,
-                      selectedMonth === index && styles.textSelected,
+                      selectedMonth === months.indexOf(month) && styles.textSelected,
                     ]}
                   >
                     {month}

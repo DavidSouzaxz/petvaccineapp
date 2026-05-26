@@ -285,6 +285,7 @@ export default function AddPetScreen({ navigation, route }) {
             label={"Data de Nascimento"}
             value={birthDate}
             onChange={(val) => setBirthDate(val)}
+            dateMode="yesterday"
             styleLabel={{
               fontSize: 12,
               color: "#9A948E",
