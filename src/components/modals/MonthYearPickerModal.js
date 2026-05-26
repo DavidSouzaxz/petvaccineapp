@@ -21,8 +21,8 @@ export default function MonthYearPickerModal({
   const yearRef = useRef(null);
 
   const months = [
-    "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-    "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
   ];
 
   const currentYear = new Date().getFullYear();
@@ -66,7 +66,7 @@ export default function MonthYearPickerModal({
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
 
-       
+
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={onCancel}>
               <Text style={styles.cancelButton}>Cancelar</Text>
@@ -77,16 +77,16 @@ export default function MonthYearPickerModal({
             </TouchableOpacity>
           </View>
 
-          
+
           <View style={styles.labelsRow}>
             <Text style={styles.pickerLabel}>Mês</Text>
             <Text style={styles.pickerLabel}>Ano</Text>
           </View>
 
-          
+
           <View style={styles.pickerWrapper}>
 
-            
+
             <ScrollView
               ref={monthRef}
               style={{ flex: 1 }}
@@ -116,7 +116,7 @@ export default function MonthYearPickerModal({
               ))}
             </ScrollView>
 
-            
+
             <ScrollView
               ref={yearRef}
               style={{ flex: 1 }}
@@ -146,7 +146,7 @@ export default function MonthYearPickerModal({
               ))}
             </ScrollView>
 
-            
+
             <View style={styles.centerHighlight} />
 
           </View>
@@ -192,16 +192,18 @@ const styles = StyleSheet.create({
 
   labelsRow: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-around",
     marginTop: 10,
-    gap: 140
+    marginHorizontal: 20
+
   },
 
   pickerLabel: {
     fontSize: 13,
     fontWeight: "700",
     color: "#999",
-    
+
+
   },
 
   pickerWrapper: {
@@ -209,6 +211,7 @@ const styles = StyleSheet.create({
     height: PICKER_HEIGHT,
     overflow: "hidden",
     paddingHorizontal: 20,
+
   },
 
   item: {
@@ -235,6 +238,6 @@ const styles = StyleSheet.create({
     height: ITEM_HEIGHT,
     backgroundColor: "#FFF4EC",
     borderRadius: 10,
-     zIndex: -1,
+    zIndex: -1,
   },
 });

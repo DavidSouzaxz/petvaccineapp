@@ -215,7 +215,7 @@ export default function AddVaccineScreen({ navigation, route }) {
                 label="Data da Aplicação"
                 value={date}
                 onChange={(val) => setDate(val)}
-                dateMode="all"
+                dateMode="past"
                 styleLabel={{
                   fontSize: 13,
                   fontWeight: "600",
