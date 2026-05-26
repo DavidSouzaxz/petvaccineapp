@@ -57,10 +57,10 @@ export default function CalendarioScreen({ navigation }) {
     return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
   };
   const handleMonthYearConfirm = (date) => {
-    console.log("Clicado");
-    setCurrentDate(date);
-    setShowMonthYearPicker(false);
-  };
+  console.log("Clicado");
+  setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
+  setShowMonthYearPicker(false);
+};
 
   async function loadPets() {
     try {
@@ -98,6 +98,7 @@ export default function CalendarioScreen({ navigation }) {
     const now = new Date();
     const today = new Date().toLocaleDateString("en-CA");     //pra pegar o dia de hoje
 
+    
     petVaccines.forEach((vac) => {
 
   // DATA DE APLICAÇÃO
@@ -202,7 +203,7 @@ export default function CalendarioScreen({ navigation }) {
     const now = new Date();
 
     const year = now.getFullYear();
-    const month = String(now.getMonth() ).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
@@ -362,8 +363,10 @@ export default function CalendarioScreen({ navigation }) {
           <Calendar
             key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
             locale="pt-br"
-            current={currentDate.toISOString().split("T")[0]}
-            onMonthChange={(m) => setCurrentDate(new Date(m.timestamp))}
+            current={currentDate.toLocaleDateString("en-CA")}
+            onMonthChange={(m) => {
+  setCurrentDate(new Date(m.year, m.month - 1, 1));
+}}
             markedDates={markedDates}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
