@@ -21,7 +21,7 @@ export const OCCURRENCE_TYPES = [
 export const OCCURRENCE_FILTERS = [
   { id: "all", label: "Todas", icon: "th-large" },
   { id: "VOMITING", label: "Vômito", icon: "water" },
-  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "apple" },
+  { id: "REDUCE_APPETITE", label: "Apetite Reduzido", icon: "drumstick-bite" },
   { id: "HECTIC", label: "Muito Agitado", icon: "bolt" },
   { id: "HAIR_FALLING", label: "Pelo Caindo", icon: "leaf" },
   { id: "LOOSE_STOOLS", label: "Fezes Amolecidas", icon: "poop" },

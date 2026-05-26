@@ -192,14 +192,16 @@ const styles = StyleSheet.create({
 
   labelsRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     marginTop: 10,
+    gap: 140
   },
 
   pickerLabel: {
     fontSize: 13,
     fontWeight: "700",
     color: "#999",
+    
   },
 
   pickerWrapper: {

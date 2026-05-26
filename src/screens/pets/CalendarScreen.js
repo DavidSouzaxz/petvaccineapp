@@ -57,10 +57,10 @@ export default function CalendarioScreen({ navigation }) {
     return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
   };
   const handleMonthYearConfirm = (date) => {
-    console.log("Clicado");
-    setCurrentDate(date);
-    setShowMonthYearPicker(false);
-  };
+  console.log("Clicado");
+  setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
+  setShowMonthYearPicker(false);
+};
 
   async function loadPets() {
     try {
@@ -94,47 +94,60 @@ export default function CalendarioScreen({ navigation }) {
 
       const formatted = {};
 
-      // DATA DE HOJE
-      const now = new Date();
-      const today = now.toISOString().split("T")[0];
+    // DATA DE HOJE
+    const now = new Date();
+    const today = new Date().toLocaleDateString("en-CA");     //pra pegar o dia de hoje
 
-      // Processar TODAS as vacinas - aplicadas e não aplicadas
-      petVaccines.forEach((vac) => {
-        if (vac.applicationDate) {
-          const date = vac.applicationDate.substring(0, 10);
+    
+    petVaccines.forEach((vac) => {
 
-          if (!formatted[date]) formatted[date] = [];
+  // DATA DE APLICAÇÃO
+  if (vac.applicationDate) {
+    const date = vac.applicationDate.substring(0, 10);
 
-          formatted[date].push({
-            id: vac.id,
-            uniqueId: `${vac.id}-${date}-applied`,
-            name: vac.name || "Vacina",
-            applied: vac.isApplied,
-            late: false,
-            isFirstDose: !vac.isApplied,
-            date,
-          });
-        }
+    if (!formatted[date]) formatted[date] = [];
 
-        // PRÓXIMA DOSE (SÓ SE JÁ FOI APLICADA)
-        if (vac.nextApplicationDate && vac.isApplied) {
-          const date = vac.nextApplicationDate.substring(0, 10);
+    const isLate = !vac.isApplied && date < today;
+    const isPending = !vac.isApplied && date >= today;
 
-          if (!formatted[date]) formatted[date] = [];
+    formatted[date].push({
+      id: vac.id,
+      uniqueId: `${vac.id}-${date}-applied`,
+      name: vac.name || "Vacina",
 
-          const isLate = date < today;
+      applied: vac.isApplied,
+      late: isLate,
+      pending: isPending,
+      isNextDose: false, 
 
-          formatted[date].push({
-            id: vac.id,
-            uniqueId: `${vac.id}-${date}-next`,
-            name: vac.name || "Vacina",
-            applied: false,
-            late: isLate,
-            isFirstDose: false,
-            date,
-          });
-        }
-      });
+      date: date,
+    });
+  }
+
+  // PRÓXIMA DOSE
+  if (vac.nextApplicationDate && vac.isApplied) {
+    const date = vac.nextApplicationDate.substring(0, 10);
+
+    if (!formatted[date]) formatted[date] = [];
+
+    const isLate = date < today;
+
+    formatted[date].push({
+      id: vac.id,
+      uniqueId: `${vac.id}-${date}-next`,
+      name: vac.name || "Vacina",
+
+      applied: false,
+      late: isLate,
+
+      pending: false, 
+      isNextDose: true, 
+
+      date: date,
+    });
+  }
+
+});
 
       setEvents(formatted);
       setSelectedDate(today);
@@ -164,13 +177,13 @@ export default function CalendarioScreen({ navigation }) {
 
     Object.keys(events).forEach((date) => {
       const hasLate = events[date].some((item) => item.late);
-      const hasPending = events[date].some(
-        (item) => !item.applied && !item.late && !item.isFirstDose,
-      );
+      const hasPending = events[date].some((item) => item.pending);
+      const hasNextDose = events[date].some((item) => item.isNextDose);;
 
       let dotColor = "#47C266";
       if (hasLate) dotColor = "#E74C3C";
-      else if (hasPending) dotColor = "#F4A361";
+        else if (hasPending) dotColor = "#F4A361";
+        else if (hasNextDose) dotColor = "#F7D154";
 
       marks[date] = { marked: true, dotColor };
     });
@@ -230,7 +243,7 @@ export default function CalendarioScreen({ navigation }) {
               ? "#E8F7EE"
               : item.late
                 ? "#FDECEA"
-                : item.isFirstDose
+                : item.pending
                   ? "#FFF4EC"
                   : "#FFF4EC",
           },
@@ -245,7 +258,15 @@ export default function CalendarioScreen({ navigation }) {
                 : "time"
           }
           size={20}
-          color={item.applied ? "#47C266" : item.late ? "#E74C3C" : "#F4A361"}
+          color={
+              item.applied
+                ? "#47C266"
+                : item.late
+                  ? "#E74C3C"
+                  : item.isNextDose
+                    ? "#F7D154" //  próxima dose
+                    : "#F4A361" //  pendente
+            }
         />
       </View>
 
@@ -254,42 +275,42 @@ export default function CalendarioScreen({ navigation }) {
         <Text style={styles.eventSubtitle}>{formatDate(item.date)}</Text>
       </View>
 
-      <View
-        style={[
-          styles.badge,
-          {
-            backgroundColor: item.applied
-              ? "#E8F7EE"
-              : item.late
-                ? "#FDECEA"
-                : item.isFirstDose
-                  ? "#EAF3FF"
-                  : "#FFF4EC",
-          },
-        ]}
-      >
-        <Text
-          style={{
-            color: item.applied
-              ? "#47C266"
-              : item.late
-                ? "#E74C3C"
-                : item.isFirstDose
-                  ? "#4A90E2"
-                  : "#F4A361",
-            fontWeight: "700",
-            fontSize: 12,
-          }}
-        >
-          {item.applied
-            ? "Aplicada"
+  <View
+  style={[
+    styles.badge,
+    {
+      backgroundColor: item.applied
+            ? "#E8F7EE"
             : item.late
-              ? "Atrasada"
-              : item.isFirstDose
-                ? "Primeira dose"
-                : "Próxima dose"}
-        </Text>
-      </View>
+              ? "#FDECEA"
+              : item.isNextDose
+                ? "#FFF9E6" //  leve
+                : "#FFF4EC", //  leve
+    },
+  ]}
+>
+    <Text
+      style={{
+        color: item.applied
+          ? "#47C266"
+          : item.late
+            ? "#E74C3C"
+            : item.isNextDose
+              ? "#F7D154" //  próxima dose
+              : "#F4A361", //  pendente
+        fontWeight: "700",
+        fontSize: 12,
+      }}
+    >
+      {item.applied
+        ? "Aplicada"
+        : item.late
+          ? "Atrasada"
+          : item.isNextDose
+            ? "Próxima dose"
+            : "Pendente"}
+    </Text>
+  </View>
     </View>
   );
 
@@ -342,8 +363,10 @@ export default function CalendarioScreen({ navigation }) {
           <Calendar
             key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
             locale="pt-br"
-            current={currentDate.toISOString().split("T")[0]}
-            onMonthChange={(m) => setCurrentDate(new Date(m.timestamp))}
+            current={currentDate.toLocaleDateString("en-CA")}
+            onMonthChange={(m) => {
+  setCurrentDate(new Date(m.year, m.month - 1, 1));
+}}
             markedDates={markedDates}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             style={[styles.calendar, { transform: [{ scaleY: 0.94 }] }]}
@@ -370,21 +393,26 @@ export default function CalendarioScreen({ navigation }) {
 
         <View style={styles.legendContainer}>
           <View style={styles.legendItem}>
-            <Ionicons name="checkmark-circle" size={15} color="#47C266" />
+            <Ionicons name="checkmark-circle" size={14} color="#47C266" />
             <Text style={styles.legendText}>Aplicada</Text>
           </View>
 
           <View style={styles.legendItem}>
-            <Ionicons name="time" size={15} color="#F4A361" />
+            <Ionicons name="time" size={14} color="#F4A361" />
+            <Text style={styles.legendText}>Pendente</Text>
+          </View>
+
+
+          <View style={styles.legendItem}>
+            <Ionicons name="time" size={14} color="#F7D154" />
             <Text style={styles.legendText}>Próxima dose</Text>
           </View>
 
           <View style={styles.legendItem}>
-            <Ionicons name="alert-circle" size={15} color="#E74C3C" />
+            <Ionicons name="alert-circle" size={14} color="#E74C3C" />
             <Text style={styles.legendText}>Atrasada</Text>
           </View>
         </View>
-
         <View style={styles.section}>
           <View style={styles.vaccineCard}>
             <View style={styles.vaccineHeader}>
@@ -648,7 +676,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 4,
-    gap: 20,
+    gap: 12,
   },
 
   legendItem: {
@@ -657,8 +685,8 @@ const styles = StyleSheet.create({
   },
 
   legendText: {
-    marginLeft: 6,
-    fontSize: 11,
+    marginLeft: 4,
+    fontSize: 9,
   },
 
   modalOverlay: {

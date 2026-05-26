@@ -127,6 +127,45 @@ function OccurrencesStack() {
   );
 }
 
+function PetsListStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="PetsListHome"
+        component={PetsScreen}
+        options={{ headerLeft: () => null }}
+      />
+      <Stack.Screen
+        name="Details"
+        component={DetailsScreen}
+        options={{ title: "Vacinas" }}
+      />
+      <Stack.Screen
+        name="AddPet"
+        component={AddPetScreen}
+        options={{ title: "Novo Pet" }}
+      />
+      <Stack.Screen
+        name="EditPet"
+        component={EditPetScreen}
+        options={{ title: "Editar Pet" }}
+      />
+      <Stack.Screen
+        name="AddVaccine"
+        component={AddVaccineScreen}
+        options={{ title: "Registrar Vacina" }}
+      />
+      <Stack.Screen
+        name="EditVaccine"
+        component={EditVaccineScreen}
+        options={{ title: "Editar Vacina" }}
+      />
+
+      <Stack.Screen name="Calendario" component={CalendarScreen} />
+    </Stack.Navigator>
+  );
+}
+
 export default function Routes() {
   const [userToken, setUserToken] = useState(null);
   const [loading, setLoading] = useState(true);
