@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { calendar } from "../../constants";
 
+const ITEM_HEIGHT = 40;
+const PICKER_HEIGHT = 180;
+
 export default function DatePickerModal({
   visible,
   value,
@@ -43,7 +46,7 @@ export default function DatePickerModal({
   useEffect(() => {
     if (visible) {
       setTimeout(() => {
-        const optionHeight = 52; // paddingVertical(12) + paddingVertical(12) + marginVertical(4) + marginVertical(4) + fontSize height
+        const optionHeight = ITEM_HEIGHT;
 
         dayScrollRef.current?.scrollTo({
           y: (selectedDay - 1) * optionHeight,
@@ -133,95 +136,107 @@ export default function DatePickerModal({
             </TouchableOpacity>
           </View>
 
+          <View style={styles.labelsRow}>
+            <Text style={styles.pickerLabel}>Dia</Text>
+            <Text style={styles.pickerLabel}>Mês</Text>
+            <Text style={styles.pickerLabel}>Ano</Text>
+          </View>
+
           <View style={styles.pickerWrapper}>
-            <View style={styles.pickerColumn}>
-              <Text style={styles.pickerLabel}>Dia</Text>
-              <ScrollView
-                ref={dayScrollRef}
-                style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
-              >
-                {days.map((day) => (
-                  <TouchableOpacity
-                    key={day}
+            <ScrollView
+              ref={dayScrollRef}
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              decelerationRate="fast"
+              bounces={false}
+              onMomentumScrollEnd={(e) => {
+                const index = Math.round(
+                  e.nativeEvent.contentOffset.y / ITEM_HEIGHT
+                );
+                setSelectedDay(index + 1);
+              }}
+              contentContainerStyle={{
+                paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
+              }}
+            >
+              {days.map((day) => (
+                <View key={day} style={styles.item}>
+                  <Text
                     style={[
-                      styles.pickerOption,
-                      selectedDay === day && styles.pickerOptionSelected,
+                      styles.text,
+                      selectedDay === day && styles.textSelected,
                     ]}
-                    onPress={() => setSelectedDay(day)}
                   >
-                    <Text
-                      style={[
-                        styles.pickerOptionText,
-                        selectedDay === day && styles.pickerOptionTextSelected,
-                      ]}
-                    >
-                      {day.toString().padStart(2, "0")}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+                    {day.toString().padStart(2, "0")}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
 
-            <View style={styles.pickerColumn}>
-              <Text style={styles.pickerLabel}>Mês</Text>
-              <ScrollView
-                ref={monthScrollRef}
-                style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
-              >
-                {months.map((month, index) => (
-                  <TouchableOpacity
-                    key={month}
+            <ScrollView
+              ref={monthScrollRef}
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              decelerationRate="fast"
+              bounces={false}
+              onMomentumScrollEnd={(e) => {
+                const index = Math.round(
+                  e.nativeEvent.contentOffset.y / ITEM_HEIGHT
+                );
+                setSelectedMonth(index);
+              }}
+              contentContainerStyle={{
+                paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
+              }}
+            >
+              {months.map((month, index) => (
+                <View key={month} style={styles.item}>
+                  <Text
                     style={[
-                      styles.pickerOption,
-                      selectedMonth === index && styles.pickerOptionSelected,
+                      styles.text,
+                      selectedMonth === index && styles.textSelected,
                     ]}
-                    onPress={() => setSelectedMonth(index)}
                   >
-                    <Text
-                      style={[
-                        styles.pickerOptionText,
-                        selectedMonth === index &&
-                          styles.pickerOptionTextSelected,
-                      ]}
-                    >
-                      {month}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+                    {month}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
 
-            <View style={styles.pickerColumn}>
-              <Text style={styles.pickerLabel}>Ano</Text>
-              <ScrollView
-                ref={yearScrollRef}
-                style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
-              >
-                {years.map((year) => (
-                  <TouchableOpacity
-                    key={year}
+            <ScrollView
+              ref={yearScrollRef}
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              decelerationRate="fast"
+              bounces={false}
+              onMomentumScrollEnd={(e) => {
+                const index = Math.round(
+                  e.nativeEvent.contentOffset.y / ITEM_HEIGHT
+                );
+                setSelectedYear(years[index]);
+              }}
+              contentContainerStyle={{
+                paddingVertical: (PICKER_HEIGHT - ITEM_HEIGHT) / 2,
+              }}
+            >
+              {years.map((year) => (
+                <View key={year} style={styles.item}>
+                  <Text
                     style={[
-                      styles.pickerOption,
-                      selectedYear === year && styles.pickerOptionSelected,
+                      styles.text,
+                      selectedYear === year && styles.textSelected,
                     ]}
-                    onPress={() => setSelectedYear(year)}
                   >
-                    <Text
-                      style={[
-                        styles.pickerOptionText,
-                        selectedYear === year &&
-                          styles.pickerOptionTextSelected,
-                      ]}
-                    >
-                      {year}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+                    {year}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.centerHighlight} />
           </View>
         </View>
       </View>
@@ -234,14 +249,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.44)",
   },
   modalContent: {
     backgroundColor: "#FFF",
-    borderRadius: 24,
+    borderRadius: 20,
     paddingBottom: 20,
     width: "90%",
-    maxHeight: "80%",
   },
   modalHeader: {
     flexDirection: "row",
@@ -252,61 +266,57 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#EFE2D7",
   },
-  modalTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#2B2B2B",
-    flex: 1,
-    textAlign: "center",
-  },
   cancelButton: {
     fontSize: 16,
     color: "#999",
     fontWeight: "600",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   confirmButton: {
     fontSize: 16,
     color: "#E98B3A",
     fontWeight: "700",
   },
-  pickerWrapper: {
+  labelsRow: {
     flexDirection: "row",
-    height: 220,
-    paddingTop: 16,
-  },
-  pickerColumn: {
-    flex: 1,
-    alignItems: "center",
+    justifyContent: "space-around",
+    marginTop: 10,
+    marginHorizontal: 20,
   },
   pickerLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
     color: "#999",
-    marginBottom: 8,
-  },
-  scrollView: {
-    width: "100%",
-  },
-  pickerOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginHorizontal: 8,
-    marginVertical: 4,
-  },
-  pickerOptionSelected: {
-    backgroundColor: "#FFF4EC",
-  },
-  pickerOptionText: {
-    fontSize: 14,
-    color: "#999",
+    flex: 1,
     textAlign: "center",
-    fontWeight: "500",
   },
-  pickerOptionTextSelected: {
+  pickerWrapper: {
+    flexDirection: "row",
+    height: PICKER_HEIGHT,
+    overflow: "hidden",
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  item: {
+    height: ITEM_HEIGHT,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 16,
+    color: "#999",
+  },
+  textSelected: {
     color: "#E98B3A",
     fontWeight: "700",
+  },
+  centerHighlight: {
+    position: "absolute",
+    top: (PICKER_HEIGHT / 2) - (ITEM_HEIGHT / 2),
+    left: 20,
+    right: 20,
+    height: ITEM_HEIGHT,
+    backgroundColor: "#FFF4EC",
+    borderRadius: 10,
+    zIndex: -1,
   },
 });
