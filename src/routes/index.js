@@ -97,7 +97,6 @@ function PetStack() {
         component={EditVaccineScreen}
         options={{ title: "Editar Vacina" }}
       />
-
       <Stack.Screen name="Calendario" component={CalendarScreen} />
     </Stack.Navigator>
   );
@@ -124,43 +123,6 @@ function OccurrencesStack() {
         component={OccurrenceDetailsScreen}
       />
       <Stack.Screen name="OccurrencesEdit" component={OcurrenceEditScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function PetsListStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="PetsListHome"
-        component={PetsScreen}
-        options={{ headerLeft: () => null }}
-      />
-      <Stack.Screen
-        name="Details"
-        component={DetailsScreen}
-        options={{ title: "Vacinas" }}
-      />
-      <Stack.Screen
-        name="AddPet"
-        component={AddPetScreen}
-        options={{ title: "Novo Pet" }}
-      />
-      <Stack.Screen
-        name="EditPet"
-        component={EditPetScreen}
-        options={{ title: "Editar Pet" }}
-      />
-      <Stack.Screen
-        name="AddVaccine"
-        component={AddVaccineScreen}
-        options={{ title: "Registrar Vacina" }}
-      />
-      <Stack.Screen
-        name="EditVaccine"
-        component={EditVaccineScreen}
-        options={{ title: "Editar Vacina" }}
-      />
     </Stack.Navigator>
   );
 }
@@ -233,7 +195,15 @@ export default function Routes() {
       <Tab.Screen name="Clinicas" component={MapStack} />
       <Tab.Screen
         name="Add"
-        component={PetsListStack}
+        component={PetStack}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate("Home", {
+              screen: "Pets",
+            });
+          },
+        })}
         options={{
           tabBarLabel: () => null,
           tabBarButton: (props) => <ActionButton {...props} />,
@@ -255,37 +225,10 @@ function ProfileStack({ onLogout }) {
       <Stack.Screen name="ProfileHome">
         {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
       </Stack.Screen>
-
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
-      <Stack.Screen name="PetsScreen" component={PetsScreen} />
-      <Stack.Screen
-        name="Details"
-        component={DetailsScreen}
-        options={{ title: "Vacinas" }}
-      />
-      <Stack.Screen
-        name="AddPet"
-        component={AddPetScreen}
-        options={{ title: "Novo Pet" }}
-      />
-      <Stack.Screen
-        name="EditPet"
-        component={EditPetScreen}
-        options={{ title: "Editar Pet" }}
-      />
-      <Stack.Screen
-        name="AddVaccine"
-        component={AddVaccineScreen}
-        options={{ title: "Registrar Vacina" }}
-      />
-      <Stack.Screen
-        name="EditVaccine"
-        component={EditVaccineScreen}
-        options={{ title: "Editar Vacina" }}
-      />
     </Stack.Navigator>
   );
 }
