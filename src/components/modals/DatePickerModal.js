@@ -120,17 +120,17 @@ export default function DatePickerModal({
   };
 
   const getMaxMonthInYear = (year) => {
-    if (!excludeToday) return 11; // Todos os 12 meses (0-11)
+    if (!excludeToday) return 11;
 
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (year === today.getFullYear()) {
-      return yesterday.getMonth(); // Máximo é o mês anterior (ou o mês atual se o dia for maior que 1)
+      return yesterday.getMonth();
     }
 
-    return 11; // Anos anteriores permitem todos os meses
+    return 11;
   };
 
   const getMaxDayInMonth = (month, year) => {
@@ -142,12 +142,12 @@ export default function DatePickerModal({
     const isYesterdayMonth = month === yesterday.getMonth() && year === yesterday.getFullYear();
 
     if (excludeToday && isCurrentMonth) {
-      // Permite dias até ontem (dia anterior ao atual)
+
       return today.getDate() - 1;
     }
 
     if (excludeToday && isYesterdayMonth && isCurrentMonth === false) {
-      // Se for um mês anterior ao atual
+
       return yesterday.getDate();
     }
 
@@ -160,7 +160,7 @@ export default function DatePickerModal({
     (_, i) => constraints.minYear + i,
   );
 
-  // Filtrar meses permitidos
+
   const maxMonthInYear = getMaxMonthInYear(selectedYear);
   const permittedMonths = months.slice(0, maxMonthInYear + 1);
 
@@ -170,7 +170,7 @@ export default function DatePickerModal({
   );
 
   const handleConfirm = () => {
-    // Validar se a data é permitida
+
     if (excludeToday) {
       const today = new Date();
       const yesterday = new Date(today);
@@ -179,7 +179,7 @@ export default function DatePickerModal({
       const selectedDate = new Date(selectedYear, selectedMonth, selectedDay);
 
       if (selectedDate > yesterday) {
-        // Se a data selecionada é futura ou hoje, ajustar para ontem
+
         onConfirm(yesterday);
         return;
       }

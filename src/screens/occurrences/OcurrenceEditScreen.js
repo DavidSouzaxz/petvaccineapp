@@ -248,6 +248,7 @@ export default function EditOccurrenceScreen({ navigation, route }) {
             <View style={{ flex: 1 }}>
               <InputDatePicker
                 label="Data da Ocorrência"
+                dateMode="yesterday"
                 value={date}
                 onChange={(val) => setDate(val)}
               />

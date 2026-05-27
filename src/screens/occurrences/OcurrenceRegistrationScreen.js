@@ -191,6 +191,7 @@ export default function AddOccurrenceScreen({ navigation, route }) {
               <InputDatePicker
                 label="Data da Ocorrência"
                 value={date}
+                dateMode="yesterday"
                 onChange={(val) => setDate(val)}
               />
             </View>
