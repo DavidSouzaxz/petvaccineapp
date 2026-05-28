@@ -291,7 +291,7 @@ export default function EditPetScreen({ navigation, route }) {
               </View>
             )}
 
-            <Text style={styles.fieldLabel}>Raca</Text>
+            <Text style={styles.fieldLabel}>Raça</Text>
             <TextInput
               style={styles.input}
               value={breed}
@@ -346,6 +346,7 @@ export default function EditPetScreen({ navigation, route }) {
               label={"Data de Nascimento"}
               value={birthDate}
               onChange={(val) => setBirthDate(val)}
+              dateMode="yesterday"
               styleLabel={{
                 fontSize: 12,
                 color: "#9A948E",

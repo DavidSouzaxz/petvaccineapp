@@ -1,14 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Linking,
-  Platform,
-} from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { AlertModal } from "../../components/modals";
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getNearbyClinics } from "../../services/ServiceMap";
@@ -16,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 
 export default function MapScreen({ navigation }) {
+  const mapRef = useRef(null); // Referência para controlar o mapa
   const [markers, setMarkers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
@@ -49,12 +43,10 @@ export default function MapScreen({ navigation }) {
       if (dist < 5) {
         setMarkers(clinics);
         shouldFetch = false;
-        console.log("Usando cache, distância:", dist.toFixed(2), "km");
       }
     }
 
     if (shouldFetch) {
-      console.log("Requisição API disparada");
       try {
         const clinics = await getNearbyClinics(lat, lon);
         setMarkers(clinics);
@@ -86,14 +78,29 @@ export default function MapScreen({ navigation }) {
     })();
   }, [fetchNearby]);
 
-  const handlePress = async (clinic) => {
-    const sucesso = await OpenGoogleMaps(clinic);
+  // Função disparada ao clicar no Marcador
+  const handleMarkerPress = (clinic) => {
+    setSelectedClinic(clinic);
+
+    // Move a câmera do mapa para centralizar a clínica clicada suavemente
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: clinic.lat, // Desloca levemente para cima para o card de baixo não cobrir o pino
+          longitude: clinic.lon,
+          latitudeDelta: 0.03,
+          longitudeDelta: 0.03,
+        },
+        400,
+      ); // 400 milissegundos de animação
+    }
+  };
+
+  const handlePressDetails = async (clinic) => {
     setLoading(true);
-    if (sucesso) {
-      setLoading(false);
-      console.log("Deu bom! O usuário foi para o Maps.");
-    } else {
-      setLoading(false);
+    const sucesso = await OpenGoogleMaps(clinic);
+    setLoading(false);
+    if (!sucesso) {
       setAlertMessage("Não conseguimos abrir o mapa no seu dispositivo.");
       setAlertVisible(true);
     }
@@ -102,33 +109,24 @@ export default function MapScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef} // Atribui a referência do mapa
         style={styles.map}
         showsUserLocation={true}
         region={region}
         onRegionChangeComplete={(r) => setRegion(r)}
-        onPress={() => setSelectedClinic(null)}
+        onPress={() => setSelectedClinic(null)} // Fecha o card se clicar no mapa vazio
+        toolbarEnabled={false}
       >
         {markers.map((m) => (
           <Marker
             key={m.id}
             coordinate={{ latitude: m.lat, longitude: m.lon }}
-            onPress={() => handlePress(selectedClinic)}
-            title={m.nome || m.name}
             pinColor="#F4A361"
-          >
-            <Callout tooltip onPress={() => OpenGoogleMaps(m)}>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle} numberOfLines={1}>
-                  {m.nome || m.name}
-                </Text>
-                <Text style={styles.calloutSubtitle}>
-                  Toque para mais detalhes
-                </Text>
-              </View>
-            </Callout>
-          </Marker>
+            onPress={() => handleMarkerPress(m)} // Executa a nossa lógica de foco e abertura
+          />
         ))}
       </MapView>
+
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -136,6 +134,7 @@ export default function MapScreen({ navigation }) {
         <Ionicons name="arrow-back" size={24} color="#333" />
       </TouchableOpacity>
 
+      {/* O Card inferior fixo que abre de forma idêntica e linda em ambos os sistemas */}
       {selectedClinic && (
         <View style={styles.card}>
           <View style={styles.cardContent}>
@@ -143,23 +142,26 @@ export default function MapScreen({ navigation }) {
               <View style={styles.cardTitleContainer}>
                 <Ionicons name="paw" style={styles.iconTitle} />
                 <Text style={styles.textCardTitle} numberOfLines={1}>
-                  {selectedClinic.name}
+                  {selectedClinic.nome || selectedClinic.name}
                 </Text>
               </View>
               <Text style={styles.cardAddress} numberOfLines={2}>
-                {selectedClinic.address}
+                {selectedClinic.endereco ||
+                  selectedClinic.address ||
+                  "Endereço não informado"}
               </Text>
             </View>
           </View>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => handlePress(selectedClinic)}
+            onPress={() => handlePressDetails(selectedClinic)}
             disabled={loading}
           >
             <Text style={styles.buttonText}>Ver Detalhes</Text>
           </TouchableOpacity>
         </View>
       )}
+
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -172,29 +174,9 @@ export default function MapScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
   map: { width: "100%", height: "100%" },
-  calloutContainer: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 10,
-    width: 180,
-    borderWidth: 1,
-    borderColor: "#EEE",
-    alignItems: "center",
-  },
-  calloutTitle: {
-    fontWeight: "bold",
-    fontSize: 14,
-    color: "#333",
-    textAlign: "center",
-  },
-  calloutSubtitle: {
-    fontSize: 12,
-    color: "#F4A361",
-    marginTop: 2,
-  },
   card: {
     position: "absolute",
-    bottom: 30,
+    bottom: 50,
     left: 20,
     right: 20,
     backgroundColor: "white",
@@ -205,9 +187,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
+    zIndex: 99,
   },
   cardContent: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-
   cardInfo: { flex: 1 },
   cardTitleContainer: {
     flexDirection: "row",
@@ -237,5 +219,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
+    zIndex: 10,
   },
 });
