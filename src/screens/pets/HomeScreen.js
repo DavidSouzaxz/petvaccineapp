@@ -303,27 +303,6 @@ export default function HomeScreen({ navigation }) {
                   : `${vaccines.length} vacinas pendentes`}
             </Text>
           </View>
-
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tipsCarousel}
-          >
-            {PET_MESSAGES.map((item) => (
-              <View key={item.id} style={styles.tipCard}>
-                <View style={styles.tipIconWrapper}>
-                  <FontAwesome5 name={item.icon} size={18} color="#F4A361" />
-                </View>
-                <Text style={styles.tipTitle}>{item.title}</Text>
-                <Text style={styles.tipText}>{item.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
-
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Clínicas Próximas</Text>
             {clinics.length > 3 && (
@@ -369,6 +348,26 @@ export default function HomeScreen({ navigation }) {
               ))}
             </View>
           ) : null}
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tipsCarousel}
+          >
+            {PET_MESSAGES.map((item) => (
+              <View key={item.id} style={styles.tipCard}>
+                <View style={styles.tipIconWrapper}>
+                  <FontAwesome5 name={item.icon} size={18} color="#F4A361" />
+                </View>
+                <Text style={styles.tipTitle}>{item.title}</Text>
+                <Text style={styles.tipText}>{item.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
         </ScrollView>
       )}
 
@@ -410,7 +409,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#F4A361",
   },
-  scrollContent: { paddingBottom: 120 },
+  scrollContent: { paddingBottom: 30 },
   sectionHeader: {
     marginHorizontal: 20,
     marginTop: 20,
