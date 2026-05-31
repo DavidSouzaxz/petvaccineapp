@@ -21,9 +21,12 @@ import ButtonRollback from "../../components/ButtonRollback";
 import MonthYearPickerModal from "../../components/modals/MonthYearPickerModal";
 import { getLatestVaccines } from "../../core/GetLatestVaccines";
 import "../../constants/calender";
-import { SPECIES_OPTIONS, SPECIES_IMAGES } from "../../constants/species";
+import { SPECIES_IMAGES } from "../../constants/species";
+import { useRoute } from "@react-navigation/native";
 
 export default function CalendarioScreen({ navigation }) {
+  const route = useRoute();
+  const petFromRoute = route.params?.pet;
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +35,7 @@ export default function CalendarioScreen({ navigation }) {
   const [showPetSelector, setShowPetSelector] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
-  const [image, setImage] = useState(null);
+  
 
   const formatDate = (dateString) => {
     if (!dateString) return "Selecione uma data";
@@ -69,7 +72,11 @@ export default function CalendarioScreen({ navigation }) {
       const data = await ServicePet.getPetsByUser(userId);
 
       setPets(data || []);
-      if (data?.length > 0) setSelectedPet(data[0]);
+      if (petFromRoute) {
+        setSelectedPet(petFromRoute);
+      } else if (data?.length > 0) {
+        setSelectedPet(data[0]);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -448,49 +455,62 @@ export default function CalendarioScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      <Modal visible={showPetSelector} transparent animationType="slide">
+      <Modal visible={showPetSelector} transparent animationType="fade" onRequestClose={() => setShowPetSelector(false)}>
         <TouchableOpacity
-          style={styles.modalOverlay}
+          style={styles.petSelectorOverlay}
+          activeOpacity={1}
           onPress={() => setShowPetSelector(false)}
         >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Selecione um pet</Text>
-
-            {pets.map((pet) => (
-              <TouchableOpacity
-                key={pet.id}
-                style={[
-                  styles.petOption,
-                  selectedPet?.id === pet.id && styles.petOptionActive,
-                ]}
-                onPress={() => {
-                  setSelectedPet(pet);
-                  setShowPetSelector(false);
-                }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Image
-                    source={
-                      pet.photoUrl
-                        ? { uri: pet.photoUrl }
-                        : SPECIES_IMAGES[pet.specie] ||
-                        SPECIES_IMAGES["Cachorro"]
-                    }
-                    style={styles.petOptionImage}
-                  />
-                  <View style={{ marginLeft: 10 }}>
-                    <Text style={styles.petOptionText}>{pet.name}</Text>
-                    <Text style={styles.petOptionBreed}>
-                      {pet.breed || "Sem raça"}
-                    </Text>
-                  </View>
-                </View>
-
-                {selectedPet?.id === pet.id && (
-                  <Ionicons name="checkmark-circle" size={22} color="#F4A361" />
-                )}
+          <View style={styles.petSelectorCard}>
+            <View style={styles.petSelectorHeader}>
+              <Text style={styles.petSelectorTitle}>Selecione um pet</Text>
+              <TouchableOpacity onPress={() => setShowPetSelector(false)}>
+                <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
-            ))}
+            </View>
+
+            <ScrollView style={styles.petSelectorList}>
+              {pets.map((pet) => (
+                <TouchableOpacity
+                  key={pet.id}
+                  style={[
+                    styles.petSelectorItem,
+                    selectedPet && selectedPet.id === pet.id && styles.petSelectorItemActive,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    setSelectedPet(pet);
+                    setShowPetSelector(false);
+                  }}
+                >
+                  <View style={styles.petSelectorItemContent}>
+                    <Image
+                      source={
+                        pet.photoUrl
+                          ? { uri: pet.photoUrl }
+                          : SPECIES_IMAGES[pet.specie] || SPECIES_IMAGES["Cachorro"]
+                      }
+                      style={styles.petSelectorItemImage}
+                    />
+                    <View>
+                      <Text
+                        style={[
+                          styles.petSelectorItemName,
+                          selectedPet && selectedPet.id === pet.id && styles.petSelectorItemNameActive,
+                        ]}
+                      >
+                        {pet.name}
+                      </Text>
+                      <Text style={styles.petSelectorItemBreed}>{pet.breed || "Sem raça"}</Text>
+                    </View>
+                  </View>
+
+                  {selectedPet && selectedPet.id === pet.id && (
+                    <Ionicons name="checkmark-circle" size={24} color="#F4A361" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -526,21 +546,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#2B2B2B",
-  },
-
-
-  titleContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 58,
-    alignItems: "center",
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#2F2F2F",
   },
 
   petCard: {
@@ -696,49 +701,81 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
 
-  modalOverlay: {
+
+   petSelectorOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
 
-  modalContent: {
-    backgroundColor: "#FFF",
+  petSelectorCard: {
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
+    maxHeight: "80%",
+    paddingBottom: 20,
   },
 
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
-
-  petOption: {
-    paddingVertical: 12,
+  petSelectorHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
   },
 
-  petOptionActive: {
-    backgroundColor: "#FFF4EC",
-    borderRadius: 12,
+  petSelectorTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
   },
 
-  petOptionImage: {
+  petSelectorList: {
+    paddingHorizontal: 0,
+  },
+
+  petSelectorItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
+  },
+
+  petSelectorItemActive: {
+    backgroundColor: "#FFF0E2",
+  },
+
+  petSelectorItemContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  petSelectorItemImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    marginRight: 12,
   },
 
-  petOptionText: {
-    fontSize: 15,
-    fontWeight: "700",
+  petSelectorItemName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2D2D2D",
   },
 
-  petOptionBreed: {
+  petSelectorItemNameActive: {
+    color: "#F4A361",
+  },
+
+  petSelectorItemBreed: {
     fontSize: 12,
-    color: "#9E948C",
+    color: "#8E8E8E",
+    marginTop: 4,
   },
 });

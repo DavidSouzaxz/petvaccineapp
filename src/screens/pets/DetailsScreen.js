@@ -316,7 +316,7 @@ export default function DetailsScreen({ route, navigation }) {
 
               <TouchableOpacity
                 style={styles.calendarCard}
-                onPress={() => navigation.navigate("Calendario", { pet })}
+                onPress={() => navigation.navigate("Calendario", { pet: pet })}
               >
                 <View style={styles.calendarIcon}>
                   <Ionicons name="calendar" size={20} color="#F4A361" />
