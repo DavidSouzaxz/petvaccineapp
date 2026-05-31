@@ -172,8 +172,15 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Olá, {userName}</Text>
-          <Text style={styles.headerSubtitle}>Seja bem-vindo!</Text>
+          <View style={styles.headerGreetingWrapper}>
+            <Text style={styles.headerGreeting}>
+              Olá, {userName.split(" ")[0]}!
+            </Text>
+            <View style={styles.pawIconWrapper}>
+              <FontAwesome5 name="paw" size={22} color="#F4A361" />
+            </View>
+          </View>
+          <Text style={styles.headerSubtitle}>Que bom te ver por aqui!</Text>
         </View>
         <View>
           <NotificationToggleButton />
@@ -191,6 +198,12 @@ export default function HomeScreen({ navigation }) {
         >
           <View style={styles.containerImage}>
             <Image source={ASSETS.petCard} style={styles.cardImage} />
+            <TouchableOpacity
+              style={styles.viewAllPetsButton}
+              onPress={() => navigation.navigate("Pets")}
+            >
+              <Text style={styles.viewAllPetsButtonText}>Ver Mais</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Meus pets</Text>
@@ -387,8 +400,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
+  },
+  headerGreetingWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   headerGreeting: { fontSize: 22, fontWeight: "700", color: "#2B2B2B" },
+  pawIconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerSubtitle: { fontSize: 14, color: "#9B9B9B", marginTop: 4 },
   notificationButton: {
     width: 36,
@@ -516,22 +543,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   containerImage: {
+    marginTop: 20,
     justifyContent: "center",
     alignItems: "center",
   },
+  viewAllPetsButton: {
+    padding: 10,
+    left: 45,
+    bottom: 45,
+
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+  },
+  viewAllPetsButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#F4A361",
+  },
   cardImage: {
     width: width - 40,
-    height: 200,
+    height: 220,
     borderRadius: 20,
-
-    backgroundColor: "#F4E7D7",
-
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-
-    elevation: 5,
   },
   petVaccineDate: { fontSize: 11, color: "#777" },
   reminderCard: {
