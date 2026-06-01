@@ -31,6 +31,7 @@ const TIP_CARD_WIDTH = (width - 60) / 3;
 export default function HomeScreen({ navigation }) {
   const [pets, setPets] = useState([]);
   const [vaccines, setVaccines] = useState([]);
+  const [clinics, setClinics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [notifications, setNotifications] = useState(false);
@@ -48,6 +49,13 @@ export default function HomeScreen({ navigation }) {
       ]);
       setPets(petResponse || []);
       setVaccines(vaccineResponse || []);
+
+      // Buscar clínicas do cache
+      const cachedData = await AsyncStorage.getItem("last_clinics_data");
+      if (cachedData) {
+        const { clinics: cachedClinics } = JSON.parse(cachedData);
+        setClinics(cachedClinics || []);
+      }
     } catch (error) {
       console.log("Erro ao buscar dados da home:", error);
     } finally {
@@ -164,8 +172,15 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Olá, {userName}</Text>
-          <Text style={styles.headerSubtitle}>Seja bem-vindo!</Text>
+          <View style={styles.headerGreetingWrapper}>
+            <Text style={styles.headerGreeting}>
+              Olá, {userName.split(" ")[0]}!
+            </Text>
+            <View style={styles.pawIconWrapper}>
+              <FontAwesome5 name="paw" size={22} color="#F4A361" />
+            </View>
+          </View>
+          <Text style={styles.headerSubtitle}>Que bom te ver por aqui!</Text>
         </View>
         <View>
           <NotificationToggleButton />
@@ -183,6 +198,12 @@ export default function HomeScreen({ navigation }) {
         >
           <View style={styles.containerImage}>
             <Image source={ASSETS.petCard} style={styles.cardImage} />
+            <TouchableOpacity
+              style={styles.viewAllPetsButton}
+              onPress={() => navigation.navigate("Pets")}
+            >
+              <Text style={styles.viewAllPetsButtonText}>Ver Mais</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Meus pets</Text>
@@ -194,116 +215,84 @@ export default function HomeScreen({ navigation }) {
 
           <View style={styles.petListWrapper}>
             {pets.length > 0 ? (
-              pets.map((pet, index) => {
-                const statusIndex = getStatusIndex(pet.vaccines);
-                const status = PET_STATUS[statusIndex];
-                const nextVaccine = getNextVaccineInfo(pet.vaccines);
-                return (
-                  <View key={pet.id || `${pet.name}-${index}`}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate("Details", { pet });
-                      }}
-                    >
-                      <View style={styles.petCard}>
-                        <View style={styles.petProfileWrapper}>
-                          <Image
-                            source={getPetImage(pet.photoUrl, pet.specie)}
-                            style={styles.petProfileImage}
-                          />
-                        </View>
-                        <View style={styles.petInfo}>
-                          <Text style={styles.petName}>{pet.name}</Text>
-                          <Text style={styles.petMeta}>
-                            {pet.breed || "Sem raça"}
-                            {pet.age ? ` - ${pet.age}` : ""}
-                          </Text>
-                          <View
-                            style={[
-                              styles.statusBadge,
-                              { backgroundColor: status.backgroundColor },
-                            ]}
-                          >
-                            <Ionicons
-                              name={status.icon}
-                              size={14}
-                              color={status.color}
+              <>
+                {pets.slice(0, 3).map((pet, index) => {
+                  const statusIndex = getStatusIndex(pet.vaccines);
+                  const status = PET_STATUS[statusIndex];
+                  const nextVaccine = getNextVaccineInfo(pet.vaccines);
+                  return (
+                    <View key={pet.id || `${pet.name}-${index}`}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate("Details", { pet });
+                        }}
+                      >
+                        <View style={styles.petCard}>
+                          <View style={styles.petProfileWrapper}>
+                            <Image
+                              source={getPetImage(pet.photoUrl, pet.specie)}
+                              style={styles.petProfileImage}
                             />
-                            <Text
+                          </View>
+                          <View style={styles.petInfo}>
+                            <Text style={styles.petName}>{pet.name}</Text>
+                            <Text style={styles.petMeta}>
+                              {pet.breed || "Sem raça"}
+                              {pet.age ? ` - ${pet.age}` : ""}
+                            </Text>
+                            <View
                               style={[
-                                styles.statusText,
-                                { color: status.color },
+                                styles.statusBadge,
+                                { backgroundColor: status.backgroundColor },
                               ]}
                             >
-                              {status.label}
+                              <Ionicons
+                                name={status.icon}
+                                size={14}
+                                color={status.color}
+                              />
+                              <Text
+                                style={[
+                                  styles.statusText,
+                                  { color: status.color },
+                                ]}
+                              >
+                                {status.label}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.petVaccineInfo}>
+                            <Text style={styles.petVaccineLabel}>
+                              Proxima vacina
                             </Text>
+                            <Text style={styles.petVaccineName}>
+                              {nextVaccine.name}
+                            </Text>
+                            <View style={styles.petVaccineDateRow}>
+                              <Ionicons
+                                name="calendar-outline"
+                                size={14}
+                                color="#888"
+                              />
+                              <Text style={styles.petVaccineDate}>
+                                {nextVaccine.dateStr}
+                              </Text>
+                            </View>
                           </View>
                         </View>
-                        <View style={styles.petVaccineInfo}>
-                          <Text style={styles.petVaccineLabel}>
-                            Proxima vacina
-                          </Text>
-                          <Text style={styles.petVaccineName}>
-                            {nextVaccine.name}
-                          </Text>
-                          <View style={styles.petVaccineDateRow}>
-                            <Ionicons
-                              name="calendar-outline"
-                              size={14}
-                              color="#888"
-                            />
-                            <Text style={styles.petVaccineDate}>
-                              {nextVaccine.dateStr}
-                            </Text>
-                          </View>
-                        </View>
-                        {/* <TouchableOpacity
-                      style={styles.moreButton}
-                      onPress={() => openMenu(pet.id)}
-                    >
-                      <Ionicons
-                        name="ellipsis-vertical"
-                        size={16}
-                        color="#999"
-                      />
-                    </TouchableOpacity> */}
-                        {/* {activeMenuPetId === pet.id && (
-                        <View style={styles.menuCard}>
-                          <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => {
-                              closeMenu();
-                              navigation.navigate("Details", { pet });
-                            }}
-                          >
-                            <Ionicons
-                              name="eye-outline"
-                              size={16}
-                              color="#6F5A49"
-                            />
-                            <Text style={styles.menuText}>Visualizar</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[styles.menuItem, styles.menuItemLast]}
-                            onPress={() => {
-                              closeMenu();
-                              navigation.navigate("EditPet", { pet });
-                            }}
-                          >
-                            <Ionicons
-                              name="pencil-outline"
-                              size={16}
-                              color="#6F5A49"
-                            />
-                            <Text style={styles.menuText}>Editar</Text>
-                          </TouchableOpacity>
-                        </View>
-                      )} */}
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                );
-              })
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+                {pets.length > 3 && (
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Pets")}
+                    style={styles.moreButton}
+                  >
+                    <Text style={styles.moreButtonText}>Ver mais pets</Text>
+                  </TouchableOpacity>
+                )}
+              </>
             ) : (
               <View style={styles.emptyCard}>
                 <Text style={styles.emptyText}>Nenhum pet cadastrado.</Text>
@@ -320,11 +309,58 @@ export default function HomeScreen({ navigation }) {
               />
             </View>
             <Text style={styles.reminderText}>
-              {vaccines.length > 0
-                ? `${vaccines.length} vacina(s) pendente(s)`
-                : "Nenhuma vacina pendente!"}
+              {vaccines.length === 0
+                ? "Nenhuma vacina pendente!"
+                : vaccines.length === 1
+                  ? "1 vacina pendente"
+                  : `${vaccines.length} vacinas pendentes`}
             </Text>
           </View>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Clínicas Próximas</Text>
+            {clinics.length > 3 && (
+              <TouchableOpacity
+                style={styles.sectionAction}
+                onPress={() => navigation.navigate("Clinicas")}
+              >
+                <Text style={styles.sectionActionText}>Ver mais</Text>
+                <Ionicons name="chevron-forward" size={14} color="#F4A361" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {clinics.length > 0 ? (
+            <View style={styles.clinicsWrapper}>
+              {clinics.slice(0, 3).map((clinic, index) => (
+                <TouchableOpacity
+                  key={clinic.id || index}
+                  style={styles.clinicCard}
+                  onPress={() =>
+                    navigation.navigate("Dashboard", { selectedClinic: clinic })
+                  }
+                >
+                  <View style={styles.clinicIconWrapper}>
+                    <FontAwesome5
+                      name="clinic-medical"
+                      size={20}
+                      color="#F4A361"
+                    />
+                  </View>
+                  <View style={styles.clinicInfo}>
+                    <Text style={styles.clinicName}>{clinic.name}</Text>
+                    <Text style={styles.clinicAddress} numberOfLines={1}>
+                      {clinic.address || "Endereço não disponível"}
+                    </Text>
+                    {clinic.distance && (
+                      <Text style={styles.clinicDistance}>
+                        {clinic.distance.toFixed(1)} km
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
@@ -364,8 +400,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3e8dd98",
+  },
+  headerGreetingWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   headerGreeting: { fontSize: 22, fontWeight: "700", color: "#2B2B2B" },
+  pawIconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerSubtitle: { fontSize: 14, color: "#9B9B9B", marginTop: 4 },
   notificationButton: {
     width: 36,
@@ -386,7 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#F4A361",
   },
-  scrollContent: { paddingBottom: 120 },
+  scrollContent: { paddingBottom: 30 },
   sectionHeader: {
     marginHorizontal: 20,
     marginTop: 20,
@@ -493,22 +543,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   containerImage: {
+    marginTop: 20,
     justifyContent: "center",
     alignItems: "center",
   },
+  viewAllPetsButton: {
+    padding: 10,
+    left: 45,
+    bottom: 45,
+
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+  },
+  viewAllPetsButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#F4A361",
+  },
   cardImage: {
     width: width - 40,
-    height: 200,
+    height: 220,
     borderRadius: 20,
-
-    backgroundColor: "#F4E7D7",
-
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-
-    elevation: 5,
   },
   petVaccineDate: { fontSize: 11, color: "#777" },
   reminderCard: {
@@ -605,6 +663,69 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  moreButton: {
+    marginHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: "#FFF",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#F4A361",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  moreButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#F4A361",
+  },
+  clinicsWrapper: {
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 20,
+  },
+  clinicCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#F4E7D7",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  clinicIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFF3E6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clinicInfo: {
+    flex: 1,
+  },
+  clinicName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2B2B2B",
+  },
+  clinicAddress: {
+    fontSize: 12,
+    color: "#8F8F8F",
+    marginTop: 2,
+  },
+  clinicDistance: {
+    fontSize: 11,
+    color: "#F4A361",
+    fontWeight: "600",
+    marginTop: 2,
+  },
 
   calendarCard: {
     marginBottom: 10,

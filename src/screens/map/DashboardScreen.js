@@ -7,6 +7,7 @@ import {
   ScrollView,
   StatusBar,
   Image,
+  Dimensions,
 } from "react-native";
 import {
   Ionicons,
@@ -19,6 +20,9 @@ import * as Location from "expo-location";
 import { getNearbyClinics } from "../../services/ServiceMap";
 import CardClinic from "../../components/CardClinic";
 import OpenGoogleMaps from "../../core/OpenGoogleMaps";
+
+const { width } = Dimensions.get("window");
+
 export default function DashboardScreen({ navigation }) {
   const [markers, setMarkers] = useState([]);
   const [region, setRegion] = useState(null);
@@ -85,32 +89,31 @@ export default function DashboardScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FDF4E7" />
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Clínicas</Text>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.banner}>
-          <Image
-            source={require("../../../assets/golden.png")}
-            style={styles.cardImage}
-          />
-          <View style={styles.bannerText}>
-            <Text style={styles.bannerTitle}>Veterinários mais próximos</Text>
-            <Text style={styles.bannerSubTitle}>
-              Facilitando a busca por médicos!
-            </Text>
-            {/* <TouchableOpacity style={styles.bannerButton}>
-              <Text style={styles.bannerButtonText}>Buscar</Text>
-            </TouchableOpacity> */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerRow}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Clínicas</Text>
           </View>
         </View>
-
+        <View style={styles.containerImage}>
+          <Image
+            source={require("../../../assets/cardClinic.png")}
+            style={styles.cardImage}
+          />
+          <TouchableOpacity
+            style={styles.viewAllPetsButton}
+            onPress={() => navigation.navigate("FullMap")}
+          >
+            <Text style={styles.viewAllPetsButtonText}>Explorar</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Mapa & Localizações</Text>
           <TouchableOpacity onPress={() => navigation.navigate("FullMap")}>
-            <Text style={styles.seeAllText}>Expandir</Text>
+            <Text style={styles.seeAllText}>Ver no Mapa</Text>
           </TouchableOpacity>
         </View>
 
@@ -159,40 +162,45 @@ export default function DashboardScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FDF4E7" },
+  container: { flex: 1, backgroundColor: "#FFF5EA", paddingTop: 35 },
+  scrollContent: { paddingBottom: 32 },
   header: {
-    padding: 30,
-    paddingTop: 70,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  greeting: { fontSize: 24, fontWeight: "bold" },
-  banner: {
-    marginHorizontal: 20,
-    backgroundColor: "#F4A361",
     padding: 20,
-    borderRadius: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    borderWidth: 2,
-    borderColor: "#4b3009",
   },
-  bannerText: {
+  title: { fontSize: 24, fontWeight: "700", color: "#222" },
+  containerImage: {
     justifyContent: "center",
-    alignItems: "flex-end",
-  },
-  cardImage: { width: 70, height: 70 },
-  bannerTitle: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
-  bannerSubTitle: { color: "#4b3009", fontSize: 12, fontWeight: "light" },
-  bannerButton: {
-    backgroundColor: "#FFF",
-    marginTop: 10,
-    padding: 10,
-    borderRadius: 10,
-    width: 80,
     alignItems: "center",
   },
-  bannerButtonText: { color: "#F4A361", fontWeight: "bold" },
+
+  cardImage: {
+    width: width - 40,
+    height: 180,
+    borderRadius: 20,
+    shadowColor: "#F4A361",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  viewAllPetsButton: {
+    padding: 10,
+    left: 33,
+    bottom: 20,
+
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+  },
+  viewAllPetsButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#F4A361",
+  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
