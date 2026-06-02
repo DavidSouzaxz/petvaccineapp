@@ -120,9 +120,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Meus pets</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("PetsScreen")}
-              >
+              <TouchableOpacity onPress={() => navigation.navigate("Pets")}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.link}>Ver todos</Text>
                   <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
