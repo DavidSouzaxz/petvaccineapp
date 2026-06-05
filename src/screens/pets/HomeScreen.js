@@ -360,7 +360,19 @@ export default function HomeScreen({ navigation }) {
                 </TouchableOpacity>
               ))}
             </View>
-          ) : null}
+          ) : (
+            <View style={styles.emptyClinicsContainer}>
+              <Text style={styles.emptyClinicsText}>
+                Encontre a cliníca mais proxima para você!
+              </Text>
+              <TouchableOpacity
+                style={styles.findClinicsButton}
+                onPress={() => navigation.navigate("FullMap")}
+              >
+                <Text style={styles.findClinicsButtonText}>Visualizar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Dicas e Curiosidades</Text>
@@ -765,5 +777,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#9A9A9A",
     marginTop: 2,
+  },
+  emptyClinicsContainer: {
+    marginHorizontal: 20,
+    padding: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50,
+  },
+  emptyClinicsText: {
+    fontSize: 12,
+    color: "#9B9B9B",
+    textAlign: "center",
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+  findClinicsButton: {
+    backgroundColor: "#F4A361",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 24,
+  },
+  findClinicsButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFF",
   },
 });

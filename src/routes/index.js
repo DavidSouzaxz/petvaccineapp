@@ -98,6 +98,7 @@ function PetStack() {
         options={{ title: "Editar Vacina" }}
       />
       <Stack.Screen name="Calendario" component={CalendarScreen} />
+      <Stack.Screen name="FullMap" component={MapScreen} />
     </Stack.Navigator>
   );
 }
