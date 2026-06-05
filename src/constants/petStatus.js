@@ -32,5 +32,4 @@ export const STATUS_MAP = {
   "Em dia": PET_STATUS[0],
   Atenção: PET_STATUS[1],
   Atrasado: PET_STATUS[2],
-  Atencao: PET_STATUS[1], // Alternativa sem acento
 };
