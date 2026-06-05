@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { AlertModal } from "../../components/modals";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Callout } from "react-native-maps";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getNearbyClinics } from "../../services/ServiceMap";
@@ -9,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 
 export default function MapScreen({ navigation }) {
-  const mapRef = useRef(null); // Referência para controlar o mapa
+  const mapRef = useRef(null);
   const [markers, setMarkers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
@@ -78,21 +84,22 @@ export default function MapScreen({ navigation }) {
     })();
   }, [fetchNearby]);
 
-  // Função disparada ao clicar no Marcador
-  const handleMarkerPress = (clinic) => {
+  // Função exclusiva para o clique do marcador no Android
+  const handleMarkerPressAndroid = (clinic) => {
+    if (Platform.OS !== "android") return;
+
     setSelectedClinic(clinic);
 
-    // Move a câmera do mapa para centralizar a clínica clicada suavemente
     if (mapRef.current) {
       mapRef.current.animateToRegion(
         {
-          latitude: clinic.lat, // Desloca levemente para cima para o card de baixo não cobrir o pino
+          latitude: clinic.lat,
           longitude: clinic.lon,
           latitudeDelta: 0.03,
           longitudeDelta: 0.03,
         },
         400,
-      ); // 400 milissegundos de animação
+      );
     }
   };
 
@@ -109,12 +116,12 @@ export default function MapScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <MapView
-        ref={mapRef} // Atribui a referência do mapa
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         region={region}
         onRegionChangeComplete={(r) => setRegion(r)}
-        onPress={() => setSelectedClinic(null)} // Fecha o card se clicar no mapa vazio
+        onPress={() => setSelectedClinic(null)} // Fecha o card do Android ao clicar fora
         toolbarEnabled={false}
       >
         {markers.map((m) => (
@@ -122,8 +129,24 @@ export default function MapScreen({ navigation }) {
             key={m.id}
             coordinate={{ latitude: m.lat, longitude: m.lon }}
             pinColor="#F4A361"
-            onPress={() => handleMarkerPress(m)} // Executa a nossa lógica de foco e abertura
-          />
+            onPress={() => handleMarkerPressAndroid(m)} // Só roda lógica se for Android
+          >
+            {/* Renderiza o Callout flutuante bonito APENAS se for iOS */}
+            {Platform.OS === "ios" && (
+              <Callout tooltip={true} onPress={() => handlePressDetails(m)}>
+                <Text style={styles.calloutWrapper}>
+                  <View style={styles.cardCallout}>
+                    <Text style={styles.calloutTitle} numberOfLines={1}>
+                      {m.nome || m.name}
+                    </Text>
+                    <Text style={styles.calloutSubtitle}>
+                      Toque para mais detalhes
+                    </Text>
+                  </View>
+                </Text>
+              </Callout>
+            )}
+          </Marker>
         ))}
       </MapView>
 
@@ -134,9 +157,9 @@ export default function MapScreen({ navigation }) {
         <Ionicons name="arrow-back" size={24} color="#333" />
       </TouchableOpacity>
 
-      {/* O Card inferior fixo que abre de forma idêntica e linda em ambos os sistemas */}
-      {selectedClinic && (
-        <View style={styles.card}>
+      {/* Renderiza o Card inferior customizado APENAS no Android */}
+      {Platform.OS === "android" && selectedClinic && (
+        <View style={styles.cardAndroid}>
           <View style={styles.cardContent}>
             <View style={styles.cardInfo}>
               <View style={styles.cardTitleContainer}>
@@ -174,7 +197,40 @@ export default function MapScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FDF4E7" },
   map: { width: "100%", height: "100%" },
-  card: {
+
+  // Estilos do Callout Flutuante (iOS)
+  calloutWrapper: { backgroundColor: "transparent" },
+  cardCallout: {
+    backgroundColor: "white",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    width: 220,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#EAEAEA",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  calloutTitle: {
+    fontWeight: "bold",
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  calloutSubtitle: {
+    fontSize: 12,
+    color: "#F4A361",
+    textAlign: "center",
+  },
+
+  // Estilos do Card Inferior Fixo (Android)
+  cardAndroid: {
     position: "absolute",
     bottom: 50,
     left: 20,
@@ -196,9 +252,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 4,
+    paddingRight: 20, // 👈 ADICIONE ISSO: Dá o recuo necessário antes do texto ser cortado
+    flex: 1,
   },
   iconTitle: { fontSize: 20, color: "#F4A361" },
-  textCardTitle: { fontWeight: "bold", fontSize: 17, color: "#333" },
+  textCardTitle: { fontWeight: "bold", fontSize: 17, color: "#333", flex: 1 },
   cardAddress: { color: "#888", fontSize: 13 },
   button: {
     backgroundColor: "#F4A361",
@@ -207,6 +265,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: "white", fontWeight: "bold", fontSize: 15 },
+
   backButton: {
     position: "absolute",
     top: 50,
