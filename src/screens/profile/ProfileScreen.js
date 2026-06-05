@@ -82,14 +82,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Perfil</Text>
-            <Text style={styles.subtitle}>
-              Gerencie sua conta e cuide{"\n"}
-              cada vez melhor dos seus pets.
-            </Text>
+          <View style={styles.headerBg}>
+            <View style={styles.header}></View>
 
-            <View style={styles.profileRow}>
+            <View style={styles.profileCard}>
               <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
                   {profileImage ? (
@@ -105,13 +101,13 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 </View>
               </View>
 
-              <View style={styles.info}>
-                <Text style={styles.name}>{user}</Text>
-                <Text style={styles.email}>{email}</Text>
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{user}</Text>
+                <Text style={styles.userEmail}>{email}</Text>
 
                 <View style={styles.badge}>
-                  <Ionicons name="shield-checkmark" size={15} color="#ff7a00" />
-                  <Text style={styles.badgeText}> Tutor responsável</Text>
+                  <Ionicons name="shield-checkmark" size={14} color="#ff7a00" />
+                  <Text style={styles.badgeText}>Tutor responsável</Text>
                 </View>
               </View>
             </View>
@@ -120,9 +116,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Meus pets</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("PetsScreen")}
-              >
+              <TouchableOpacity onPress={() => navigation.navigate("Pets")}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.link}>Ver todos</Text>
                   <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
@@ -285,25 +279,30 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+
+  headerBg: {
+    backgroundColor: "#ffe4ce",
     paddingBottom: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: "700",
+    color: "#222",
   },
 
-  subtitle: {
-    color: "#777",
-    marginBottom: 20,
-    marginTop: 4,
-    fontSize: 13,
-  },
-
-  profileRow: {
+  profileCard: {
     flexDirection: "row",
     alignItems: "center",
+    marginLeft: 5,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    gap: 16,
   },
 
   avatarContainer: {
@@ -311,61 +310,62 @@ const styles = StyleSheet.create({
   },
 
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: "#f3c39c",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#f09b56",
+    elevation: 4,
   },
 
   avatarText: {
-    fontSize: 30,
+    fontSize: 40,
     fontWeight: "700",
+    color: "#fff",
   },
 
   avatarImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 
-  camera: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
+  userInfo: {
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
-  info: {
-    marginLeft: 15,
-  },
-
-  name: {
-    fontSize: 18,
+  userName: {
+    fontSize: 20,
     fontWeight: "700",
+    color: "#222",
+    marginBottom: 4,
   },
 
-  email: {
-    color: "#777",
+  userEmail: {
+    fontSize: 13,
+    color: "#8E8E8E",
+    marginBottom: 10,
   },
 
   badge: {
     flexDirection: "row",
-    backgroundColor: "#ffe8d6",
-    padding: 5,
+    alignItems: "center",
+    backgroundColor: "#fdb06873",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: 20,
-    marginTop: 5,
+    alignSelf: "flex-start",
   },
 
   badgeText: {
     color: "#ff7a00",
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: "600",
+    marginLeft: 2,
   },
 
   card: {

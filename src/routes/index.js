@@ -123,6 +123,11 @@ function OccurrencesStack() {
         component={OccurrenceDetailsScreen}
       />
       <Stack.Screen name="OccurrencesEdit" component={OcurrenceEditScreen} />
+      <Stack.Screen
+        name="AddPet"
+        component={AddPetScreen}
+        options={{ title: "Novo Pet" }}
+      />
     </Stack.Navigator>
   );
 }
@@ -268,6 +273,11 @@ function ProfileStack({ onLogout }) {
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
+      <Stack.Screen
+        name="Pets"
+        component={PetsScreen}
+        options={{ title: "Meus Pets" }}
+      />
     </Stack.Navigator>
   );
 }
