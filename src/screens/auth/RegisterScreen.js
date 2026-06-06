@@ -165,7 +165,7 @@ export default function RegisterScreen({ navigation }) {
       imageStyle={styles.imageStyle}
       resizeMode="cover"
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.card}>
             <Text style={styles.title}>Criar Conta</Text>
@@ -269,7 +269,7 @@ export default function RegisterScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+      </View>
       <Modal
         visible={avatarModalVisible}
         transparent={true}

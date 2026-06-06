@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -153,7 +154,10 @@ export default function DashboardScreen({ navigation }) {
               />
             ))
           ) : (
-            <Text style={styles.emptyText}>Buscando clínicas...</Text>
+            <View>
+              <Text style={styles.emptyText}>Buscando clínicas...</Text>
+              <ActivityIndicator size="large" color="#F4A361" />
+            </View>
           )}
         </View>
       </ScrollView>

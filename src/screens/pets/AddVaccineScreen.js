@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   ScrollView,
   FlatList,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal } from "../../components/modals";
 import ServiceVaccine from "../../services/ServiceVaccine";
@@ -97,9 +99,13 @@ export default function AddVaccineScreen({ navigation, route }) {
         </View>
         <View style={{ width: 36 }} />
       </View>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        extraHeight={180}
       >
         {/* <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
           <ButtonRollback navigation={navigation} disabled={loading} />
@@ -297,7 +303,7 @@ export default function AddVaccineScreen({ navigation, route }) {
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -309,6 +315,10 @@ export default function AddVaccineScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
+  scrollContent: {
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",

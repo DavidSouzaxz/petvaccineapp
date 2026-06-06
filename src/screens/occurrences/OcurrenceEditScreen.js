@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal } from "../../components/modals";
 import * as ImagePicker from "expo-image-picker";
@@ -172,9 +174,13 @@ export default function EditOccurrenceScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        extraHeight={180}
       >
         <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
           <ButtonRollback navigation={navigation} disabled={saving} />
@@ -283,7 +289,7 @@ export default function EditOccurrenceScreen({ navigation, route }) {
             )}
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -295,6 +301,10 @@ export default function EditOccurrenceScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
+  scrollContent: {
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
   headerBox: { alignItems: "center", marginBottom: 20, marginTop: 10 },
   iconCircle: {
     width: 70,

@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
 import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServicePet from "../../services/ServicePet";
@@ -214,9 +216,13 @@ export default function EditPetScreen({ navigation, route }) {
           <ActivityIndicator size="large" color="#F4A361" />
         </View>
       ) : (
-        <ScrollView
+        <KeyboardAwareScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+          extraHeight={180}
         >
           {/* <ButtonRollback navigation={navigation} disabled={loading} /> */}
 
@@ -422,21 +428,22 @@ export default function EditPetScreen({ navigation, route }) {
               placeholderTextColor="#B9B1A9"
             />
           </View>
-        </ScrollView>
-      )}
-      {!loading && (
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handlerSave}
-          disabled={loading2}
-        >
-          {loading2 ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.saveButtonText}>Salvar </Text>
+          {!loading && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handlerSave}
+              disabled={loading2}
+            >
+              {loading2 ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.saveButtonText}>Salvar </Text>
+              )}
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
+        </KeyboardAwareScrollView>
       )}
+
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -454,7 +461,11 @@ export default function EditPetScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
 
   headerBox: {
     alignItems: "center",
@@ -633,10 +644,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveButton: {
-    position: "absolute",
-    left: 20,
-    right: 20,
-    bottom: 26,
     backgroundColor: "#E98B3A",
     paddingVertical: 14,
     borderRadius: 16,

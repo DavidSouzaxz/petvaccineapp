@@ -50,7 +50,6 @@ export default function HomeScreen({ navigation }) {
       setPets(petResponse || []);
       setVaccines(vaccineResponse || []);
 
-      // Buscar clínicas do cache
       const cachedData = await AsyncStorage.getItem("last_clinics_data");
       if (cachedData) {
         const { clinics: cachedClinics } = JSON.parse(cachedData);
@@ -96,43 +95,35 @@ export default function HomeScreen({ navigation }) {
 
   const getStatusIndex = (vaccines) => {
     if (!vaccines || vaccines.length === 0) {
-      return 0;
+      return 0; // Verde: Sem vacinas cadastras, assume neutro/em dia
     }
 
-    const latestVaccines = getLatestVaccines(vaccines);
-    if (latestVaccines.length === 0) {
+    // 1. Herda a string de data calculada pela regra prioritária de negócios
+    const nextVaccineInfo = getNextVaccineInfo(vaccines);
+
+    // Se não houver data válida ou o pet não tiver vacinas, mantém em dia
+    if (!nextVaccineInfo || nextVaccineInfo.dateStr === "--/--/----") {
       return 0;
     }
 
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas os dias físicos
 
-    const allVaccines = latestVaccines
-      .map((v) => {
-        const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
-        return {
-          date: dateProp ? new Date(dateProp) : null,
-        };
-      })
-      .filter((v) => v.date)
-      .sort((a, b) => a.date - b.date);
+    // 2. Transforma a string formatada "DD/MM/AAAA" de volta em um objeto Date seguro
+    const [day, month, year] = nextVaccineInfo.dateStr.split("/");
+    const targetDate = new Date(Number(year), Number(month) - 1, Number(day));
+    targetDate.setHours(0, 0, 0, 0);
 
-    if (allVaccines.length === 0) {
-      return 0;
-    }
-
-    const nextVaccineDate = new Date(allVaccines[0].date);
-    nextVaccineDate.setHours(0, 0, 0, 0);
-
-    const diffTime = nextVaccineDate - now;
+    // 3. Calcula a diferença de tempo em dias absolutos
+    const diffTime = targetDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return 2;
+      return 2; // Vermelho: Vacina atrasada (data menor que hoje)
     } else if (diffDays <= 3) {
-      return 1;
+      return 1; // Amarelo: Atenção, faltam 3 dias ou menos para a aplicação
     } else {
-      return 0;
+      return 0; // Verde: Tudo em dia com os prazos futuros
     }
   };
 
@@ -144,7 +135,25 @@ export default function HomeScreen({ navigation }) {
     if (latestVaccines.length === 0)
       return { name: "Sem vacinas", dateStr: "--/--/----" };
 
-    const allVaccines = latestVaccines
+    const pendingVaccines = latestVaccines
+      .filter((v) => v.isApplied === false || v.isApplied === "false")
+      .map((v) => {
+        const dateProp = v.applicationDate;
+        return {
+          name: v.name,
+          date: dateProp ? new Date(dateProp) : null,
+        };
+      })
+      .filter((v) => v.date)
+      .sort((a, b) => a.date - b.date); // Ordena
+    if (pendingVaccines.length > 0) {
+      const criticalVaccine = pendingVaccines[0];
+      const dateStr = criticalVaccine.date.toLocaleDateString("pt-BR");
+      return { name: criticalVaccine.name, dateStr };
+    }
+
+    const upcomingVaccines = latestVaccines
+      .filter((v) => v.isApplied === true || v.isApplied === "true")
       .map((v) => {
         const dateProp = v.nextApplicationDateTime || v.nextApplicationDate;
         return {
@@ -155,15 +164,13 @@ export default function HomeScreen({ navigation }) {
       .filter((v) => v.date)
       .sort((a, b) => a.date - b.date);
 
-    if (allVaccines.length === 0) {
-      return { name: "Sem vacinas", dateStr: "--/--/----" };
+    if (upcomingVaccines.length > 0) {
+      const nextVaccine = upcomingVaccines[0];
+      const dateStr = nextVaccine.date.toLocaleDateString("pt-BR");
+      return { name: nextVaccine.name, dateStr };
     }
 
-    const closest = allVaccines[0];
-
-    const dateStr = closest.date.toLocaleDateString("pt-BR");
-
-    return { name: closest.name, dateStr };
+    return { name: "Sem vacinas", dateStr: "--/--/----" };
   };
 
   return (

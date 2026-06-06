@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from "expo-image-picker";
 import ButtonRollback from "../../components/ButtonRollback";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -119,9 +121,13 @@ export default function AddOccurrenceScreen({ navigation, route }) {
         <View style={{ width: 36 }} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40, paddingTop: 20 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        extraHeight={180}
       >
         <View style={styles.containerCircle}>
           <View
@@ -225,13 +231,18 @@ export default function AddOccurrenceScreen({ navigation, route }) {
             )}
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
   headerBox: {
     alignItems: "center",
     paddingBottom: 20,

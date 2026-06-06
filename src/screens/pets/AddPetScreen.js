@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { AlertModal } from "../../components/modals";
@@ -168,9 +170,13 @@ export default function AddPetScreen({ navigation, route }) {
         </View>
         <View style={{ width: 36 }} />
       </View>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        extraHeight={180}
       >
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
@@ -364,19 +370,19 @@ export default function AddPetScreen({ navigation, route }) {
             editable={false}
           />
         </View>
-      </ScrollView>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handlerSave}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar</Text>
+          )}
+        </TouchableOpacity>
+      </KeyboardAwareScrollView>
 
-      <TouchableOpacity
-        style={styles.saveButton}
-        onPress={handlerSave}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.saveButtonText}>Salvar</Text>
-        )}
-      </TouchableOpacity>
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -388,7 +394,11 @@ export default function AddPetScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1" },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
 
   headerBox: {
     alignItems: "center",
@@ -540,10 +550,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveButton: {
-    position: "absolute",
-    left: 20,
-    right: 20,
-    bottom: 26,
     backgroundColor: "#E98B3A",
     paddingVertical: 14,
     borderRadius: 16,

@@ -9,21 +9,24 @@ export const getLatestVaccines = (vaccinesList) => {
   const latestMap = {};
 
   vaccinesList.forEach((vac) => {
-    // Só processa vacinas aplicadas
-    if (!vac.isApplied) return;
+    const dateProp = vac.applicationDate || vac.nextApplicationDate;
+    if (!dateProp) return;
 
-    const currentVacDate = new Date(vac.applicationDate);
+    const currentVacDate = new Date(dateProp.replace(" ", "T"));
     const existingVac = latestMap[vac.name];
 
-    // Se não existir a vacina no mapa OU a vacina atual for mais recente que a salva, substitui
-    if (
-      !existingVac ||
-      currentVacDate > new Date(existingVac.applicationDate)
-    ) {
+    if (!existingVac) {
       latestMap[vac.name] = vac;
+    } else {
+      const existingDateProp =
+        existingVac.applicationDate || existingVac.nextApplicationDate;
+      const existingVacDate = new Date(existingDateProp.replace(" ", "T"));
+
+      if (currentVacDate > existingVacDate) {
+        latestMap[vac.name] = vac;
+      }
     }
   });
 
-  // Retorna um array apenas com as últimas doses de cada vacina
   return Object.values(latestMap);
 };

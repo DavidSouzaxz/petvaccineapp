@@ -21,14 +21,12 @@
         "backgroundColor": "#FDF1E7"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "package": "com.anonymous.PetCard"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-localization",
-      "@react-native-community/datetimepicker"
-    ]
+    "plugins": ["expo-localization", "@react-native-community/datetimepicker"]
   }
 }

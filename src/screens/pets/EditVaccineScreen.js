@@ -8,9 +8,11 @@ import {
   ActivityIndicator,
   Switch,
   ScrollView,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
-import { AlertModal } from "../../components/modals";
+import { AlertModal, ConfirmationModal } from "../../components/modals";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
@@ -73,6 +75,8 @@ export default function EditVaccineScreen({ navigation, route }) {
   const [reminder, setReminder] = useState(!!vaccine?.reminder);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -90,6 +94,29 @@ export default function EditVaccineScreen({ navigation, route }) {
     if (cleaned.length > 4)
       formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
     setDate(formatted);
+  };
+
+  const handleDelete = () => {
+    setConfirmMessage(`Tem certeza que quer deletar ${vaccine.name}?`);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmVisible(false);
+    setLoading(true);
+    try {
+      await ServiceVaccine.delete(vaccine.id);
+      setAlertMessage("Vacina excluida com sucesso!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.pop();
+      }, 500);
+    } catch (error) {
+      setAlertMessage("Nao foi possivel excluir o pet.");
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTimeChange = (text) => {
@@ -145,6 +172,16 @@ export default function EditVaccineScreen({ navigation, route }) {
     }
   };
 
+  const confirmationApplication = () => {
+    setConfirmMessage(`Tem certeza que deseja aplicar está Vacina?`);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmationApplication = async () => {
+    setIsApplied(!isApplied);
+    setConfirmVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -158,9 +195,13 @@ export default function EditVaccineScreen({ navigation, route }) {
         </View>
         <View style={{ width: 36 }} />
       </View>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 70}
+        extraHeight={180}
       >
         {/* <View style={{ paddingHorizontal: 20, paddingTop: 35 }}>
           <ButtonRollback navigation={navigation} disabled={loading} />
@@ -186,7 +227,7 @@ export default function EditVaccineScreen({ navigation, route }) {
             <TouchableOpacity
               style={styles.checkboxContainer}
               disabled={isApplied}
-              onPress={() => setIsApplied(!isApplied)}
+              onPress={confirmationApplication}
             >
               <Ionicons
                 name={isApplied ? "checkbox" : "checkbox-outline"}
@@ -202,6 +243,12 @@ export default function EditVaccineScreen({ navigation, route }) {
               >
                 Aplicada
               </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash-outline" color="#E14C4C" size={20} />
             </TouchableOpacity>
             {/* <View style={styles.toggleBox}>
             <Switch
@@ -359,11 +406,23 @@ export default function EditVaccineScreen({ navigation, route }) {
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
+      />
+      <ConfirmationModal
+        visible={confirmVisible}
+        message={confirmMessage}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+      />
+      <ConfirmationModal
+        visible={confirmVisible}
+        message={confirmMessage}
+        onConfirm={handleConfirmationApplication}
+        onCancel={() => setConfirmVisible(false)}
       />
     </View>
   );
@@ -371,6 +430,10 @@ export default function EditVaccineScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF7F1", padding: 0 },
+  scrollContent: {
+    paddingBottom: 40,
+    flexGrow: 1,
+  },
   titleBox: {
     alignItems: "center",
     paddingBottom: 20,
@@ -404,11 +467,12 @@ const styles = StyleSheet.create({
   togglesRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     gap: 32,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 20,
   },
+
   toggleBox: {
     alignItems: "center",
     justifyContent: "center",
@@ -447,6 +511,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 6,
     textAlign: "center",
+  },
+  deleteButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    right: 12,
   },
   card: {
     backgroundColor: "#FFF",
