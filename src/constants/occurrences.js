@@ -42,7 +42,7 @@ export const OCCURRENCE_TYPE_COLORS = {
   REDUCE_APPETITE: {
     accent: "#3A7BD5",
     badge: "#E7F0FB",
-    icon: "apple",
+    icon: "drumstick-bite",
   },
   HECTIC: { accent: "#3A7BD5", badge: "#E7F0FB", icon: "bolt" },
   LOOSE_STOOLS: { accent: "#d15e31", badge: "#fce6dd", icon: "poop" },

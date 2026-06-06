@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.26)",
   },
   title: {
     fontSize: 36,
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   button: {
-    backgroundColor: "#F4A361",
+    backgroundColor: "#ff7a00",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

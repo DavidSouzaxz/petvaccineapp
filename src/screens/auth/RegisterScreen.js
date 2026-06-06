@@ -381,11 +381,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 8,
     color: "#333",
+    fontWeight: "800",
   },
   card: {
     backgroundColor: "#FFF",
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   avatarSection: {
-    marginBottom: 20,
+    marginBottom: 5,
   },
   avatarLabel: {
     fontSize: 14,

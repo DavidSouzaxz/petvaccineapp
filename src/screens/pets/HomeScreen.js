@@ -227,7 +227,11 @@ export default function HomeScreen({ navigation }) {
                           navigation.navigate("Details", { pet });
                         }}
                       >
-                        <View style={styles.petCard}>
+                        <TouchableOpacity
+                            style={styles.petCard}
+                            activeOpacity={0.85}
+                            onPress={() => navigation.navigate("Details", { pet })}
+                          >
                           <View style={styles.petProfileWrapper}>
                             <Image
                               source={getPetImage(pet.photoUrl, pet.specie)}
@@ -279,7 +283,7 @@ export default function HomeScreen({ navigation }) {
                               </Text>
                             </View>
                           </View>
-                        </View>
+                        </TouchableOpacity>
                       </TouchableOpacity>
                     </View>
                   );
@@ -485,6 +489,7 @@ const styles = StyleSheet.create({
     width: PET_CARD_WIDTH,
     alignSelf: "center",
     position: "relative",
+    overflow: "hidden",
   },
   petProfileWrapper: {
     width: 56,
