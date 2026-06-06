@@ -274,6 +274,11 @@ function ProfileStack({ onLogout }) {
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
+       <Stack.Screen
+        name="Details"
+        component={DetailsScreen}
+        options={{ title: "Vacinas" }}
+      />
       <Stack.Screen
         name="Pets"
         component={PetsScreen}

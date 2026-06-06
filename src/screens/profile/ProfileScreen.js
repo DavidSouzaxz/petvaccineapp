@@ -15,6 +15,7 @@ import ServicePet from "../../services/ServicePet";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileScreen({ navigation, onLogout }) {
   const [user, setUser] = useState("");
@@ -24,12 +25,33 @@ export default function ProfileScreen({ navigation, onLogout }) {
   const [profileImage, setProfileImage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const petsEmDia = pets.filter(
-    (pet) => pet.vaccines.isApplied === true,
-  ).length;
-  const petsPendentes = pets.filter(
-    (pet) => pet.vaccines.isApplied === false,
-  ).length;
+  const petsEmDia = pets.filter((pet) => {
+    const vacs = Array.isArray(pet.vaccines)
+      ? pet.vaccines
+      : pet.vaccines
+      ? [pet.vaccines]
+      : [];
+    if (vacs.length === 0) return true; // sem vacinas = considerado em dia
+    return vacs.every((v) => v.isApplied === true);
+  }).length;
+
+  const petsPendentes = pets.filter((pet) => {
+    const vacs = Array.isArray(pet.vaccines)
+      ? pet.vaccines
+      : pet.vaccines
+      ? [pet.vaccines]
+      : [];
+    return vacs.some((v) => v.isApplied === false);
+  }).length;
+
+  const vaccinesPending = pets.reduce((sum, pet) => {
+    const vacs = Array.isArray(pet.vaccines)
+      ? pet.vaccines
+      : pet.vaccines
+      ? [pet.vaccines]
+      : [];
+    return sum + vacs.filter((v) => v.isApplied === false).length;
+  }, 0);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -106,7 +128,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 <Text style={styles.userEmail}>{email}</Text>
 
                 <View style={styles.badge}>
-                  <Ionicons name="shield-checkmark" size={14} color="#ff7a00" />
+                  <Ionicons name="shield-checkmark" size={14} color="#c6670fff" />
                   <Text style={styles.badgeText}>Tutor responsável</Text>
                 </View>
               </View>
@@ -116,7 +138,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Meus pets</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Pets")}>
+              <TouchableOpacity onPress={() => navigation.navigate("Home", { screen: "Pets" })}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.link}>Ver todos</Text>
                   <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
@@ -143,7 +165,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
               <View style={styles.stat}>
                 <Text style={styles.statNumber}>{petsPendentes}</Text>
-                <Text style={styles.statLabel}>pendentes</Text>
+                <Text style={styles.statLabel}>com pendências</Text>
               </View>
             </View>
           </View>
@@ -279,15 +301,15 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 30,
     paddingBottom: 10,
   },
 
   headerBg: {
     backgroundColor: "#ffe4ce",
-    paddingBottom: 20,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    paddingBottom: 50,
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
   },
 
   title: {
@@ -301,7 +323,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 5,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 25,
     gap: 16,
   },
 
@@ -347,7 +369,7 @@ const styles = StyleSheet.create({
 
   userEmail: {
     fontSize: 13,
-    color: "#8E8E8E",
+    color: "#727272ff",
     marginBottom: 10,
   },
 
@@ -362,7 +384,7 @@ const styles = StyleSheet.create({
   },
 
   badgeText: {
-    color: "#ff7a00",
+    color: "#c6670fff",
     fontSize: 11,
     fontWeight: "600",
     marginLeft: 2,
@@ -371,6 +393,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     margin: 20,
+    marginTop: -25,
     borderRadius: 16,
     padding: 15,
     elevation: 0.6,
