@@ -50,6 +50,59 @@ export default function PetsScreen({ navigation }) {
     return `${years} ano${years > 1 ? "s" : ""}`;
   };
 
+  const getPetStatusProperties = (vaccines) => {
+    // Configurações padrão caso não tenha vacinas cadastradas
+    if (!vaccines || vaccines.length === 0) {
+      return { label: "Em dia", color: "#27AE60", backgroundColor: "#E7F9F0" };
+    }
+
+    // Filtra e isola vacinas que NÃO foram aplicadas
+    const pendingVaccines = vaccines
+      .filter((v) => v.isApplied === false || v.isApplied === "false")
+      .map((v) => {
+        const dateProp = v.applicationDate || v.applicationDateTime;
+        return {
+          date: dateProp ? new Date(dateProp.replace(" ", "T")) : null,
+        };
+      })
+      .filter((v) => v.date && !isNaN(v.date.getTime()))
+      .sort((a, b) => a.date - b.date); // Mais antiga para a mais nova
+
+    if (pendingVaccines.length > 0) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      const targetDate = new Date(pendingVaccines[0].date);
+      targetDate.setHours(0, 0, 0, 0);
+
+      const diffTime = targetDate - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return {
+          label: "Atrasado",
+          color: "#E74C3C",
+          backgroundColor: "#FCE6D6",
+        }; // Vermelho
+      } else if (diffDays <= 3) {
+        return {
+          label: "Atenção",
+          color: "#D4AC0D",
+          backgroundColor: "#FEF9E7",
+        }; // Amarelo
+      } else {
+        return {
+          label: "Em dia",
+          color: "#27AE60",
+          backgroundColor: "#E7F9F0",
+        }; // Verde (Agendado com folga)
+      }
+    }
+
+    // Se todas as vacinas existentes estiverem aplicadas (true), o pet está seguro
+    return { label: "Em dia", color: "#27AE60", backgroundColor: "#E7F9F0" };
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -78,87 +131,86 @@ export default function PetsScreen({ navigation }) {
         >
           {pets.length > 0 ? (
             <View style={styles.petList}>
-              {pets.map((pet, index) => (
-                <TouchableOpacity
-                  key={pet.id}
-                  style={[
-                    styles.petCard,
-                    index === pets.length - 1 && styles.lastCard,
-                  ]}
-                  onPress={() => navigation.navigate("Details", { pet })}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.petImageContainer}>
-                    <Image
-                      source={getPetImage(pet.photoUrl, pet.specie)}
-                      style={styles.petImage}
-                    />
-                  </View>
+              {pets.map((pet, index) => {
+                // 👈 ADICIONADO: Executa a varredura dinâmica para o pet da iteração atual
+                const statusProps = getPetStatusProperties(pet.vaccines);
 
-                  <View style={styles.petContent}>
-                    <View style={styles.petHeader}>
-                      <Text style={styles.petName}>{pet.name}</Text>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={22}
-                        color="#D1C4B9"
+                return (
+                  <TouchableOpacity
+                    key={pet.id}
+                    style={[
+                      styles.petCard,
+                      index === pets.length - 1 && styles.lastCard,
+                    ]}
+                    onPress={() => navigation.navigate("Details", { pet })}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.petImageContainer}>
+                      <Image
+                        source={getPetImage(pet.photoUrl, pet.specie)}
+                        style={styles.petImage}
                       />
                     </View>
 
-                    <Text style={styles.petBreed}>
-                      {pet.breed || "Raça não definida"}
-                    </Text>
+                    <View style={styles.petContent}>
+                      <View style={styles.petHeader}>
+                        <Text style={styles.petName}>{pet.name}</Text>
+                        <Ionicons
+                          name="chevron-forward"
+                          size={22}
+                          color="#D1C4B9"
+                        />
+                      </View>
 
-                    <View style={styles.petMeta}>
-                      <View style={styles.metaBox}>
-                        <Ionicons
-                          name="calendar-outline"
-                          size={16}
-                          color="#E98B3A"
-                        />
-                        <Text style={styles.metaText}>
-                          {calculateAge(pet.birthDate)}
-                        </Text>
-                      </View>
-                      <View style={styles.metaDivider} />
-                      <View style={styles.metaBox}>
-                        <Ionicons
-                          name="scale-outline"
-                          size={16}
-                          color="#E98B3A"
-                        />
-                        <Text style={styles.metaText}>
-                          {pet.weight || "?"} kg
-                        </Text>
-                      </View>
-                      <View style={styles.metaDivider} />
-                      <View
-                        style={[
-                          styles.statusBadge,
-                          {
-                            backgroundColor:
-                              pet.status === "PENDENTE" ? "#FBE6D6" : "#E7F9F0",
-                          },
-                        ]}
-                      >
-                        <Text
+                      <Text style={styles.petBreed}>
+                        {pet.breed || "Raça não definida"}
+                      </Text>
+
+                      <View style={styles.petMeta}>
+                        <View style={styles.metaBox}>
+                          <Ionicons
+                            name="calendar-outline"
+                            size={16}
+                            color="#E98B3A"
+                          />
+                          <Text style={styles.metaText}>
+                            {calculateAge(pet.birthDate)}
+                          </Text>
+                        </View>
+                        <View style={styles.metaDivider} />
+                        <View style={styles.metaBox}>
+                          <Ionicons
+                            name="scale-outline"
+                            size={16}
+                            color="#E98B3A"
+                          />
+                          <Text style={styles.metaText}>
+                            {pet.weight || "?"} kg
+                          </Text>
+                        </View>
+                        <View style={styles.metaDivider} />
+
+                        {/* 👈 ALTERADO: Passa a renderizar as cores e textos calculados dinamicamente */}
+                        <View
                           style={[
-                            styles.statusLabel,
-                            {
-                              color:
-                                pet.status === "PENDENTE"
-                                  ? "#E74C3C"
-                                  : "#27AE60",
-                            },
+                            styles.statusBadge,
+                            { backgroundColor: statusProps.backgroundColor },
                           ]}
                         >
-                          {pet.status === "PENDENTE" ? "Ativo" : "Em dia"}
-                        </Text>
+                          <Text
+                            style={[
+                              styles.statusLabel,
+                              { color: statusProps.color },
+                            ]}
+                          >
+                            {statusProps.label}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           ) : (
             <View style={styles.emptyState}>

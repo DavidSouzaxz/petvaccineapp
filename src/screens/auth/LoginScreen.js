@@ -45,6 +45,12 @@ export default function LoginScreen({ navigation, onSignIn }) {
         onSignIn(response.token);
       }
     } catch (error) {
+      alert(
+        "Erro de Conexão: " +
+          error.message +
+          " | " +
+          JSON.stringify(error.response?.data),
+      );
       setAlertMessage("E-mail ou senha inválidos.");
       setAlertVisible(true);
       setLoading(false);
@@ -59,7 +65,7 @@ export default function LoginScreen({ navigation, onSignIn }) {
 
   return (
     <ImageBackground
-      source={require("../../../assets/background-4.png")}
+      source={require("../../../assets/background_4.png")}
       style={styles.background}
       imageStyle={styles.imageStyle}
       resizeMode="cover"

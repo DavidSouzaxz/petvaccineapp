@@ -2,13 +2,14 @@
   "expo": {
     "name": "PetCard",
     "slug": "PetCard",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+
+    "newArchEnabled": false,
     "splash": {
-      "image": "./assets/background-4.png",
+      "image": "./assets/background_4.png",
       "resizeMode": "contain",
       "backgroundColor": "#FDF1E7"
     },
@@ -22,11 +23,26 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.anonymous.PetCard"
+      "package": "com.dvdcomputer.petcard",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-localization", "@react-native-community/datetimepicker"]
+    "plugins": ["expo-localization", "@react-native-community/datetimepicker"],
+    "extra": {
+      "eas": {
+        "projectId": "857ecb38-d8a1-403d-9f8f-f7ee49a358ea"
+      }
+    }
   }
 }

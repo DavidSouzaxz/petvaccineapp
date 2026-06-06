@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   ImageBackground,
   Image,
-  ScrollView,
   Modal,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from "expo-image-picker";
 import { AlertModal, ConfirmationModal } from "../../components/modals";
 import ServiceUser from "../../services/ServiceUser";
@@ -32,6 +33,7 @@ export default function RegisterScreen({ navigation }) {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+
   const handleRegister = async () => {
     setLoading(true);
     if (
@@ -57,7 +59,6 @@ export default function RegisterScreen({ navigation }) {
     let photoUrl = null;
 
     try {
-      // Se for galeria ou câmera, fazer upload da imagem
       if (selectedAvatarType === "gallery" || selectedAvatarType === "camera") {
         const authData = await ServiceSignature.getSignature();
         photoUrl = await ServiceSignature.uploadImage(profileImage, authData);
@@ -160,12 +161,21 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require("../../../assets/background-4.png")}
+      source={require("../../../assets/background_4.png")}
       style={styles.background}
       imageStyle={styles.imageStyle}
       resizeMode="cover"
     >
-      <View style={styles.scrollContainer}>
+      <KeyboardAwareScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={Platform.OS === "ios" ? 40 : 100}
+        extraHeight={Platform.OS === "ios" ? 120 : 150}
+      >
         <View style={styles.container}>
           <View style={styles.card}>
             <Text style={styles.title}>Criar Conta</Text>
@@ -174,7 +184,6 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.avatarSection}>
               <Text style={styles.avatarLabel}>Escolha seu avatar</Text>
 
-              {/* Main Avatar Display with Edit Button */}
               <View style={styles.mainAvatarContainer}>
                 <View style={styles.mainAvatarWrapper}>
                   {profileImage ? (
@@ -269,7 +278,9 @@ export default function RegisterScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
+
+      {/* Modals e Componentes Externos ficam fora do Scroll */}
       <Modal
         visible={avatarModalVisible}
         transparent={true}
@@ -350,6 +361,7 @@ export default function RegisterScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
+
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
@@ -372,10 +384,13 @@ const styles = StyleSheet.create({
   imageStyle: {
     resizeMode: "cover",
   },
-  scrollContainer: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingVertical: 20,
+    paddingVertical: 30,
   },
   container: {
     paddingHorizontal: 20,
@@ -390,28 +405,26 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFF",
     borderRadius: 16,
-    padding: 12,
-    marginBottom: 25,
+    padding: 16,
     elevation: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    gap: 8,
+    gap: 12,
   },
   avatarSection: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   avatarLabel: {
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 16,
+    marginBottom: 10,
     textAlign: "center",
   },
   mainAvatarContainer: {
     alignItems: "center",
-    marginBottom: 20,
     position: "relative",
   },
   mainAvatarWrapper: {
@@ -433,9 +446,9 @@ const styles = StyleSheet.create({
   editAvatarButton: {
     position: "absolute",
     bottom: 0,
-    right: "25%",
+    right: "32%",
     backgroundColor: "#ff7a00",
-    borderRadius: 20,
+    borderRadius: 16,
     width: 32,
     height: 32,
     justifyContent: "center",
@@ -443,57 +456,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
-  avatarOptionsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    justifyContent: "space-between",
-  },
-  avatarOption: {
-    width: "48%",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e5e5e5",
-  },
-  avatarOptionImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    overflow: "hidden",
-  },
-  avatarOptionImg: {
-    width: 40,
-    height: 50,
-    borderRadius: 25,
-  },
-  avatarOptionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#fff5ea",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  avatarOptionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#333",
-    textAlign: "center",
-  },
   modalOverlay: {
     flex: 1,
-    right: "2%",
-    bottom: 34,
+    paddingRight: "5%",
+    paddingBottom: "20%",
     justifyContent: "center",
     alignItems: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.2)",
   },
   modalContent: {
     backgroundColor: "#fff",
@@ -509,7 +478,7 @@ const styles = StyleSheet.create({
   modalOption: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 7,
+    padding: 8,
     marginVertical: 4,
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
@@ -519,7 +488,7 @@ const styles = StyleSheet.create({
   smallModalOptionImage: {
     width: 25,
     height: 25,
-    borderRadius: 20,
+    borderRadius: 12.5,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
@@ -527,21 +496,20 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   smallModalOptionImg: {
-    width: 30,
-    height: 30,
-    borderRadius: 20,
+    width: 25,
+    height: 25,
+    borderRadius: 12.5,
   },
   smallModalOptionIcon: {
     width: 25,
     height: 25,
-    borderRadius: 20,
-
+    borderRadius: 12.5,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
   },
   smallModalOptionLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
     color: "#333",
     flex: 1,
@@ -561,9 +529,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 8,
-    marginBottom: 12,
-    elevation: 0,
-    shadowColor: "transparent",
+    marginBottom: 4,
   },
   buttonText: {
     color: "#FFF",
@@ -573,7 +539,7 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#707070",
     textAlign: "center",
-    marginTop: 10,
+    marginTop: 8,
     fontWeight: "600",
     fontSize: 14,
   },
