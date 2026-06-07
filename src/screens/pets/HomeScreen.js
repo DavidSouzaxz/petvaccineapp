@@ -22,6 +22,7 @@ import { getLatestVaccines } from "../../core/GetLatestVaccines";
 import { NotificationManager } from "../../components/NotificationManager";
 import NotificationToggleButton from "../../components/NotificationToggleButton";
 import { PET_MESSAGES, PET_STATUS, ASSETS } from "../../constants";
+import OpenGoogleMaps from "../../core/OpenGoogleMaps";
 
 const { width } = Dimensions.get("window");
 
@@ -343,13 +344,17 @@ export default function HomeScreen({ navigation }) {
           {clinics.length > 0 ? (
             <View style={styles.clinicsWrapper}>
               {clinics.slice(0, 3).map((clinic, index) => (
-                <TouchableOpacity
-                  key={clinic.id || index}
-                  style={styles.clinicCard}
-                  onPress={() =>
-                    navigation.navigate("Dashboard", { selectedClinic: clinic })
+                  <TouchableOpacity
+                key={clinic.id || index}
+                style={styles.clinicCard}
+                onPress={async () => {
+                  const opened = await OpenGoogleMaps(clinic);
+                  if (!opened) {
+                    // fallback: abrir mapa interno se não conseguir abrir o Google Maps
+                    navigation.navigate("FullMap", { selectedClinic: clinic });
                   }
-                >
+                }}
+              >
                   <View style={styles.clinicIconWrapper}>
                     <FontAwesome5
                       name="clinic-medical"

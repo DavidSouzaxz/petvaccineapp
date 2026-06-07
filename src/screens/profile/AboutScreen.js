@@ -37,14 +37,14 @@ export default function AboutScreen({ navigation }) {
           <View style={styles.logo}>
             <Ionicons name="heart" size={40} color="#ff7a00" />
           </View>
-          <Text style={styles.appName}>PetVaccine</Text>
+          <Text style={styles.appName}>PetCard</Text>
           <Text style={styles.version}>Versão 1.0.0</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Sobre o app</Text>
           <Text style={styles.description}>
-            O PetVaccine é um aplicativo dedicado a ajudar tutores responsáveis
+            O PetCard é um aplicativo dedicado a ajudar tutores responsáveis
             a gerenciar e acompanhar as vacinas e cuidados de saúde dos seus
             pets. Nosso objetivo é facilitar o cuidado com seus animais de
             estimação.
@@ -164,7 +164,7 @@ export default function AboutScreen({ navigation }) {
 
         <View style={styles.footerCard}>
           <Text style={styles.footerText}>
-            © 2026 PetVaccine. Todos os direitos reservados.
+            © 2026 PetCard. Todos os direitos reservados.
           </Text>
           <Text style={styles.footerSubText}>
             Desenvolvido com ❤️ para cuidadores de pets
