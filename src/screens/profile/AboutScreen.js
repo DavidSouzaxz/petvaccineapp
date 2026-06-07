@@ -272,6 +272,8 @@ const styles = StyleSheet.create({
   featureDesc: {
     fontSize: 12,
     color: "#777",
+    width: "85%",
+    flexWrap: "wrap",
   },
 
   linkItem: {

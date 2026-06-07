@@ -34,21 +34,61 @@ export default function RegisterScreen({ navigation }) {
   const [confirmMessage, setConfirmMessage] = useState("");
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const formatPhoneNumber = (text) => {
+    const cleaned = text.replace(/\D/g, "");
+    const limited = cleaned.slice(0, 11);
+
+    if (limited.length <= 2) {
+      return limited.length > 0 ? `(${limited}` : "";
+    }
+    if (limited.length <= 6) {
+      return `(${limited.slice(0, 2)}) ${limited.slice(2)}`;
+    }
+    return `(${limited.slice(0, 2)}) ${limited.slice(2, 7)}-${limited.slice(7)}`;
+  };
+
+  const handleContactChange = (text) => {
+    const formatted = formatPhoneNumber(text);
+    setContact(formatted);
+  };
+
   const handleRegister = async () => {
     setLoading(true);
-    if (
-      !name ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !contact ||
-      !profileImage
-    ) {
-      setAlertMessage("Preencha todos os campos e selecione um avatar.");
+
+    // 👈 ALTERADO: Removido o !profileImage do validador caso você queira permitir cadastros sem foto
+    if (!name || !email || !password || !confirmPassword || !contact) {
+      setAlertMessage("Por favor, preencha todos os campos.");
       setAlertVisible(true);
       setLoading(false);
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setAlertMessage("Por favor, insira um e-mail válido.");
+      setAlertVisible(true);
+      setLoading(false);
+      return;
+    }
+
+    const rawContact = contact.replace(/\D/g, "");
+    if (rawContact.length < 11) {
+      setAlertMessage("O número de contato deve conter o DDD e 9 dígitos.");
+      setAlertVisible(true);
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setAlertMessage("A senha deve conter no mínimo 6 caracteres.");
+      setAlertVisible(true);
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setAlertMessage("As senhas não conferem.");
       setAlertVisible(true);
@@ -59,21 +99,21 @@ export default function RegisterScreen({ navigation }) {
     let photoUrl = null;
 
     try {
-      if (selectedAvatarType === "gallery" || selectedAvatarType === "camera") {
+      // 👈 ALTERADO: Faz upload apenas se houver uma imagem real da câmera ou galeria
+      if (
+        profileImage &&
+        (selectedAvatarType === "gallery" || selectedAvatarType === "camera")
+      ) {
         const authData = await ServiceSignature.getSignature();
         photoUrl = await ServiceSignature.uploadImage(profileImage, authData);
-      } else if (selectedAvatarType === "avatar1") {
-        photoUrl = "avatar1";
-      } else if (selectedAvatarType === "avatar2") {
-        photoUrl = "avatar2";
       }
 
       const credentials = {
         name: name,
-        email: email,
+        email: email.trim(),
         password: password,
-        contact: contact,
-        photoUrl: photoUrl,
+        contact: rawContact,
+        photoUrl: photoUrl, // Passa null se o usuário escolheu ficar sem foto
       };
 
       await ServiceUser.register(credentials);
@@ -108,16 +148,6 @@ export default function RegisterScreen({ navigation }) {
   const handleConfirmSuccess = () => {
     setConfirmVisible(false);
     navigation.navigate("Login");
-  };
-
-  const selectProfileImage = (imageType) => {
-    if (imageType === "avatar1") {
-      setProfileImage(require("../../../assets/profile_man.png"));
-      setSelectedAvatarType("avatar1");
-    } else if (imageType === "avatar2") {
-      setProfileImage(require("../../../assets/profile_male.png"));
-      setSelectedAvatarType("avatar2");
-    }
   };
 
   const pickImageFromGallery = async () => {
@@ -159,6 +189,12 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
+  // 👈 ADICIONADO: Função para limpar a foto selecionada
+  const removePhoto = () => {
+    setProfileImage(null);
+    setSelectedAvatarType(null);
+  };
+
   return (
     <ImageBackground
       source={require("../../../assets/background_4.png")}
@@ -180,20 +216,15 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.card}>
             <Text style={styles.title}>Criar Conta</Text>
 
-            {/* Avatar Selection */}
+            {/* Photo Selection Area */}
             <View style={styles.avatarSection}>
-              <Text style={styles.avatarLabel}>Escolha seu avatar</Text>
+              <Text style={styles.avatarLabel}>Foto de Perfil</Text>
 
               <View style={styles.mainAvatarContainer}>
                 <View style={styles.mainAvatarWrapper}>
                   {profileImage ? (
                     <Image
-                      source={
-                        selectedAvatarType === "gallery" ||
-                        selectedAvatarType === "camera"
-                          ? { uri: profileImage }
-                          : profileImage
-                      }
+                      source={{ uri: profileImage }}
                       style={styles.mainAvatarImage}
                     />
                   ) : (
@@ -230,7 +261,7 @@ export default function RegisterScreen({ navigation }) {
               style={styles.input}
               placeholder="Número de Contato"
               value={contact}
-              onChangeText={setContact}
+              onChangeText={handleContactChange}
               keyboardType="phone-pad"
               placeholderTextColor="#999"
             />
@@ -245,23 +276,47 @@ export default function RegisterScreen({ navigation }) {
               placeholderTextColor="#999"
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Senha"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Senha (mínimo 6 caracteres)"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={22}
+                  color="#707070"
+                />
+              </TouchableOpacity>
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Confirmar Senha"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Confirmar Senha"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <MaterialCommunityIcons
+                  name={showConfirmPassword ? "eye-off" : "eye"}
+                  size={22}
+                  color="#707070"
+                />
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.button} onPress={handleRegister}>
               {loading ? (
@@ -280,7 +335,7 @@ export default function RegisterScreen({ navigation }) {
         </View>
       </KeyboardAwareScrollView>
 
-      {/* Modals e Componentes Externos ficam fora do Scroll */}
+      {/* Modal Reduzido: Apenas Galeria, Câmera ou Remover */}
       <Modal
         visible={avatarModalVisible}
         transparent={true}
@@ -296,38 +351,6 @@ export default function RegisterScreen({ navigation }) {
             <TouchableOpacity
               style={styles.modalOption}
               onPress={() => {
-                selectProfileImage("avatar1");
-                setAvatarModalVisible(false);
-              }}
-            >
-              <View style={styles.smallModalOptionImage}>
-                <Image
-                  source={require("../../../assets/profile_man.png")}
-                  style={styles.smallModalOptionImg}
-                />
-              </View>
-              <Text style={styles.smallModalOptionLabel}>Avatar 1</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => {
-                selectProfileImage("avatar2");
-                setAvatarModalVisible(false);
-              }}
-            >
-              <View style={styles.smallModalOptionImage}>
-                <Image
-                  source={require("../../../assets/profile_male.png")}
-                  style={styles.smallModalOptionImg}
-                />
-              </View>
-              <Text style={styles.smallModalOptionLabel}>Avatar 2</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => {
                 pickImageFromGallery();
                 setAvatarModalVisible(false);
               }}
@@ -335,7 +358,7 @@ export default function RegisterScreen({ navigation }) {
               <View style={styles.smallModalOptionIcon}>
                 <MaterialCommunityIcons
                   name="image-plus"
-                  size={15}
+                  size={18}
                   color="#ff7a00"
                 />
               </View>
@@ -352,12 +375,36 @@ export default function RegisterScreen({ navigation }) {
               <View style={styles.smallModalOptionIcon}>
                 <MaterialCommunityIcons
                   name="camera-plus"
-                  size={15}
+                  size={18}
                   color="#ff7a00"
                 />
               </View>
               <Text style={styles.smallModalOptionLabel}>Câmera</Text>
             </TouchableOpacity>
+
+            {/* 👈 ADICIONADO: Opção de limpar a seleção da foto */}
+            {profileImage && (
+              <TouchableOpacity
+                style={[styles.modalOption, styles.modalDeleteOption]}
+                onPress={() => {
+                  removePhoto();
+                  setAvatarModalVisible(false);
+                }}
+              >
+                <View style={styles.smallModalOptionIcon}>
+                  <MaterialCommunityIcons
+                    name="image-remove"
+                    size={18}
+                    color="#E74C3C"
+                  />
+                </View>
+                <Text
+                  style={[styles.smallModalOptionLabel, styles.deleteLabel]}
+                >
+                  Remover Foto
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -397,11 +444,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 25,
-    fontWeight: "bold",
+    fontWeight: "800",
     textAlign: "center",
     marginBottom: 8,
     color: "#333",
-    fontWeight: "800",
   },
   card: {
     backgroundColor: "#FFF",
@@ -474,46 +520,37 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    width: 150,
+    width: 160, // 👈 Ajustado levemente para acomodar o texto de remoção
   },
   modalOption: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 8,
+    padding: 10,
     marginVertical: 4,
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e5e5e5",
   },
-  smallModalOptionImage: {
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-    overflow: "hidden",
-  },
-  smallModalOptionImg: {
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
+  modalDeleteOption: {
+    borderColor: "#FADBD8",
+    backgroundColor: "#FDEDEC",
   },
   smallModalOptionIcon: {
     width: 25,
     height: 25,
-    borderRadius: 12.5,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
   },
   smallModalOptionLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#333",
     flex: 1,
+  },
+  deleteLabel: {
+    color: "#E74C3C",
   },
   input: {
     padding: 12,
@@ -523,6 +560,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#e5e5e5",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e5e5e5",
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    fontSize: 16,
+    color: "#333",
+  },
+  eyeButton: {
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     backgroundColor: "#ff7a00",

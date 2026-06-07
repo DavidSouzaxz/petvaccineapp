@@ -133,7 +133,7 @@ export default function EditVaccineScreen({ navigation, route }) {
   };
 
   const handleSave = async () => {
-    if (!name || !date || !time) {
+    if (!name || !date || !time || !nextTime || !nextDate) {
       setAlertMessage("Preencha o nome, data e hora.");
       setAlertVisible(true);
       return;

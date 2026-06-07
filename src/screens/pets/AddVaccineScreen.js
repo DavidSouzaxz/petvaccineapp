@@ -50,8 +50,8 @@ export default function AddVaccineScreen({ navigation, route }) {
   };
 
   const handleSave = async () => {
-    if (!name || !date || !time) {
-      setAlertMessage("Preencha o nome, data e hora.");
+    if (!name || !date || !time || !dateNext || !timeNext) {
+      setAlertMessage("Preencha todos os campos.");
       setAlertVisible(true);
       return;
     }
@@ -274,7 +274,7 @@ export default function AddVaccineScreen({ navigation, route }) {
             </View>
           </View>
 
-          <Text style={styles.label}>Observações</Text>
+          <Text style={styles.label}>Observações(Opcional)</Text>
           <TextInput
             style={[styles.input, { height: 80 }]}
             value={observations}

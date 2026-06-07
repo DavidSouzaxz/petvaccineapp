@@ -29,6 +29,20 @@ export default function InputTimePicker({
     onChange(formatted);
   };
 
+  const handleBlur = () => {
+    if (!value) return;
+
+    // Se o valor tiver o tamanho de "13:3" ou "02:0" (4 caracteres), injeta o 0 no final
+    if (value.length === 4) {
+      onChange(`${value}0`);
+    }
+    // Segurança extra: se o usuário deixar apenas o número da hora (ex: "13" ou "13:"), completa com os minutos zerados
+    else if (value.length === 2 || value.length === 3) {
+      const hours = value.replace(":", "");
+      onChange(`${hours}:00`);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={[styles.label, styleLabel]}>{label}</Text>
@@ -37,6 +51,7 @@ export default function InputTimePicker({
           style={styles.input}
           value={value}
           onChangeText={handleTextChange}
+          onBlur={handleBlur}
           placeholder="00:00"
           placeholderTextColor="#B9B1A9"
           keyboardType="numeric"
