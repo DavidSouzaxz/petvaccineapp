@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TouchableOpacity, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NotificationManager } from "./NotificationManager";
 
 export default function NotificationToggleButton() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -18,6 +19,16 @@ export default function NotificationToggleButton() {
 
   const handleToggle = async () => {
     const newState = !isEnabled;
+
+    if (newState) {
+      // 👈 Se o usuário tentar ativar, pede a permissão nativa primeiro
+      const hasPermission = await NotificationManager.requestPermissions();
+      if (!hasPermission) return; // Se o usuário negar no Android/iOS, barra a ação
+
+      // Garante também que a chave geral de notificações esteja ativa
+      await AsyncStorage.setItem("@notificationsEnabled", "true");
+    }
+
     setIsEnabled(newState);
     await AsyncStorage.setItem(
       "@notificationsEnabledVaccine",

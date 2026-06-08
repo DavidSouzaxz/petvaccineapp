@@ -272,6 +272,7 @@ export default function EditOccurrenceScreen({ navigation, route }) {
           <TextInput
             style={[styles.input, styles.textArea]}
             value={description}
+            placeholderTextColor="#B9B1A9"
             onChangeText={setDescription}
             placeholder="Escreva aqui..."
             multiline
@@ -363,6 +364,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
     borderRadius: 15,
     padding: 12,
+    color: "#000",
     fontSize: 15,
     marginBottom: 15,
     borderWidth: 1,

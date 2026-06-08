@@ -44,10 +44,9 @@ export default function AboutScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Sobre o app</Text>
           <Text style={styles.description}>
-            O PetCard é um aplicativo dedicado a ajudar tutores responsáveis
-            a gerenciar e acompanhar as vacinas e cuidados de saúde dos seus
-            pets. Nosso objetivo é facilitar o cuidado com seus animais de
-            estimação.
+            O PetCard é um aplicativo dedicado a ajudar tutores responsáveis a
+            gerenciar e acompanhar as vacinas e cuidados de saúde dos seus pets.
+            Nosso objetivo é facilitar o cuidado com seus animais de estimação.
           </Text>
         </View>
 
@@ -108,7 +107,11 @@ export default function AboutScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.linkItem}
-            onPress={() => handleOpenLink("https://www.example.com/privacy")}
+            onPress={() =>
+              handleOpenLink(
+                "https://github.com/DavidSouzaxz/petvaccineapp/blob/main/public/POLITICA_PRIVACIDADE.md",
+              )
+            }
           >
             <View style={styles.linkLeft}>
               <Ionicons
@@ -125,7 +128,11 @@ export default function AboutScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.linkItem}
-            onPress={() => handleOpenLink("https://www.example.com/terms")}
+            onPress={() =>
+              handleOpenLink(
+                "https://github.com/DavidSouzaxz/petvaccineapp/blob/main/public/TERMOS_SERVICO.md",
+              )
+            }
           >
             <View style={styles.linkLeft}>
               <Ionicons
@@ -140,26 +147,7 @@ export default function AboutScreen({ navigation }) {
 
           <View style={styles.divider} />
 
-          <TouchableOpacity
-            style={styles.linkItem}
-            onPress={() => handleOpenLink("https://www.example.com/contact")}
-          >
-            <View style={styles.linkLeft}>
-              <Ionicons name="mail-outline" size={18} color="#ff7a00" />
-              <Text style={styles.linkText}>Fale Conosco</Text>
-            </View>
-            <Ionicons name="open-outline" size={16} color="#ccc" />
-          </TouchableOpacity>
-
           <View style={styles.divider} />
-
-          <TouchableOpacity style={styles.linkItem}>
-            <View style={styles.linkLeft}>
-              <Ionicons name="star-outline" size={18} color="#ff7a00" />
-              <Text style={styles.linkText}>Avaliar o app</Text>
-            </View>
-            <Ionicons name="open-outline" size={16} color="#ccc" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.footerCard}>

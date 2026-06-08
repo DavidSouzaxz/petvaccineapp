@@ -75,7 +75,8 @@ export default function EditVaccineScreen({ navigation, route }) {
   const [reminder, setReminder] = useState(!!vaccine?.reminder);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+  const [confirmApplyVisible, setConfirmApplyVisible] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
 
   useFocusEffect(
@@ -98,11 +99,11 @@ export default function EditVaccineScreen({ navigation, route }) {
 
   const handleDelete = () => {
     setConfirmMessage(`Tem certeza que quer deletar ${vaccine.name}?`);
-    setConfirmVisible(true);
+    setConfirmDeleteVisible(true);
   };
 
   const handleConfirmDelete = async () => {
-    setConfirmVisible(false);
+    setConfirmDeleteVisible(false);
     setLoading(true);
     try {
       await ServiceVaccine.delete(vaccine.id);
@@ -174,12 +175,12 @@ export default function EditVaccineScreen({ navigation, route }) {
 
   const confirmationApplication = () => {
     setConfirmMessage(`Tem certeza que deseja aplicar está Vacina?`);
-    setConfirmVisible(true);
+    setConfirmApplyVisible(true);
   };
 
   const handleConfirmationApplication = async () => {
     setIsApplied(!isApplied);
-    setConfirmVisible(false);
+    setConfirmApplyVisible(false);
   };
 
   return (
@@ -413,16 +414,16 @@ export default function EditVaccineScreen({ navigation, route }) {
         onClose={() => setAlertVisible(false)}
       />
       <ConfirmationModal
-        visible={confirmVisible}
+        visible={confirmDeleteVisible}
         message={confirmMessage}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setConfirmVisible(false)}
+        onCancel={() => setConfirmDeleteVisible(false)}
       />
       <ConfirmationModal
-        visible={confirmVisible}
+        visible={confirmApplyVisible}
         message={confirmMessage}
         onConfirm={handleConfirmationApplication}
-        onCancel={() => setConfirmVisible(false)}
+        onCancel={() => setConfirmApplyVisible(false)}
       />
     </View>
   );

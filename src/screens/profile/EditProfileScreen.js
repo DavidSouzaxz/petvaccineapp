@@ -5,11 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
-  Switch,
   ActivityIndicator,
-  StatusBar,
   Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -24,16 +21,8 @@ export default function EditProfileScreen({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [birth, setBirth] = useState("");
-  const [city, setCity] = useState("");
-  const [about, setAbout] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
   const [image, setImage] = useState(null);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState("");
-
-  const [vacinas, setVacinas] = useState(true);
-  const [dicas, setDicas] = useState(true);
-  const [promocoes, setPromocoes] = useState(false);
 
   useEffect(() => {
     loadingData();
@@ -72,7 +61,6 @@ export default function EditProfileScreen({ navigation }) {
   const handleSave = async () => {
     setLoading(true);
     const userId = await AsyncStorage.getItem("@userId");
-
     let finalPhotoUrl = currentPhotoUrl;
 
     try {
@@ -136,8 +124,6 @@ export default function EditProfileScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-
-
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               {image ? (
@@ -164,7 +150,7 @@ export default function EditProfileScreen({ navigation }) {
               value={name}
               onChangeText={setName}
               placeholder="Digite seu nome"
-              placeholderTextColor="#999"
+              placeholderTextColor="#B9B1A9"
             />
 
             <Text style={styles.label}>E-mail</Text>
@@ -173,16 +159,16 @@ export default function EditProfileScreen({ navigation }) {
               value={email}
               editable={false}
               selectTextOnFocus={false}
-              onChangeText={setEmail}
               placeholderTextColor="#777"
             />
+
             <Text style={styles.label}>Telefone</Text>
             <TextInput
               style={styles.input}
               value={phone}
               onChangeText={(text) => setPhone(formatPhone(text))}
               placeholder="(00) 00000-0000"
-              placeholderTextColor="#999"
+              placeholderTextColor="#B9B1A9"
               keyboardType="phone-pad"
               maxLength={15}
             />
@@ -206,12 +192,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f7efe5",
   },
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
   headerBox: {
     alignItems: "center",
     paddingBottom: 20,
     marginTop: 58,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3e8dd98",
+    flex: 1,
   },
   headerText: {
     fontSize: 18,
@@ -233,32 +224,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 30,
   },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    marginBottom: 25,
-  },
-  headerIcon: {
-    width: 28,
-    alignItems: "center",
-  },
-
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#222",
-  },
-
   avatarContainer: {
     marginTop: 20,
     alignItems: "center",
     marginBottom: 18,
+    position: "relative",
   },
-
   avatar: {
     width: 90,
     height: 90,
@@ -267,23 +238,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   avatarText: {
     fontSize: 30,
     fontWeight: "700",
     color: "#222",
   },
-
   avatarImage: {
     width: 90,
     height: 90,
     borderRadius: 45,
   },
-
   camera: {
     position: "absolute",
     bottom: 0,
-    right: 135,
+    alignSelf: "center",
+    marginLeft: 65,
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -291,7 +260,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -299,14 +267,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 0.6,
   },
-
   label: {
     fontSize: 13,
     color: "#666",
     marginBottom: 6,
     marginTop: 8,
   },
-
   input: {
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -316,41 +282,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 10,
     fontSize: 14,
-  },
-
-  inputDisabled: {
-    backgroundColor: "#f5f5f5b4",
-    color: "#747474ff",
-    borderColor: "#ddd",
-  },
-
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    marginTop: 15,
-    marginBottom: 8,
-    color: "#222",
-  },
-
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f2",
-  },
-
-  switchText: {
-    fontSize: 14,
     color: "#333",
   },
-
+  inputDisabled: {
+    backgroundColor: "#f5f5f5b4",
+    color: "#747474", // 👈 FIXADO CONTRA TEXTO BRANCO DO DARK MODE
+    borderColor: "#ddd",
+  },
   button: {
     backgroundColor: "#f28c2b",
     padding: 14,
@@ -358,7 +296,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 18,
   },
-
   buttonText: {
     color: "#fff",
     fontSize: 14,

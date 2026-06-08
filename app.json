@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "PetCard",
-    "slug": "PetCard",
+    "name": "PetCard App",
+    "slug": "petcard-app",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "light",
-
     "newArchEnabled": false,
     "splash": {
       "image": "./assets/background_4.png",
@@ -23,7 +22,7 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.dvdcomputer.petcard",
+      "package": "com.petcardapp.petcard",
       "permissions": [
         "INTERNET",
         "ACCESS_COARSE_LOCATION",
@@ -31,7 +30,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "API_EXPO_KEY"
+          "apiKey": "$EXPO_API_KEY_MAPS"
         }
       }
     },
@@ -41,8 +40,9 @@
     "plugins": ["expo-localization", "@react-native-community/datetimepicker"],
     "extra": {
       "eas": {
-        "projectId": "857ecb38-d8a1-403d-9f8f-f7ee49a358ea"
+        "projectId": "b92a1355-650a-41ea-b9f2-6509d6c8e006"
       }
-    }
+    },
+    "owner": "d4vid0p"
   }
 }

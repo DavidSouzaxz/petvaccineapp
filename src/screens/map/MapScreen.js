@@ -20,6 +20,7 @@ export default function MapScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [region, setRegion] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -73,6 +74,7 @@ export default function MapScreen({ navigation }) {
       let loc = await Location.getCurrentPositionAsync({});
 
       const { latitude, longitude } = loc.coords;
+      setUserLocation({ latitude, longitude });
       setRegion({
         latitude,
         longitude,
@@ -84,7 +86,29 @@ export default function MapScreen({ navigation }) {
     })();
   }, [fetchNearby]);
 
-  // Função exclusiva para o clique do marcador no Android
+  const centerMapOnUser = async () => {
+    try {
+      let loc = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = loc.coords;
+      setUserLocation({ latitude, longitude });
+
+      if (mapRef.current) {
+        mapRef.current.animateToRegion(
+          {
+            latitude,
+            longitude,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
+          },
+          600,
+        );
+      }
+    } catch (error) {
+      setAlertMessage("Não foi possível acessar sua localização atual.");
+      setAlertVisible(true);
+    }
+  };
+
   const handleMarkerPressAndroid = (clinic) => {
     if (Platform.OS !== "android") return;
 
@@ -119,6 +143,7 @@ export default function MapScreen({ navigation }) {
         ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
+        showsMyLocationButton={false}
         region={region}
         onRegionChangeComplete={(r) => setRegion(r)}
         onPress={() => setSelectedClinic(null)} // Fecha o card do Android ao clicar fora
@@ -155,6 +180,17 @@ export default function MapScreen({ navigation }) {
         onPress={() => navigation.goBack()}
       >
         <Ionicons name="arrow-back" size={24} color="#333" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.centerButton,
+          // Ajusta a altura dependendo se o card de detalhes do Android está aberto ou não
+          { bottom: Platform.OS === "android" && selectedClinic ? 240 : 50 },
+        ]}
+        onPress={centerMapOnUser}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="locate" size={26} color="#F4A361" />
       </TouchableOpacity>
 
       {/* Renderiza o Card inferior customizado APENAS no Android */}
@@ -278,6 +314,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
+    zIndex: 10,
+  },
+  centerButton: {
+    position: "absolute",
+    right: 20,
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 25,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
     zIndex: 10,
   },
 });

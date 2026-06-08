@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NotificationManager } from "../../components/NotificationManager";
 
 export default function NotificationsScreen({ navigation }) {
   const [vaccineNotifications, setVaccineNotifications] = useState(false);
@@ -32,41 +33,64 @@ export default function NotificationsScreen({ navigation }) {
   };
 
   const handleGeneralNotificationsChange = async (value) => {
-    const newValue = !generalNotifications;
-    setGeneralNotifications(newValue);
-    await AsyncStorage.setItem("@notificationsEnabled", newValue.toString());
+    // 👈 Usa a função do manager que gerencia permissões e cancelamentos locais
+    const success = await NotificationManager.toggleNotificationSetting(value);
+    setGeneralNotifications(success);
+
+    // Se desativar o geral, desativa o visual das outras chaves também
+    if (!value) {
+      setVaccineNotifications(false);
+      setTipNotifications(false);
+      setPromotions(false);
+      await AsyncStorage.setItem("@notificationsEnabledVaccine", "false");
+      await AsyncStorage.setItem("@notificationsEnabledSaude", "false");
+      await AsyncStorage.setItem("@notificationsEnabledPromotions", "false");
+    }
   };
 
   const handleVaccineNotificationsChange = async (value) => {
-    const newValue = !vaccineNotifications;
-    setVaccineNotifications(newValue);
+    if (value) {
+      const hasPermission = await NotificationManager.requestPermissions();
+      if (!hasPermission) return;
+      // Ativa o geral caso estivesse desligado
+      setGeneralNotifications(true);
+      await AsyncStorage.setItem("@notificationsEnabled", "true");
+    }
+    setVaccineNotifications(value);
     await AsyncStorage.setItem(
       "@notificationsEnabledVaccine",
-      newValue.toString(),
+      value.toString(),
     );
   };
 
   const handleTipNotificationsChange = async (value) => {
-    const newValue = !tipNotifications;
-    setTipNotifications(newValue);
-    await AsyncStorage.setItem(
-      "@notificationsEnabledSaude",
-      newValue.toString(),
-    );
+    if (value) {
+      const hasPermission = await NotificationManager.requestPermissions();
+      if (!hasPermission) return;
+      setGeneralNotifications(true);
+      await AsyncStorage.setItem("@notificationsEnabled", "true");
+    }
+    setTipNotifications(value);
+    await AsyncStorage.setItem("@notificationsEnabledSaude", value.toString());
   };
 
   const handlePromotionsChange = async (value) => {
-    const newValue = !promotions;
-    setPromotions(newValue);
+    if (value) {
+      const hasPermission = await NotificationManager.requestPermissions();
+      if (!hasPermission) return;
+      setGeneralNotifications(true);
+      await AsyncStorage.setItem("@notificationsEnabled", "true");
+    }
+    setPromotions(value);
     await AsyncStorage.setItem(
       "@notificationsEnabledPromotions",
-      newValue.toString(),
+      value.toString(),
     );
   };
 
   useEffect(() => {
     loadPermissionsNotification();
-  });
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -113,6 +137,7 @@ export default function NotificationsScreen({ navigation }) {
             </View>
             <Switch
               value={vaccineNotifications}
+              disabled={!generalNotifications && vaccineNotifications}
               onValueChange={handleVaccineNotificationsChange}
               trackColor={{ false: "#ccc", true: "#ff7a0050" }}
               thumbColor={vaccineNotifications ? "#ff7a00" : "#f4f3f4"}
@@ -121,7 +146,7 @@ export default function NotificationsScreen({ navigation }) {
 
           <View style={styles.divider} />
 
-          <View style={styles.switchRow}>
+          {/* <View style={styles.switchRow}>
             <View style={styles.switchContent}>
               <Text style={styles.switchLabel}>Dicas de saúde</Text>
               <Text style={styles.switchDescription}>
@@ -134,9 +159,9 @@ export default function NotificationsScreen({ navigation }) {
               trackColor={{ false: "#ccc", true: "#ff7a0050" }}
               thumbColor={tipNotifications ? "#ff7a00" : "#f4f3f4"}
             />
-          </View>
+          </View> */}
 
-          <View style={styles.divider} />
+          {/* <View style={styles.divider} />
 
           <View style={styles.divider} />
 
@@ -153,7 +178,7 @@ export default function NotificationsScreen({ navigation }) {
               trackColor={{ false: "#ccc", true: "#ff7a0050" }}
               thumbColor={promotions ? "#ff7a00" : "#f4f3f4"}
             />
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.infoCard}>

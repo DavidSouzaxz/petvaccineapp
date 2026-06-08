@@ -272,9 +272,14 @@ function ProfileStack({ onLogout }) {
       </Stack.Screen>
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen name="Privacy" component={PrivacyScreen} />
+
+      {/* 👈 ALTERADO: Mudou para ler como função para injetar o onLogout */}
+      <Stack.Screen name="Privacy">
+        {(props) => <PrivacyScreen {...props} onLogout={onLogout} />}
+      </Stack.Screen>
+
       <Stack.Screen name="About" component={AboutScreen} />
-       <Stack.Screen
+      <Stack.Screen
         name="Details"
         component={DetailsScreen}
         options={{ title: "Vacinas" }}

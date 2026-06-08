@@ -18,6 +18,7 @@ import ServiceUser from "../../services/ServiceUser";
 import ServiceSignature from "../../services/ServiceSignature";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import api from "../../services/api";
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState("");
@@ -58,7 +59,6 @@ export default function RegisterScreen({ navigation }) {
   const handleRegister = async () => {
     setLoading(true);
 
-    // 👈 ALTERADO: Removido o !profileImage do validador caso você queira permitir cadastros sem foto
     if (!name || !email || !password || !confirmPassword || !contact) {
       setAlertMessage("Por favor, preencha todos os campos.");
       setAlertVisible(true);
@@ -96,28 +96,51 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    let photoUrl = null;
-
     try {
-      // 👈 ALTERADO: Faz upload apenas se houver uma imagem real da câmera ou galeria
-      if (
-        profileImage &&
-        (selectedAvatarType === "gallery" || selectedAvatarType === "camera")
-      ) {
-        const authData = await ServiceSignature.getSignature();
-        photoUrl = await ServiceSignature.uploadImage(profileImage, authData);
-      }
-
+      // PASSO 1: Registrar o usuário com photoUrl inicial nula
       const credentials = {
         name: name,
         email: email.trim(),
         password: password,
         contact: rawContact,
-        photoUrl: photoUrl, // Passa null se o usuário escolheu ficar sem foto
+        photoUrl: null,
       };
-
       await ServiceUser.register(credentials);
-      setConfirmMessage("Conta criada com sucesso!");
+
+      // PASSO 2: Efetuar o login imediatamente para pegar o Token
+      const loginResponse = await ServiceUser.login({
+        email: email.trim(),
+        password: password,
+      });
+
+      const token = loginResponse?.token;
+      const userId = loginResponse?.userId;
+
+      // PASSO 3: Se houver foto, injeta o token no header e faz o processo de upload
+      if (
+        profileImage &&
+        (selectedAvatarType === "gallery" || selectedAvatarType === "camera")
+      ) {
+        // Injeta nativamente no Axios importado para evitar o 403
+        console.log(loginResponse);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        const authData = await ServiceSignature.getSignature();
+        const photoUrl = await ServiceSignature.uploadImage(
+          profileImage,
+          authData,
+        );
+
+        const dataUser = {
+          photoUrl: photoUrl,
+        };
+
+        // Atualiza a foto usando o seu endpoint de edição de perfil
+        await ServiceUser.update(userId, dataUser);
+      }
+
+      // PASSO 4: Grava os registros de configurações padrões locais
+      await AsyncStorage.setItem("@token", token); // Salva o token para persistir o login
       await AsyncStorage.setItem(
         "@notificationsEnabled",
         JSON.stringify(false),
@@ -134,7 +157,13 @@ export default function RegisterScreen({ navigation }) {
         "@notificationsEnabledPromotions",
         JSON.stringify(false),
       );
-      setConfirmVisible(true);
+
+      setAlertMessage("Conta criada com sucesso!");
+      setAlertVisible(true);
+
+      setTimeout(() => {
+        navigation.navigate("Login");
+      }, 1500);
     } catch (error) {
       const msg = error.response?.data || "Erro ao cadastrar usuário.";
       setAlertMessage(msg);
@@ -147,7 +176,6 @@ export default function RegisterScreen({ navigation }) {
 
   const handleConfirmSuccess = () => {
     setConfirmVisible(false);
-    navigation.navigate("Login");
   };
 
   const pickImageFromGallery = async () => {
@@ -254,7 +282,7 @@ export default function RegisterScreen({ navigation }) {
               placeholder="Nome Completo"
               value={name}
               onChangeText={setName}
-              placeholderTextColor="#999"
+              placeholderTextColor="#B9B1A9"
             />
 
             <TextInput
@@ -263,7 +291,7 @@ export default function RegisterScreen({ navigation }) {
               value={contact}
               onChangeText={handleContactChange}
               keyboardType="phone-pad"
-              placeholderTextColor="#999"
+              placeholderTextColor="#B9B1A9"
             />
 
             <TextInput
@@ -273,7 +301,7 @@ export default function RegisterScreen({ navigation }) {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
-              placeholderTextColor="#999"
+              placeholderTextColor="#B9B1A9"
             />
 
             <View style={styles.passwordContainer}>
@@ -283,7 +311,7 @@ export default function RegisterScreen({ navigation }) {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                placeholderTextColor="#999"
+                placeholderTextColor="#B9B1A9"
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -304,7 +332,7 @@ export default function RegisterScreen({ navigation }) {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
-                placeholderTextColor="#999"
+                placeholderTextColor="#B9B1A9"
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -414,12 +442,12 @@ export default function RegisterScreen({ navigation }) {
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
-      <ConfirmationModal
+      {/* <ConfirmationModal
         visible={confirmVisible}
         message={confirmMessage}
         onConfirm={handleConfirmSuccess}
         onCancel={() => setConfirmVisible(false)}
-      />
+      /> */}
     </ImageBackground>
   );
 }

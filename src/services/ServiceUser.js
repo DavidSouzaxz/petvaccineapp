@@ -20,6 +20,10 @@ const ServiceUser = {
     const response = await api.patch(`/users/${id}`, userData);
     return response.data;
   },
+  delete: async (id) => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
 };
 
 export default ServiceUser;

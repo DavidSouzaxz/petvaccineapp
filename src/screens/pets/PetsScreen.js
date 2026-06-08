@@ -190,7 +190,6 @@ export default function PetsScreen({ navigation }) {
                         </View>
                         <View style={styles.metaDivider} />
 
-                        {/* 👈 ALTERADO: Passa a renderizar as cores e textos calculados dinamicamente */}
                         <View
                           style={[
                             styles.statusBadge,
@@ -368,7 +367,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    flex: 1,
+    flexWrap: "wrap",
+    width: "25%",
   },
   metaDivider: {
     width: 1,
@@ -379,12 +379,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#2B2B2B",
     fontWeight: "700",
+    flexWrap: "wrap",
   },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    marginLeft: "auto",
   },
   statusLabel: {
     fontSize: 11,

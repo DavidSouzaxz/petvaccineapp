@@ -102,6 +102,7 @@ export default function DashboardScreen({ navigation }) {
         <View style={styles.containerImage}>
           <Image
             source={require("../../../assets/cardClinic.png")}
+            resizeMode="contain"
             style={styles.cardImage}
           />
           <TouchableOpacity
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "bold" },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#8d826f" },
   seeAllText: { color: "#F4A361", fontWeight: "bold" },
   mapPreview: {
     height: 150,

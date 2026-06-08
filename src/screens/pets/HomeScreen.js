@@ -205,7 +205,11 @@ export default function HomeScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.containerImage}>
-            <Image source={ASSETS.petCard} style={styles.cardImage} />
+            <Image
+              source={ASSETS.petCard}
+              style={styles.cardImage}
+              resizeMode="contain"
+            />
             <TouchableOpacity
               style={styles.viewAllPetsButton}
               onPress={() => navigation.navigate("Pets")}
@@ -236,10 +240,12 @@ export default function HomeScreen({ navigation }) {
                         }}
                       >
                         <TouchableOpacity
-                            style={styles.petCard}
-                            activeOpacity={0.85}
-                            onPress={() => navigation.navigate("Details", { pet })}
-                          >
+                          style={styles.petCard}
+                          activeOpacity={0.85}
+                          onPress={() =>
+                            navigation.navigate("Details", { pet })
+                          }
+                        >
                           <View style={styles.petProfileWrapper}>
                             <Image
                               source={getPetImage(pet.photoUrl, pet.specie)}
@@ -344,17 +350,19 @@ export default function HomeScreen({ navigation }) {
           {clinics.length > 0 ? (
             <View style={styles.clinicsWrapper}>
               {clinics.slice(0, 3).map((clinic, index) => (
-                  <TouchableOpacity
-                key={clinic.id || index}
-                style={styles.clinicCard}
-                onPress={async () => {
-                  const opened = await OpenGoogleMaps(clinic);
-                  if (!opened) {
-                    // fallback: abrir mapa interno se não conseguir abrir o Google Maps
-                    navigation.navigate("FullMap", { selectedClinic: clinic });
-                  }
-                }}
-              >
+                <TouchableOpacity
+                  key={clinic.id || index}
+                  style={styles.clinicCard}
+                  onPress={async () => {
+                    const opened = await OpenGoogleMaps(clinic);
+                    if (!opened) {
+                      // fallback: abrir mapa interno se não conseguir abrir o Google Maps
+                      navigation.navigate("FullMap", {
+                        selectedClinic: clinic,
+                      });
+                    }
+                  }}
+                >
                   <View style={styles.clinicIconWrapper}>
                     <FontAwesome5
                       name="clinic-medical"
@@ -594,7 +602,7 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     width: width - 40,
-    height: 220,
+    height: 240,
     borderRadius: 20,
   },
   petVaccineDate: { fontSize: 11, color: "#777" },

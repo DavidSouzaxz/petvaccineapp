@@ -21,6 +21,7 @@ import { validateDate, validateTime } from "../../core/validators";
 import InputDatePicker from "../../components/InputDatePicker";
 import InputTimePicker from "../../components/InputTimePicker";
 import { OCCURRENCE_TYPES } from "../../constants/occurrences";
+import { AlertModal } from "../../components/modals";
 
 export default function AddOccurrenceScreen({ navigation, route }) {
   const { petId, petName, petColor } = route.params;
@@ -32,6 +33,8 @@ export default function AddOccurrenceScreen({ navigation, route }) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [image, setImage] = useState(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -74,31 +77,35 @@ export default function AddOccurrenceScreen({ navigation, route }) {
     }
 
     setLoading(true);
+    let finalPhotoUrl = null;
+
+    if (image) {
+      const authData = await ServiceSignature.getSignature();
+
+      finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
+    }
+
+    const isoDateTime = `${date}T${time}:00`;
+
+    const newOccurrence = {
+      pet: {
+        id: petId,
+      },
+      type: type,
+      title: title,
+      description: description,
+      occurrenceDate: isoDateTime,
+      photoUrl: finalPhotoUrl,
+    };
 
     try {
-      let finalPhotoUrl = null;
-
-      if (image) {
-        const authData = await ServiceSignature.getSignature();
-
-        finalPhotoUrl = await ServiceSignature.uploadImage(image, authData);
-      }
-
-      const isoDateTime = `${date}T${time}:00`;
-
-      const newOccurrence = {
-        petId: petId,
-        type: type,
-        title: title,
-        description: description,
-        occurrenceDate: isoDateTime,
-        photoUrl: finalPhotoUrl,
-      };
-
       await ServiceOccurrence.register(newOccurrence);
 
-      Alert.alert("Sucesso", "Ocorrência registrada!");
-      navigation.goBack();
+      setAlertMessage("Sucesso", "Ocorrência registrada!");
+      setAlertVisible(true);
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
     } catch (error) {
       console.log(error);
       Alert.alert("Erro", "Falha ao processar o registro ou upload.");
@@ -214,6 +221,7 @@ export default function AddOccurrenceScreen({ navigation, route }) {
           <TextInput
             style={[styles.input, styles.textArea]}
             value={description}
+            placeholderTextColor="#B9B1A9"
             onChangeText={setDescription}
             placeholder="Escreva aqui..."
             multiline
@@ -232,6 +240,11 @@ export default function AddOccurrenceScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 }
@@ -308,6 +321,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
     borderRadius: 15,
     padding: 12,
+    color: "#000",
     fontSize: 15,
     marginBottom: 15,
     borderWidth: 1,

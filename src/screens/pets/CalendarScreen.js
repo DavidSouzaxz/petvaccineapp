@@ -35,7 +35,6 @@ export default function CalendarioScreen({ navigation }) {
   const [showPetSelector, setShowPetSelector] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
-  
 
   const formatDate = (dateString) => {
     if (!dateString) return "Selecione uma data";
@@ -60,7 +59,6 @@ export default function CalendarioScreen({ navigation }) {
     return `${Number(day)} de ${months[Number(month) - 1]} de ${year}`;
   };
   const handleMonthYearConfirm = (date) => {
-    console.log("Clicado");
     setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
     setShowMonthYearPicker(false);
   };
@@ -103,11 +101,9 @@ export default function CalendarioScreen({ navigation }) {
 
       // DATA DE HOJE
       const now = new Date();
-      const today = new Date().toLocaleDateString("en-CA");     //pra pegar o dia de hoje
-
+      const today = new Date().toLocaleDateString("en-CA"); //pra pegar o dia de hoje
 
       petVaccines.forEach((vac) => {
-
         // DATA DE APLICAÇÃO
         if (vac.applicationDate) {
           const date = vac.applicationDate.substring(0, 10);
@@ -153,7 +149,6 @@ export default function CalendarioScreen({ navigation }) {
             date: date,
           });
         }
-
       });
 
       setEvents(formatted);
@@ -185,7 +180,7 @@ export default function CalendarioScreen({ navigation }) {
     Object.keys(events).forEach((date) => {
       const hasLate = events[date].some((item) => item.late);
       const hasPending = events[date].some((item) => item.pending);
-      const hasNextDose = events[date].some((item) => item.isNextDose);;
+      const hasNextDose = events[date].some((item) => item.isNextDose);
 
       let dotColor = "#47C266";
       if (hasLate) dotColor = "#E74C3C";
@@ -339,8 +334,6 @@ export default function CalendarioScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50 }}
       >
-
-
         <TouchableOpacity
           style={styles.petCard}
           onPress={() => setShowPetSelector(true)}
@@ -351,7 +344,7 @@ export default function CalendarioScreen({ navigation }) {
                 selectedPet?.photoUrl
                   ? { uri: selectedPet.photoUrl }
                   : SPECIES_IMAGES[selectedPet?.specie] ||
-                  SPECIES_IMAGES["Cachorro"]
+                    SPECIES_IMAGES["Cachorro"]
               }
               style={styles.petImage}
             />
@@ -390,7 +383,6 @@ export default function CalendarioScreen({ navigation }) {
           <TouchableOpacity
             style={styles.calendarHeaderOverlay}
             onPress={() => {
-              console.log("Clicado no header do calendar");
               setShowMonthYearPicker(true);
             }}
             activeOpacity={0.7}
@@ -407,7 +399,6 @@ export default function CalendarioScreen({ navigation }) {
             <Ionicons name="time" size={14} color="#F4A361" />
             <Text style={styles.legendText}>Pendente</Text>
           </View>
-
 
           <View style={styles.legendItem}>
             <Ionicons name="time" size={14} color="#F7D154" />
@@ -455,7 +446,12 @@ export default function CalendarioScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      <Modal visible={showPetSelector} transparent animationType="fade" onRequestClose={() => setShowPetSelector(false)}>
+      <Modal
+        visible={showPetSelector}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPetSelector(false)}
+      >
         <TouchableOpacity
           style={styles.petSelectorOverlay}
           activeOpacity={1}
@@ -475,7 +471,9 @@ export default function CalendarioScreen({ navigation }) {
                   key={pet.id}
                   style={[
                     styles.petSelectorItem,
-                    selectedPet && selectedPet.id === pet.id && styles.petSelectorItemActive,
+                    selectedPet &&
+                      selectedPet.id === pet.id &&
+                      styles.petSelectorItemActive,
                   ]}
                   activeOpacity={0.7}
                   onPress={() => {
@@ -488,7 +486,8 @@ export default function CalendarioScreen({ navigation }) {
                       source={
                         pet.photoUrl
                           ? { uri: pet.photoUrl }
-                          : SPECIES_IMAGES[pet.specie] || SPECIES_IMAGES["Cachorro"]
+                          : SPECIES_IMAGES[pet.specie] ||
+                            SPECIES_IMAGES["Cachorro"]
                       }
                       style={styles.petSelectorItemImage}
                     />
@@ -496,17 +495,25 @@ export default function CalendarioScreen({ navigation }) {
                       <Text
                         style={[
                           styles.petSelectorItemName,
-                          selectedPet && selectedPet.id === pet.id && styles.petSelectorItemNameActive,
+                          selectedPet &&
+                            selectedPet.id === pet.id &&
+                            styles.petSelectorItemNameActive,
                         ]}
                       >
                         {pet.name}
                       </Text>
-                      <Text style={styles.petSelectorItemBreed}>{pet.breed || "Sem raça"}</Text>
+                      <Text style={styles.petSelectorItemBreed}>
+                        {pet.breed || "Sem raça"}
+                      </Text>
                     </View>
                   </View>
 
                   {selectedPet && selectedPet.id === pet.id && (
-                    <Ionicons name="checkmark-circle" size={24} color="#F4A361" />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color="#F4A361"
+                    />
                   )}
                 </TouchableOpacity>
               ))}
@@ -626,6 +633,7 @@ const styles = StyleSheet.create({
   },
 
   vaccineDate: {
+    color: "#000",
     fontSize: 16,
     fontWeight: "700",
   },
@@ -669,6 +677,7 @@ const styles = StyleSheet.create({
   },
 
   eventTitle: {
+    color: "#000",
     fontSize: 15,
     fontWeight: "700",
   },
@@ -697,12 +706,12 @@ const styles = StyleSheet.create({
   },
 
   legendText: {
+    color: "#000",
     marginLeft: 4,
     fontSize: 9,
   },
 
-
-   petSelectorOverlay: {
+  petSelectorOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",

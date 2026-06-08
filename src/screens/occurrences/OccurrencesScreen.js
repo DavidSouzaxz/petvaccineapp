@@ -73,6 +73,7 @@ export default function OccurrencesScreen({ navigation }) {
     setLoading(true);
     try {
       const data = await ServiceOccurrences.getByIdPet(petId);
+
       setOccurrences(data || []);
     } catch (e) {
       console.error("Erro ao buscar ocorrências:", e);

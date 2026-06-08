@@ -384,43 +384,65 @@ export default function DetailsScreen({ route, navigation }) {
             <View style={styles.infoCard}>
               <View style={{ flex: 1 }}>
                 <Text
-                  style={{ fontWeight: "700", fontSize: 16, marginBottom: 10 }}
+                  style={{
+                    fontWeight: "700",
+                    fontSize: 16,
+                    marginBottom: 10,
+                    color: "#000",
+                  }}
                 >
                   Informações do Pet
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Nome:</Text> {pet.name}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Nome:
+                  </Text>{" "}
+                  {pet.name}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Espécie:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Espécie:
+                  </Text>{" "}
                   {pet.specie || pet.species || "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Raça:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Raça:
+                  </Text>{" "}
                   {pet.breed || "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Sexo:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Sexo:
+                  </Text>{" "}
                   {pet.sex || "-"}
                 </Text>
                 {/* <Text style={{ fontSize: 14, marginBottom: 6 }}>
                   <Text style={{ fontWeight: "600" }}>Cor:</Text>{" "}
                   {pet.color || "-"}
                 </Text> */}
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Peso:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Peso:
+                  </Text>{" "}
                   {pet.weight ? `${pet.weight} kg` : "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Data de nascimento:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Data de nascimento:
+                  </Text>{" "}
                   {pet.birthDate ? FormatDateDisplay(pet.birthDate) : "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Microchip:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Microchip:
+                  </Text>{" "}
                   {pet.microchip || "-"}
                 </Text>
-                <Text style={{ fontSize: 14, marginBottom: 6 }}>
-                  <Text style={{ fontWeight: "600" }}>Observações:</Text>{" "}
+                <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>
+                    Observações:
+                  </Text>{" "}
                   {pet.observations || "-"}
                 </Text>
               </View>

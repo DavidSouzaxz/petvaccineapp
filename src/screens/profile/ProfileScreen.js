@@ -5,17 +5,16 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import ServiceUser from "../../services/ServiceUser";
 import ServicePet from "../../services/ServicePet";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileScreen({ navigation, onLogout }) {
   const [user, setUser] = useState("");
@@ -29,9 +28,9 @@ export default function ProfileScreen({ navigation, onLogout }) {
     const vacs = Array.isArray(pet.vaccines)
       ? pet.vaccines
       : pet.vaccines
-      ? [pet.vaccines]
-      : [];
-    if (vacs.length === 0) return true; // sem vacinas = considerado em dia
+        ? [pet.vaccines]
+        : [];
+    if (vacs.length === 0) return true;
     return vacs.every((v) => v.isApplied === true);
   }).length;
 
@@ -39,19 +38,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
     const vacs = Array.isArray(pet.vaccines)
       ? pet.vaccines
       : pet.vaccines
-      ? [pet.vaccines]
-      : [];
+        ? [pet.vaccines]
+        : [];
     return vacs.some((v) => v.isApplied === false);
   }).length;
-
-  const vaccinesPending = pets.reduce((sum, pet) => {
-    const vacs = Array.isArray(pet.vaccines)
-      ? pet.vaccines
-      : pet.vaccines
-      ? [pet.vaccines]
-      : [];
-    return sum + vacs.filter((v) => v.isApplied === false).length;
-  }, 0);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -72,7 +62,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
   const fetchPets = async () => {
     const userId = await AsyncStorage.getItem("@userId");
-
     try {
       setLoading(true);
       const data = await ServicePet.getPetsByUser(userId);
@@ -90,6 +79,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
     fetchPets();
     const unsubscribe = navigation.addListener("focus", () => {
       loadUserData();
+      fetchPets(); // 👈 Garante atualização das estatísticas ao voltar pra tela
     });
 
     return unsubscribe;
@@ -97,7 +87,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF5EA" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffe4ce" />
       {loading ? (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#ff7a00" />
@@ -105,40 +95,50 @@ export default function ProfileScreen({ navigation, onLogout }) {
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.headerBg}>
-            <View style={styles.header}></View>
-
             <View style={styles.profileCard}>
               <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
-                  {profileImage ? (
+                  {/* 👈 ALTERADO: Agora renderiza o ícone de cadastro caso esteja sem foto ou nulo */}
+                  {profileImage &&
+                  profileImage !== "null" &&
+                  profileImage !== "" ? (
                     <Image
                       source={{ uri: profileImage }}
                       style={styles.avatarImage}
                     />
                   ) : (
-                    <Text style={styles.avatarText}>
-                      {user ? user[0] : "U"}
-                    </Text>
+                    <MaterialCommunityIcons
+                      name="account-circle"
+                      size={94}
+                      color="#e5e5e5"
+                    />
                   )}
                 </View>
               </View>
 
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user}</Text>
-                <Text style={styles.userEmail}>{email}</Text>
+                <Text style={styles.userName} numberOfLines={1}>
+                  {user || "Usuário"}
+                </Text>
+                <Text style={styles.userEmail} numberOfLines={1}>
+                  {email}
+                </Text>
 
                 <View style={styles.badge}>
-                  <Ionicons name="shield-checkmark" size={14} color="#c6670fff" />
+                  <Ionicons name="shield-checkmark" size={14} color="#c6670f" />
                   <Text style={styles.badgeText}>Tutor responsável</Text>
                 </View>
               </View>
             </View>
           </View>
 
+          {/* Card Meus Pets */}
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Meus pets</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Home", { screen: "Pets" })}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Home", { screen: "Pets" })}
+              >
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.link}>Ver todos</Text>
                   <Ionicons name="chevron-forward" size={14} color="#ff7a00" />
@@ -156,7 +156,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
               <View style={styles.stat}>
                 <Text style={styles.statNumber}>
-                  {petsEmDia === 0 ? pets.length : petsEmDia}
+                  {pets.length === 0 ? 0 : petsEmDia}
                 </Text>
                 <Text style={styles.statLabel}>em dia</Text>
               </View>
@@ -170,6 +170,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
             </View>
           </View>
 
+          {/* Lista de Configurações */}
           <View style={styles.menuCard}>
             <Text style={styles.sectionTitle}>Configurações</Text>
 
@@ -244,37 +245,21 @@ export default function ProfileScreen({ navigation, onLogout }) {
               </View>
               <Ionicons name="chevron-forward" size={18} color="#ccc" />
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.menuItem} onPress={onLogout}>
               <View style={styles.menuLeft}>
                 <View
-                  style={[styles.iconCircle, { backgroundColor: "#e74d3c57" }]}
+                  style={[styles.iconCircle, { backgroundColor: "#e74d3c30" }]}
                 >
-                  <Ionicons name="exit-outline" size={20} color="#e74c3c" />
+                  <Ionicons name="exit-outline" size={18} color="#e74c3c" />
                 </View>
-                <Text style={styles.menuText}>Sair</Text>
+                <Text style={[styles.menuText, styles.logoutTextColor]}>
+                  Sair da conta
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#ccc" />
             </TouchableOpacity>
           </View>
-
-          {/* <View style={styles.help}>
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={22}
-              color="#ff7a00"
-            />
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.helpTitle}>Precisa de ajuda?</Text>
-              <Text style={styles.helpText}>
-                Fale conosco ou acesse a central.
-              </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.logout} onPress={onLogout}>
-            <Ionicons name="exit-outline" size={20} color="#e74c3c" />
-            <Text style={styles.logoutText}>Sair da conta</Text>
-          </TouchableOpacity> */}
         </ScrollView>
       )}
     </View>
@@ -286,237 +271,184 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f7efe5",
   },
-
   loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 100,
+    paddingVertical: 100,
   },
-
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 10,
-  },
-
   headerBg: {
     backgroundColor: "#ffe4ce",
-    paddingBottom: 50,
+    paddingTop: 30,
+    paddingBottom: 60, // 👈 Aumentado para criar a área de respiro perfeita
     borderBottomLeftRadius: 35,
     borderBottomRightRadius: 35,
   },
-
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#222",
-  },
-
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 5,
-    paddingHorizontal: 20,
-    paddingTop: 25,
+    paddingHorizontal: 24,
+    marginTop: 20,
     gap: 16,
   },
-
   avatarContainer: {
-    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
   },
-
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#f3c39c",
+    backgroundColor: "#fff", // 👈 Alterado para branco para destacar o ícone account-circle
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#f09b56",
     elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    overflow: "hidden",
   },
-
-  avatarText: {
-    fontSize: 40,
-    fontWeight: "700",
-    color: "#fff",
-  },
-
   avatarImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
   },
-
   userInfo: {
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-
-  userName: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#222",
-    marginBottom: 4,
-  },
-
-  userEmail: {
-    fontSize: 13,
-    color: "#727272ff",
-    marginBottom: 10,
-  },
-
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fdb06873",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-  },
-
-  badgeText: {
-    color: "#c6670fff",
-    fontSize: 11,
-    fontWeight: "600",
-    marginLeft: 2,
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    margin: 20,
-    marginTop: -25,
-    borderRadius: 16,
-    padding: 15,
-    elevation: 0.6,
-    marginBottom: 5,
-  },
-
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-
-  cardTitle: {
-    fontWeight: "700",
-  },
-
-  link: {
-    color: "#ff7a00",
-    marginHorizontal: 5,
-  },
-
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  stat: {
     flex: 1,
     alignItems: "flex-start",
     justifyContent: "center",
-    marginLeft: 15,
   },
-
-  statNumber: {
-    fontSize: 18,
+  userName: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#222",
+    marginBottom: 2,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 8,
+  },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fdb06840",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+  badgeText: {
+    color: "#c6670f",
+    fontSize: 12,
     fontWeight: "700",
+    marginLeft: 4,
   },
-
+  card: {
+    backgroundColor: "#fff",
+    marginHorizontal: 20,
+    marginTop: -30, // 👈 O pulo do gato: Faz o card flutuar por cima do fundo bege arredondado
+    borderRadius: 20,
+    padding: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    marginBottom: 20,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+  },
+  link: {
+    color: "#ff7a00",
+    fontWeight: "700",
+    fontSize: 14,
+    marginRight: 4,
+  },
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  stat: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#333",
+    marginBottom: 2,
+  },
   statLabel: {
     fontSize: 12,
     color: "#777",
+    textAlign: "center",
+    flexWrap: "wrap",
+    width: "86%",
   },
-
   divider: {
     width: 1,
-    height: 40,
-    backgroundColor: "#eee",
+    height: 35,
+    backgroundColor: "#77777777",
   },
-
-  sectionTitle: {
-    fontWeight: "700",
-    marginHorizontal: 14,
-    marginTop: 14,
-    marginBottom: 5,
-  },
-
   menuCard: {
     backgroundColor: "#fff",
-    margin: 20,
-    borderRadius: 16,
-    marginBottom: 30,
-    elevation: 0.6,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    paddingVertical: 10,
+    marginBottom: 40,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
-
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#333",
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 10,
+  },
   menuItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 15,
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
   },
-
   menuLeft: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
   },
-
   iconCircle: {
-    width: 28,
-    height: 28,
+    width: 34,
+    height: 34,
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
   },
-
   menuText: {
-    marginLeft: 10,
-  },
-
-  arrow: {
-    color: "#ccc",
-  },
-
-  help: {
-    flexDirection: "row",
-
-    margin: 10,
-    padding: 15,
-    borderRadius: 16,
-  },
-
-  helpTitle: {
-    fontWeight: "700",
-  },
-
-  helpText: {
-    fontSize: 12,
-    color: "#777",
-  },
-
-  logout: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffe1deff",
-
-    margin: 20,
-    padding: 15,
-    borderRadius: 16,
-    elevation: 0.3,
-    marginTop: 3,
-  },
-
-  logoutText: {
-    marginLeft: 10,
-    color: "#e74c3c",
+    fontSize: 15,
     fontWeight: "600",
+    color: "#444", // 👈 Protege o texto contra sumiço no Dark Mode do celular
+  },
+  logoutTextColor: {
+    color: "#e74c3c",
   },
 });
