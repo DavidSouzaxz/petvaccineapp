@@ -56,7 +56,7 @@ export default function LoginScreen({ navigation, onSignIn }) {
         onSignIn(response.token);
       }
     } catch (error) {
-      setAlertMessage(error.response?.data);
+      setAlertMessage(error.response?.data || "Erro ao fazer Login!");
       setAlertVisible(true);
       setLoading(false);
     } finally {
