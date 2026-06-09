@@ -16,15 +16,31 @@ import ServiceVaccine from "../../services/ServiceVaccine";
 import ButtonRollback from "../../components/ButtonRollback";
 import FormatDateDisplay from "../../core/FormatDateDisplay";
 import { getPetImage } from "../../core/SpeciesImageMap";
+import ServicePet from "../../services/ServicePet";
 import { Calendar } from "react-native-calendars";
 
 export default function DetailsScreen({ route, navigation }) {
-  const { pet, petColor = "#F4A361" } = route.params;
+  const { pet: initialPet, petColor = "#F4A361" } = route.params;
 
+  const [pet, setPet] = useState(initialPet);
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines || []);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("Vacinas");
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const loadPetDetails = useCallback(async () => {
+    try {
+      if (ServicePet?.findById) {
+        // Ajuste para o método correto do seu ServiceUser/ServicePet
+        const updatedPet = await ServicePet.findById(initialPet.id);
+        if (updatedPet) {
+          setPet(updatedPet);
+        }
+      }
+    } catch (error) {
+      System.out.println("Erro ao recarregar dados do pet: " + error);
+    }
+  }, [initialPet.id]);
 
   const markedDates = useMemo(() => {
     const marks = {};
@@ -88,8 +104,9 @@ export default function DetailsScreen({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      loadPetDetails();
       loadVaccines();
-    }, [loadVaccines]),
+    }, [loadPetDetails, loadVaccines]),
   );
 
   const petStatus = useMemo(() => {
