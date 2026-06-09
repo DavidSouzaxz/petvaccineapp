@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   featureDesc: {
     fontSize: 12,
     color: "#777",
-    width: "85%",
+    width: "80%",
     flexWrap: "wrap",
   },
 

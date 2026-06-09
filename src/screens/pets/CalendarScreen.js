@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: "80%",
-    paddingBottom: 20,
+    paddingBottom: 30,
   },
 
   petSelectorHeader: {
