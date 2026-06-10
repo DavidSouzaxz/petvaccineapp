@@ -30,22 +30,19 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "$EXPO_API_KEY_MAPS"
+          "apiKey": "$API_KEY"
         }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-localization",
-      "@react-native-community/datetimepicker"
-    ],
+    "plugins": ["expo-localization", "@react-native-community/datetimepicker"],
     "extra": {
       "eas": {
-        "projectId": "efbf0d27-ef59-4bbd-8fa2-266189fabe1b"
+        "projectId": "b92a1355-650a-41ea-b9f2-6509d6c8e006"
       }
     },
-    "owner": ""
+    "owner": "d4vid0p"
   }
 }

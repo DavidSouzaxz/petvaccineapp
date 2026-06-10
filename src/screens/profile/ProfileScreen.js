@@ -98,7 +98,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
             <View style={styles.profileCard}>
               <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
-                  {/* 👈 ALTERADO: Agora renderiza o ícone de cadastro caso esteja sem foto ou nulo */}
                   {profileImage &&
                   profileImage !== "null" &&
                   profileImage !== "" ? (

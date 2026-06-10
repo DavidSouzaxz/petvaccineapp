@@ -12,7 +12,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import ButtonRollback from "../../components/ButtonRollback";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import ServiceUser from "../../services/ServiceUser";
 import ServiceSignature from "../../services/ServiceSignature";
 
@@ -127,14 +127,23 @@ export default function EditProfileScreen({ navigation }) {
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               {image ? (
+                // 1. Se o usuário acabou de escolher uma foto nova na galeria/câmera, exibe ela
                 <Image source={{ uri: image }} style={styles.avatarImage} />
-              ) : currentPhotoUrl ? (
+              ) : currentPhotoUrl &&
+                currentPhotoUrl !== "null" &&
+                currentPhotoUrl !== "" ? (
+                // 2. Se não escolheu uma nova, mas tem uma foto válida vinda do banco, exibe a do banco
                 <Image
                   source={{ uri: currentPhotoUrl }}
                   style={styles.avatarImage}
                 />
               ) : (
-                <Text style={styles.avatarText}>{name ? name[0] : ""}</Text>
+                // 3. Se não cair em nenhuma das condições acima, exibe o ícone padrão de conta
+                <MaterialCommunityIcons
+                  name="account-circle"
+                  size={90} // Ajustado para 90 para casar com a largura/altura da sua View (45 * 2)
+                  color="#e5e5e5"
+                />
               )}
             </View>
 

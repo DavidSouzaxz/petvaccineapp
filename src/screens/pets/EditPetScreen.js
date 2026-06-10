@@ -27,18 +27,14 @@ import { getPetImage } from "../../core/SpeciesImageMap";
 import { SPECIES_OPTIONS } from "../../constants/species";
 
 export default function EditPetScreen({ navigation, route }) {
-  const editingPet = route.params?.pet;
-  const [loading, setLoading] = useState(false);
+  const petId = route.params?.petDetails?.id;
+  const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
-  const [name, setName] = useState(editingPet?.name ?? "");
-  const [breed, setBreed] = useState(editingPet?.breed ?? "");
+  const [name, setName] = useState("");
+  const [breed, setBreed] = useState("");
   const [species, setSpecies] = useState("Cachorro");
   const [isSpeciesOpen, setIsSpeciesOpen] = useState(false);
-  const [sex, setSex] = useState(
-    editingPet?.sex && editingPet.sex.toLowerCase() === "macho"
-      ? "Macho"
-      : "Femea",
-  );
+  const [sex, setSex] = useState("Macho");
   const [birthDate, setBirthDate] = useState("");
   const [weight, setWeight] = useState("");
   const [color, setColor] = useState("");
@@ -48,7 +44,7 @@ export default function EditPetScreen({ navigation, route }) {
   const [ownerPhone, setOwnerPhone] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [image, setImage] = useState(null);
-  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(editingPet?.photoUrl);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -68,7 +64,7 @@ export default function EditPetScreen({ navigation, route }) {
   };
 
   const handleDelete = () => {
-    setConfirmMessage(`Tem certeza que quer deletar ${editingPet?.name}?`);
+    setConfirmMessage(`Tem certeza que quer deletar ${name || "este pet"}?`);
     setConfirmVisible(true);
   };
 
@@ -76,11 +72,11 @@ export default function EditPetScreen({ navigation, route }) {
     setConfirmVisible(false);
     setLoading(true);
     try {
-      await ServicePet.delete(editingPet.id);
+      await ServicePet.delete(petId);
       setAlertMessage("Pet excluido com sucesso!");
       setAlertVisible(true);
       setTimeout(() => {
-        navigation.pop();
+        navigation.popToTop();
       }, 1000);
     } catch (error) {
       setAlertMessage("Nao foi possivel excluir o pet.");
@@ -107,10 +103,18 @@ export default function EditPetScreen({ navigation, route }) {
 
   const loadingPet = async () => {
     setLoading(true);
-    const petId = editingPet.id;
-
     try {
+      // 🟢 CORRIGIDO: Usa a variável limpa 'petId'
       const response = await ServicePet.getById(petId);
+
+      setName(response.name ?? "");
+      setBreed(response.breed ?? "");
+      setSpecies(response.specie ?? "Cachorro");
+      setSex(
+        response.sex && response.sex.toLowerCase() === "macho"
+          ? "Macho"
+          : "Femea",
+      );
       setBirthDate(
         response.birthDate ? FormatDateDisplay(response.birthDate) : "",
       );
@@ -119,14 +123,11 @@ export default function EditPetScreen({ navigation, route }) {
           ? String(response.weight).replace(".", ",")
           : "",
       );
-      setSpecies(response.specie);
-
-      setMicrochip(response.microchip);
-      setSex(response.sex);
-      setNotes(response.observations);
+      setMicrochip(response.microchip ?? "");
+      setNotes(response.observations ?? "");
       setCurrentPhotoUrl(response.photoUrl);
     } catch (error) {
-      setAlertMessage("erro ao carregar os dados do pet.");
+      setAlertMessage("Erro ao carregar os dados do pet.");
       setAlertVisible(true);
       console.log(error);
     } finally {
@@ -180,7 +181,7 @@ export default function EditPetScreen({ navigation, route }) {
         photoUrl: finalPhotoUrl,
       };
 
-      await ServicePet.update(editingPet.id, petAtualizado);
+      await ServicePet.update(petId, petAtualizado);
       setAlertMessage("Pet atualizado com sucesso!");
       setAlertVisible(true);
       setTimeout(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,27 +20,30 @@ import ServicePet from "../../services/ServicePet";
 import { Calendar } from "react-native-calendars";
 
 export default function DetailsScreen({ route, navigation }) {
-  const { pet: initialPet, petColor = "#F4A361" } = route.params;
+  const petId = route.params?.petId || route.params?.pet?.id;
+  const petColor = route.params?.petColor || "#F4A361";
 
-  const [pet, setPet] = useState(initialPet);
+  const [petDetails, setPetDetails] = useState();
   const [vaccines, setVaccines] = useState(route.params?.pet?.vaccines || []);
-  const [loading, setLoading] = useState(false);
+
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Vacinas");
   const [selectedDate, setSelectedDate] = useState(null);
 
   const loadPetDetails = useCallback(async () => {
     try {
-      if (ServicePet?.findById) {
-        // Ajuste para o método correto do seu ServiceUser/ServicePet
-        const updatedPet = await ServicePet.findById(initialPet.id);
-        if (updatedPet) {
-          setPet(updatedPet);
-        }
+      const updatedPet = await ServicePet.getById(petId); // Mantido o getById padrão da sua service
+      if (updatedPet) {
+        setPetDetails(updatedPet);
       }
     } catch (error) {
-      System.out.println("Erro ao recarregar dados do pet: " + error);
+      console.log("Erro ao recarregar dados do pet:", error);
     }
-  }, [initialPet.id]);
+  }, [petId]);
+
+  useEffect(() => {
+    loadPetDetails();
+  });
 
   const markedDates = useMemo(() => {
     const marks = {};
@@ -81,31 +84,30 @@ export default function DetailsScreen({ route, navigation }) {
   const handleEditVaccine = (item) => {
     navigation.navigate("EditVaccine", {
       vaccine: item,
-      petId: pet.id,
-      petName: pet.name,
+      petId: petDetails.id,
+      petName: petDetails.name,
       petColor,
     });
   };
 
   const loadVaccines = useCallback(async () => {
-    setLoading(true);
     try {
       const data = await ServiceVaccine.listAll();
       const petVaccines = (data || []).filter(
-        (item) => item?.pet?.id === pet.id || item?.petId === pet.id,
+        (item) => item?.pet?.id === petId || item?.petId === petId,
       );
       setVaccines(petVaccines);
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
-  }, [pet.id]);
+  }, [petId]);
 
   useFocusEffect(
     useCallback(() => {
-      loadPetDetails();
-      loadVaccines();
+      setLoading(true);
+      Promise.all([loadPetDetails(), loadVaccines()]).finally(() => {
+        setLoading(false);
+      });
     }, [loadPetDetails, loadVaccines]),
   );
 
@@ -169,6 +171,14 @@ export default function DetailsScreen({ route, navigation }) {
     });
   }, [vaccines]);
 
+  if (loading || !petDetails) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#F4A361" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -194,22 +204,22 @@ export default function DetailsScreen({ route, navigation }) {
         >
           <View style={styles.petCard}>
             <Image
-              source={getPetImage(pet.photoUrl, pet.specie)}
+              source={getPetImage(petDetails.photoUrl, petDetails.specie)}
               style={styles.petAvatar}
             />
             <View style={styles.petInfo}>
               <View style={styles.rowEdit}>
-                <Text style={styles.petName}>{pet.name}</Text>
+                <Text style={styles.petName}>{petDetails.name}</Text>
                 <TouchableOpacity
                   style={styles.editButton}
-                  onPress={() => navigation.navigate("EditPet", { pet })}
+                  onPress={() => navigation.navigate("EditPet", { petDetails })}
                 >
                   <Ionicons name="pencil-outline" size={20} color="#B56A2B" />
                 </TouchableOpacity>
               </View>
               <Text style={styles.petMeta}>
-                {pet.breed || "Sem raca"}
-                {pet.age ? ` - ${pet.age}` : ""}
+                {petDetails.breed || "Sem raca"}
+                {petDetails.age ? ` - ${petDetails.age}` : ""}
               </Text>
               <View
                 style={[
@@ -314,9 +324,9 @@ export default function DetailsScreen({ route, navigation }) {
                 style={styles.addButton}
                 onPress={() =>
                   navigation.navigate("AddVaccine", {
-                    petId: pet.id,
+                    petId: petDetails.id,
                     petColor,
-                    petName: pet.name,
+                    petName: petDetails.name,
                   })
                 }
               >
@@ -333,7 +343,9 @@ export default function DetailsScreen({ route, navigation }) {
 
               <TouchableOpacity
                 style={styles.calendarCard}
-                onPress={() => navigation.navigate("Calendario", { pet: pet })}
+                onPress={() =>
+                  navigation.navigate("Calendario", { pet: petDetails })
+                }
               >
                 <View style={styles.calendarIcon}>
                   <Ionicons name="calendar" size={20} color="#F4A361" />
@@ -414,53 +426,55 @@ export default function DetailsScreen({ route, navigation }) {
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Nome:
                   </Text>{" "}
-                  {pet.name}
+                  {petDetails.name}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Espécie:
                   </Text>{" "}
-                  {pet.specie || pet.species || "-"}
+                  {petDetails.specie || petDetails.species || "-"}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Raça:
                   </Text>{" "}
-                  {pet.breed || "-"}
+                  {petDetails.breed || "-"}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Sexo:
                   </Text>{" "}
-                  {pet.sex || "-"}
+                  {petDetails.sex || "-"}
                 </Text>
                 {/* <Text style={{ fontSize: 14, marginBottom: 6 }}>
                   <Text style={{ fontWeight: "600" }}>Cor:</Text>{" "}
-                  {pet.color || "-"}
+                  {petDetails.color || "-"}
                 </Text> */}
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Peso:
                   </Text>{" "}
-                  {pet.weight ? `${pet.weight} kg` : "-"}
+                  {petDetails.weight ? `${petDetails.weight} kg` : "-"}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Data de nascimento:
                   </Text>{" "}
-                  {pet.birthDate ? FormatDateDisplay(pet.birthDate) : "-"}
+                  {petDetails.birthDate
+                    ? FormatDateDisplay(petDetails.birthDate)
+                    : "-"}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Microchip:
                   </Text>{" "}
-                  {pet.microchip || "-"}
+                  {petDetails.microchip || "-"}
                 </Text>
                 <Text style={{ fontSize: 14, marginBottom: 6, color: "#000" }}>
                   <Text style={{ fontWeight: "600", color: "#000" }}>
                     Observações:
                   </Text>{" "}
-                  {pet.observations || "-"}
+                  {petDetails.observations || "-"}
                 </Text>
               </View>
             </View>
@@ -476,7 +490,8 @@ export default function DetailsScreen({ route, navigation }) {
               />
               <Text style={styles.resumoTitle}>Resumo de Saúde</Text>
               <Text style={styles.resumoText}>
-                {pet.name} está {petStatus.label.toLowerCase()} com as vacinas.
+                {petDetails.name} está {petStatus.label.toLowerCase()} com as
+                vacinas.
               </Text>
               <Text style={styles.resumoStat}>
                 Total de vacinas:{" "}
