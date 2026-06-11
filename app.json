@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PetCard App",
-    "slug": "petcard-app",
+    "name": "PetCard Club",
+    "slug": "petcard-club",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
@@ -13,7 +13,8 @@
       "backgroundColor": "#FDF1E7"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.petcardclub.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.petcardapp.petcard",
+      "package": "com.petcardclub.petcard",
       "permissions": [
         "INTERNET",
         "ACCESS_COARSE_LOCATION",
@@ -30,7 +31,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "$API_KEY"
+          "apiKey": "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
         }
       }
     },
@@ -40,9 +41,9 @@
     "plugins": ["expo-localization", "@react-native-community/datetimepicker"],
     "extra": {
       "eas": {
-        "projectId": "b92a1355-650a-41ea-b9f2-6509d6c8e006"
+        "projectId": "f5bf72c7-685a-4ec3-bb5b-3a5105038ed8"
       }
     },
-    "owner": "d4vid0p"
+    "owner": "dvddoido"
   }
 }
