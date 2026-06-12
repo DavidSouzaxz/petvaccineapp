@@ -69,10 +69,8 @@ export default function AddOccurrenceScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!title || !description || !date || !time) {
-      Alert.alert(
-        "Atenção",
-        "Por favor, preencha todos os campos obrigatórios.",
-      );
+      setAlertVisible(true);
+      setAlertMessage("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
@@ -108,7 +106,8 @@ export default function AddOccurrenceScreen({ navigation, route }) {
       }, 1500);
     } catch (error) {
       console.log(error);
-      Alert.alert("Erro", "Falha ao processar o registro ou upload.");
+      setAlertVisible(true);
+      setAlertMessage("Falha ao processar o registro ou upload.");
     } finally {
       setLoading(false);
     }

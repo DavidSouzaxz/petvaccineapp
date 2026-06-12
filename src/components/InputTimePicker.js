@@ -9,18 +9,26 @@ export default function InputTimePicker({
   styleLabel,
 }) {
   const handleTextChange = (text) => {
+    // Remove tudo que não for número
     let cleaned = text.replace(/\D/g, "");
 
-    if (cleaned.length >= 1) {
-      if (parseInt(cleaned[0]) > 2) cleaned = "2";
-    }
+    // VALIDAÇÃO CORRIGIDA: Só valida o limite de horas quando houver pelo menos 2 dígitos
     if (cleaned.length >= 2) {
-      if (parseInt(cleaned.slice(0, 2)) > 23) cleaned = "23" + cleaned.slice(2);
-    }
-    if (cleaned.length >= 3) {
-      if (parseInt(cleaned[2]) > 5) cleaned = cleaned.slice(0, 2) + "5";
+      const hours = parseInt(cleaned.slice(0, 2));
+      // Se a hora for maior que 23 (ex: 24, 25, 99), limita para 23
+      if (hours > 23) {
+        cleaned = "23" + cleaned.slice(2);
+      }
     }
 
+    // Valida o primeiro dígito dos minutos (não pode ser maior que 5, ex: 13:60 não existe)
+    if (cleaned.length >= 3) {
+      if (parseInt(cleaned[2]) > 5) {
+        cleaned = cleaned.slice(0, 2) + "5";
+      }
+    }
+
+    // Aplica a máscara de dois-pontos (HH:MM)
     let formatted = cleaned;
     if (cleaned.length > 2) {
       formatted = `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;
@@ -32,14 +40,20 @@ export default function InputTimePicker({
   const handleBlur = () => {
     if (!value) return;
 
-    // Se o valor tiver o tamanho de "13:3" ou "02:0" (4 caracteres), injeta o 0 no final
-    if (value.length === 4) {
-      onChange(`${value}0`);
+    // Remove qualquer dois-pontos temporário para analisar os números puros
+    const digits = value.replace(":", "");
+
+    // Caso 1: Usuário digitou apenas 1 número (ex: "2") -> vira "02:00"
+    if (digits.length === 1) {
+      onChange(`0${digits}:00`);
     }
-    // Segurança extra: se o usuário deixar apenas o número da hora (ex: "13" ou "13:"), completa com os minutos zerados
-    else if (value.length === 2 || value.length === 3) {
-      const hours = value.replace(":", "");
-      onChange(`${hours}:00`);
+    // Caso 2: Usuário digitou as horas completas (ex: "13" ou "13:") -> vira "13:00"
+    else if (digits.length === 2) {
+      onChange(`${digits}:00`);
+    }
+    // Caso 3: Usuário digitou horas e metade dos minutos (ex: "13:3") -> vira "13:30"
+    else if (digits.length === 3) {
+      onChange(`${digits.slice(0, 2)}:${digits.slice(2)}0`);
     }
   };
 
