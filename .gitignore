@@ -48,5 +48,3 @@ yarn-error.*
 .eas/
 .expo/
 
-app.json
-eas.json
